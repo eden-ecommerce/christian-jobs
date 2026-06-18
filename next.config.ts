@@ -23,7 +23,6 @@ const nextConfig: NextConfig = {
   // from — hardcoding `http://localhost:3000` here breaks the v0 preview and
   // any proxied/sandbox host because the browser can't reach localhost.
   assetPrefix: process.env.NODE_ENV === "production" ? ASSET_BASE_URL : undefined,
-  basePath: process.env.NODE_ENV === "production" ? "/events" : undefined,
   // v0 iterates quickly — builds tolerate TS errors during dev.
   // Before deploy: run `pnpm predeploy` (ts-check + lint + build) and fix all errors.
   typescript: {
