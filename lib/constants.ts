@@ -11,13 +11,11 @@
  */
 
 /** REPLACE: asset + `_next/static` origin */
-export const ASSET_PRODUCTION_ORIGIN =
-  "https://events-snowy-phi.vercel.app/events";
+export const ASSET_PRODUCTION_ORIGIN = "https://events-snowy-phi.vercel.app";
 export const ASSET_DEV_ORIGIN = "http://localhost:3000";
 
 /** REPLACE: API origin (may differ from assets) */
-export const API_PRODUCTION_ORIGIN =
-  "https://events-snowy-phi.vercel.app/events";
+export const API_PRODUCTION_ORIGIN = "https://events-snowy-phi.vercel.app";
 export const API_DEV_ORIGIN = "http://localhost:3000";
 
 export const ASSET_BASE_URL =

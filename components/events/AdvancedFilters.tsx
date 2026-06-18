@@ -76,16 +76,13 @@ export function AdvancedFilters({
   /** Apply a batch of param changes and navigate. null removes the key. */
   const apply = useCallback(
     (changes: Record<string, string | null>) => {
-      console.log("[v0] Filter apply called with changes:", changes);
       const next = new URLSearchParams(params.toString());
       for (const [key, value] of Object.entries(changes)) {
         if (value === null || value === "") next.delete(key);
         else next.set(key, value);
       }
       next.delete("page");
-      const newUrl = `${NAMESPACE_PATH}/search?${next.toString()}`;
-      console.log("[v0] Pushing to URL:", newUrl);
-      router.push(newUrl);
+      router.push(`${NAMESPACE_PATH}/search?${next.toString()}`);
     },
     [params, router],
   );
@@ -274,13 +271,10 @@ export function AdvancedFilters({
                 key={q.value}
                 type="button"
                 onClick={() => {
-                  console.log("[v0] Quick range button clicked:", q.label, "isActive:", isActive);
                   if (isActive) {
-                    console.log("[v0] Clearing date range");
                     apply({ from: null, to: null });
                   } else {
                     const r = quickRangeDates(q.value);
-                    console.log("[v0] Setting date range:", r);
                     apply({ from: r.from, to: r.to });
                   }
                 }}
@@ -341,12 +335,11 @@ export function AdvancedFilters({
               <button
                 key={cat.value}
                 type="button"
-                onClick={() => {
-                  console.log("[v0] Category button clicked:", cat.label, "currentCategory:", activeCategory);
+                onClick={() =>
                   apply({
                     category: activeCategory === cat.value ? null : cat.value,
-                  });
-                }}
+                  })
+                }
                 aria-pressed={activeCategory === cat.value}
                 className={`flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors ${
                   activeCategory === cat.value
