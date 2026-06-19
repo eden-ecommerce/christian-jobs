@@ -14,6 +14,7 @@ type LocationSearchProps = {
   onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
   placeholder?: string;
   disabled?: boolean;
+  className?: string;
 };
 
 export function LocationSearch({
@@ -21,6 +22,7 @@ export function LocationSearch({
   onPlaceSelect,
   placeholder = "Search for a location…",
   disabled = false,
+  className,
 }: LocationSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const placesLibrary = useMapsLibrary("places");
@@ -57,6 +59,7 @@ export function LocationSearch({
       placeholder={placeholder}
       disabled={disabled}
       aria-label="Location search"
+      className={className}
     />
   );
 }

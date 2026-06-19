@@ -45,15 +45,14 @@ function HomeLocationSearchInner() {
   return (
     <div className="flex flex-col gap-2 sm:flex-row">
       <div className="relative flex-1">
-        <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary" />
-        <div className="pl-12 [&_input]:h-14 [&_input]:w-full [&_input]:rounded-full [&_input]:border [&_input]:border-border [&_input]:bg-card [&_input]:pl-0 [&_input]:pr-4 [&_input]:text-base [&_input]:text-foreground [&_input]:outline-none [&_input]:placeholder:text-muted-foreground [&_input]:focus:border-primary [&_input]:focus:ring-2 [&_input]:focus:ring-ring/30">
-          <LocationSearch
-            key={inputKey}
-            defaultValue={defaultValue}
-            onPlaceSelect={handlePlaceSelect}
-            placeholder="Enter a town, city or postcode…"
-          />
-        </div>
+        <MapPin className="pointer-events-none absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-primary" />
+        <LocationSearch
+          key={inputKey}
+          defaultValue={defaultValue}
+          onPlaceSelect={handlePlaceSelect}
+          placeholder="Enter a town, city or postcode…"
+          className="h-14 w-full rounded-full border-border bg-card pl-12 pr-4 text-base focus:border-primary focus:ring-2 focus:ring-ring/30"
+        />
       </div>
       <button
         type="button"

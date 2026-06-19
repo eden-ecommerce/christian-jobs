@@ -180,26 +180,22 @@ function buildSearchParams(params: SearchEventsParams) {
   const filters = [EVENTS_BASE_FILTER];
   if (typeof online === "boolean") filters.push(`online:${online}`);
 
-  // Use occurrenceStartTimestamps so recurring events are matched if ANY
-  // occurrence falls within the window, not just nextOccurrenceStartTimestamp.
-  const numericFilters: string[][] = [];
-  if (typeof dateFrom === "number" && typeof dateTo === "number") {
-    // Any occurrence that starts within [from, to]
-    numericFilters.push([
-      `occurrenceStartTimestamps >= ${dateFrom}`,
-      `occurrenceStartTimestamps <= ${dateTo}`,
-    ]);
-  } else if (typeof dateFrom === "number") {
-    numericFilters.push([`occurrenceStartTimestamps >= ${dateFrom}`]);
-  } else if (typeof dateTo === "number") {
-    numericFilters.push([`occurrenceStartTimestamps <= ${dateTo}`]);
+  // Filter recurring events by occurrenceStartTimestamps (array attribute).
+  // Algolia numeric filters: outer array = AND, inner array = OR.
+  // To match "any occurrence within [from, to]", we need TWO separate AND conditions
+  // each expressed as a plain string (not as inner OR arrays).
+  const numericFilters: string[] = [];
+  if (typeof dateFrom === "number") {
+    numericFilters.push(`occurrenceStartTimestamps >= ${dateFrom}`);
+  }
+  if (typeof dateTo === "number") {
+    numericFilters.push(`occurrenceStartTimestamps <= ${dateTo}`);
   }
 
   const hasGeo = typeof lat === "number" && typeof lng === "number";
 
   const base: Record<string, unknown> = {
     filters: filters.join(" AND "),
-    // numericFilters is an array of arrays — Algolia ANDs the outer array, ORs the inner.
     ...(numericFilters.length > 0 ? { numericFilters } : {}),
     getRankingInfo: hasGeo,
   };
