@@ -7,9 +7,31 @@ import { NAMESPACE_PATH } from "@lib/config";
 import { getCategoryFacets, searchEvents } from "@lib/algolia/events";
 import { getLocationStats, getRegions } from "@lib/locations";
 import { PromoteEventBanner } from "@components/events/PromoteEventBanner";
+import { buildEventListJsonLd, buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
+import type { Metadata } from "next";
 import { ArrowRight, MapPin, Search } from "lucide-react";
 
 export const revalidate = 1800;
+
+export const metadata: Metadata = {
+  title: "Christian Events Near You | Eden.co.uk",
+  description:
+    "Find Christian events, conferences, training and worship nights across the UK. Browse by location or search by category.",
+  alternates: { canonical: "https://www.eden.co.uk/events" },
+  openGraph: {
+    title: "Christian Events Near You | Eden.co.uk",
+    description:
+      "Find Christian events, conferences, training and worship nights across the UK.",
+    url: "https://www.eden.co.uk/events",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Christian Events Near You | Eden.co.uk",
+    description:
+      "Find Christian events, conferences, training and worship nights across the UK.",
+  },
+};
 
 export default async function EventsHomePage() {
   const [upcoming, { categories, totalCount, uncategorisedCount }] = await Promise.all([
@@ -20,8 +42,20 @@ export default async function EventsHomePage() {
   const regions = getRegions();
   const stats = getLocationStats();
 
+  const listJsonLd = buildEventListJsonLd(
+    upcoming.hits,
+    "Upcoming Christian Events",
+    "https://www.eden.co.uk/events"
+  );
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Eden", url: "https://www.eden.co.uk" },
+    { name: "Events", url: "https://www.eden.co.uk/events" },
+  ]);
+
   return (
     <main>
+      <script {...jsonLdScriptProps(listJsonLd)} />
+      <script {...jsonLdScriptProps(breadcrumbJsonLd)} />
       {/* Hero */}
       <section className="border-b border-border bg-accent/40">
         <div className="mx-auto max-w-4xl px-4 py-14 text-center sm:py-20">

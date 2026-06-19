@@ -22,6 +22,11 @@ import { PromoteEventSidebarCta } from "@components/events/PromoteEventBanner";
 import { getEventById, getOrganisationById, searchEvents } from "@lib/algolia/events";
 import { formatDateRange, formatPrice } from "@lib/format";
 import { NAMESPACE_PATH } from "@lib/config";
+import {
+  buildEventJsonLd,
+  buildBreadcrumbJsonLd,
+  jsonLdScriptProps,
+} from "@lib/seo/jsonld";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -29,9 +34,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const event = await getEventById(id);
   if (!event) return { title: "Event not found" };
+
+  const description =
+    event.description?.slice(0, 155).replace(/\s+$/, "") || undefined;
+  const canonicalUrl = `https://www.eden.co.uk/events/${event.id}`;
+  const image = event.thumbnailUrl ?? undefined;
+
   return {
     title: event.title,
-    description: event.description.slice(0, 155) || undefined,
+    description,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      title: event.title,
+      description,
+      url: canonicalUrl,
+      type: "website",
+      ...(image ? { images: [{ url: image, alt: event.title }] } : {}),
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title: event.title,
+      description,
+      ...(image ? { images: [image] } : {}),
+    },
   };
 }
 
@@ -110,8 +135,17 @@ export default async function EventPage({ params }: Props) {
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   })();
 
+  const eventJsonLd = buildEventJsonLd(event);
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Events", url: "https://www.eden.co.uk/events" },
+    { name: "Search", url: "https://www.eden.co.uk/events/search" },
+    { name: event.title, url: `https://www.eden.co.uk/events/${event.id}` },
+  ]);
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      <script {...jsonLdScriptProps(eventJsonLd)} />
+      <script {...jsonLdScriptProps(breadcrumbJsonLd)} />
       <Breadcrumbs
         items={[
           { label: "Events", href: NAMESPACE_PATH },

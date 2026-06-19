@@ -20,12 +20,52 @@ import { dateFromMs, dateToMs } from "@lib/date-range";
 import { NAMESPACE_PATH } from "@lib/config";
 import { getSearchPageContent } from "@lib/sanity/get-search-page";
 import { isSanityEnvConfigured } from "@lib/env-configured.server";
-
-export const metadata: Metadata = {
-  title: "Search Christian events",
-};
+import { buildEventListJsonLd, buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
 
 type SearchParams = Record<string, string | string[] | undefined>;
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<Metadata> {
+  const sp = await searchParams;
+  const query = Array.isArray(sp.q) ? sp.q[0] : sp.q;
+  const category = Array.isArray(sp.category) ? sp.category[0] : sp.category;
+  const place = Array.isArray(sp.place) ? sp.place[0] : sp.place;
+  const hasFilters = !!(
+    query || category || place || sp.from || sp.to || sp.online || sp.org
+  );
+
+  const title = place
+    ? `Christian events near ${place}`
+    : query
+      ? `"${query}" — Christian events`
+      : category
+        ? `${category} Christian events`
+        : "Search Christian events";
+
+  const description = place
+    ? `Browse Christian events near ${place} — conferences, training, worship and community gatherings.`
+    : "Search thousands of Christian events across the UK by location, date, category or organisation.";
+
+  return {
+    title,
+    description,
+    // Filtered/paginated search URLs should not be indexed
+    ...(hasFilters
+      ? { robots: { index: false, follow: true } }
+      : {
+          alternates: { canonical: "https://www.eden.co.uk/events/search" },
+          openGraph: {
+            title,
+            description,
+            url: "https://www.eden.co.uk/events/search",
+            type: "website",
+          },
+        }),
+  };
+}
 
 function one(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -112,8 +152,23 @@ export default async function SearchPage({
 
   const noResults = result.hits.length === 0;
 
+  const listJsonLd = !noResults
+    ? buildEventListJsonLd(
+        result.hits,
+        headline,
+        "https://www.eden.co.uk/events/search"
+      )
+    : null;
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Eden", url: "https://www.eden.co.uk" },
+    { name: "Events", url: "https://www.eden.co.uk/events" },
+    { name: "Search", url: "https://www.eden.co.uk/events/search" },
+  ]);
+
   return (
     <main className="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
+      {listJsonLd && <script {...jsonLdScriptProps(listJsonLd)} />}
+      <script {...jsonLdScriptProps(breadcrumbJsonLd)} />
       <Breadcrumbs
         items={[{ label: "Events", href: NAMESPACE_PATH }, { label: "Search" }]}
       />

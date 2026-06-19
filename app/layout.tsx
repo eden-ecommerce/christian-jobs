@@ -19,13 +19,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(ASSET_BASE_URL),
+  metadataBase: new URL("https://www.eden.co.uk"),
   title: {
     default: "Christian Events Near You | Eden.co.uk",
     template: "%s | Eden Events",
   },
   description:
     "Find Christian events, conferences, training and gatherings across the UK. Search by location or browse by region, county and town.",
+  openGraph: {
+    siteName: "Eden Events",
+    locale: "en_GB",
+    type: "website",
+  },
+  twitter: {
+    site: "@edencouk",
+  },
   icons: {
     icon: [
       {
