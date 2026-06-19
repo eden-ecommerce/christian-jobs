@@ -7,11 +7,8 @@ import {
   defaultHierarchicalSearchPreset,
   organisationHubIndex,
 } from "@lib/algolia/constants";
-import {
-  extractHierarchyLabel,
-  DEFAULT_HIERARCHY_SEPARATOR,
-  DEFAULT_LABEL_ID_DELIMITER,
-} from "@lib/algolia/hierarchical-filter";
+import { extractHierarchyLabel } from "@lib/algolia/hierarchical-filter";
+import { cleanCategoryLabel } from "@lib/algolia/category-label";
 
 /**
  * Shape derived from live `organisationHub` browse (entityType:event).
@@ -67,17 +64,7 @@ function num(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-/** Strip hierarchical facet encoding (e.g. "Label:::id") from EVERY segment for display. */
-export function cleanCategoryLabel(value: string | null): string | null {
-  if (!value) return null;
-  // Split on the separator, strip the :::id suffix from each segment, then rejoin.
-  const separator = DEFAULT_HIERARCHY_SEPARATOR;
-  const delimiter = DEFAULT_LABEL_ID_DELIMITER;
-  return value
-    .split(separator)
-    .map((seg) => seg.split(delimiter)[0]?.trim() ?? seg)
-    .join(separator);
-}
+export { cleanCategoryLabel } from "@lib/algolia/category-label";
 
 function mapHit(raw: RawHit): EventHit {
   const location = (raw.location ?? {}) as Record<string, unknown>;

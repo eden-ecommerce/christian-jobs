@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { NAMESPACE_PATH } from "@lib/config";
 import type { EventFacet } from "@lib/algolia/events";
-import { cleanCategoryLabel } from "@lib/algolia/events";
+import { cleanCategoryLabel } from "@lib/algolia/category-label";
 
 type Props = {
   lvl0: EventFacet[];
