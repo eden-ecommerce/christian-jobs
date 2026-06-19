@@ -10,6 +10,8 @@ type Props = {
   lvl0: EventFacet[];
   lvl1: EventFacet[];
   lvl2: EventFacet[];
+  lvl3: EventFacet[];
+  lvl4: EventFacet[];
 };
 
 /**
@@ -17,7 +19,7 @@ type Props = {
  * Reads/writes the `category` search param to drive the server query.
  * Separator between hierarchy levels is " > " (Algolia convention).
  */
-export function CategoriesHierarchicalFilter({ lvl0, lvl1, lvl2 }: Props) {
+export function CategoriesHierarchicalFilter({ lvl0, lvl1, lvl2, lvl3, lvl4 }: Props) {
   const [open, setOpen] = useState(true);
   const router = useRouter();
   const params = useSearchParams();
@@ -57,6 +59,10 @@ export function CategoriesHierarchicalFilter({ lvl0, lvl1, lvl2 }: Props) {
     children = lvl1.filter((f) => f.value.startsWith(`${selected} > `));
   } else if (depth === 2) {
     children = lvl2.filter((f) => f.value.startsWith(`${selected} > `));
+  } else if (depth === 3) {
+    children = lvl3.filter((f) => f.value.startsWith(`${selected} > `));
+  } else if (depth === 4) {
+    children = lvl4.filter((f) => f.value.startsWith(`${selected} > `));
   }
 
   if (lvl0.length === 0) return null;

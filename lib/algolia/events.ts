@@ -151,6 +151,8 @@ export type EventFacets = {
   categories: EventFacet[];
   categoryLvl1: EventFacet[];
   categoryLvl2: EventFacet[];
+  categoryLvl3: EventFacet[];
+  categoryLvl4: EventFacet[];
   organisationTypes: EventFacet[];
 };
 
@@ -163,7 +165,7 @@ export type SearchEventsResult = {
   facets: EventFacets;
 };
 
-const EMPTY_FACETS: EventFacets = { categories: [], categoryLvl1: [], categoryLvl2: [], organisationTypes: [] };
+const EMPTY_FACETS: EventFacets = { categories: [], categoryLvl1: [], categoryLvl2: [], categoryLvl3: [], categoryLvl4: [], organisationTypes: [] };
 
 const EMPTY_RESULT: SearchEventsResult = {
   hits: [],
@@ -209,6 +211,8 @@ function categoryFacetFilter(category: string): string[] {
     `categoryHierarchy.lvl0:${category}`,
     `categoryHierarchy.lvl1:${category}`,
     `categoryHierarchy.lvl2:${category}`,
+    `categoryHierarchy.lvl3:${category}`,
+    `categoryHierarchy.lvl4:${category}`,
   ];
 }
 
@@ -261,6 +265,8 @@ export async function searchEvents(
       "categoryHierarchy.lvl0",
       "categoryHierarchy.lvl1",
       "categoryHierarchy.lvl2",
+      "categoryHierarchy.lvl3",
+      "categoryHierarchy.lvl4",
       "organisationType",
     ],
   };
@@ -340,6 +346,22 @@ function readFacets(result: unknown): EventFacets {
     }))
     .sort((a, b) => b.count - a.count);
 
+  const categoryLvl3 = Object.entries(facets["categoryHierarchy.lvl3"] ?? {})
+    .map(([value, count]) => ({
+      value,
+      label: cleanCategoryLabel(value.split(" > ").at(-1) ?? value) ?? value,
+      count,
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  const categoryLvl4 = Object.entries(facets["categoryHierarchy.lvl4"] ?? {})
+    .map(([value, count]) => ({
+      value,
+      label: cleanCategoryLabel(value.split(" > ").at(-1) ?? value) ?? value,
+      count,
+    }))
+    .sort((a, b) => b.count - a.count);
+
   const organisationTypes = Object.entries(facets["organisationType"] ?? {})
     .map(([value, count]) => ({
       value,
@@ -348,7 +370,7 @@ function readFacets(result: unknown): EventFacets {
     }))
     .sort((a, b) => b.count - a.count);
 
-  return { categories, categoryLvl1, categoryLvl2, organisationTypes };
+  return { categories, categoryLvl1, categoryLvl2, categoryLvl3, categoryLvl4, organisationTypes };
 }
 
 /** Fetch a single event by its id. The Algolia objectID is `event:<id>`. */

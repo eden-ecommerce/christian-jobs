@@ -1,6 +1,7 @@
 "use client";
 
 import { EventsUserLocationFilter } from "@components/events/EventsUserLocationFilter";
+import { CategoriesHierarchicalFilter } from "@components/events/CategoriesHierarchicalFilter";
 import { useUserLocation } from "@hooks/google-maps/use-user-location";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
@@ -11,10 +12,16 @@ import {
   quickRangeDates,
   type QuickRange,
 } from "@lib/date-range";
+import type { EventFacet } from "@lib/algolia/events";
 
 export type Facet = { label: string; value: string; count: number };
 
 type Props = {
+  categoryLvl0: EventFacet[];
+  categoryLvl1: EventFacet[];
+  categoryLvl2: EventFacet[];
+  categoryLvl3: EventFacet[];
+  categoryLvl4: EventFacet[];
   organisationTypes: Facet[];
   hasGeo: boolean;
 };
@@ -58,6 +65,11 @@ function Section({
 }
 
 export function AdvancedFilters({
+  categoryLvl0,
+  categoryLvl1,
+  categoryLvl2,
+  categoryLvl3,
+  categoryLvl4,
   organisationTypes,
   hasGeo,
 }: Props) {
@@ -175,7 +187,13 @@ export function AdvancedFilters({
         </div>
       </Section>
 
-      {/* Categories filter moved to search page with hierarchical InstantSearch component */}
+      <CategoriesHierarchicalFilter
+        lvl0={categoryLvl0}
+        lvl1={categoryLvl1}
+        lvl2={categoryLvl2}
+        lvl3={categoryLvl3}
+        lvl4={categoryLvl4}
+      />
 
       <Section title="Organisation Type">
         <div className="flex flex-col gap-1">

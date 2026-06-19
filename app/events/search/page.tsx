@@ -138,6 +138,8 @@ export default async function SearchPage({
           categories={result.facets.categories}
           categoryLvl1={result.facets.categoryLvl1}
           categoryLvl2={result.facets.categoryLvl2}
+          categoryLvl3={result.facets.categoryLvl3}
+          categoryLvl4={result.facets.categoryLvl4}
           organisationTypes={result.facets.organisationTypes}
           hasGeo={hasGeo}
         />
