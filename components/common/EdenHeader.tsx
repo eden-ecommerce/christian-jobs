@@ -1,9 +1,9 @@
 "use client";
 
+import { EdenLogo } from "@components/common/EdenLogo";
 import { HeaderSearch } from "@components/common/HeaderSearch";
 import { NsLink } from "@components/ns-link";
 import { NAMESPACE_PATH } from "@lib/config";
-import Image from "next/image";
 import { ShoppingBag, HelpCircle, User, Phone } from "lucide-react";
 
 const NAV_LINKS = [
@@ -44,15 +44,7 @@ export function EdenHeader() {
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:py-4">
           {/* Logo */}
           <a href="https://www.eden.co.uk" className="shrink-0" aria-label="Eden home">
-            <Image
-              src="/eden-logo.svg"
-              alt="Eden"
-              width={120}
-              height={87}
-              className="h-12 w-auto sm:h-14"
-              unoptimized
-              priority
-            />
+            <EdenLogo className="h-12 w-auto sm:h-14" />
           </a>
 
           {/* Live instant search */}

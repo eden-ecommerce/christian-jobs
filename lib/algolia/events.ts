@@ -184,26 +184,25 @@ function buildSearchParams(params: SearchEventsParams) {
   const filters = [EVENTS_BASE_FILTER];
   if (typeof online === "boolean") filters.push(`online:${online}`);
 
-  // Use occurrenceStartTimestamps so recurring events are matched if ANY
-  // occurrence falls within the window, not just nextOccurrenceStartTimestamp.
-  const numericFilters: string[][] = [];
-  if (typeof dateFrom === "number" && typeof dateTo === "number") {
-    // Any occurrence that starts within [from, to]
-    numericFilters.push([
-      `occurrenceStartTimestamps >= ${dateFrom}`,
-      `occurrenceStartTimestamps <= ${dateTo}`,
-    ]);
-  } else if (typeof dateFrom === "number") {
-    numericFilters.push([`occurrenceStartTimestamps >= ${dateFrom}`]);
-  } else if (typeof dateTo === "number") {
-    numericFilters.push([`occurrenceStartTimestamps <= ${dateTo}`]);
+  // occurrenceStartTimestamps (array) is NOT in numericAttributesForFiltering
+  // on this index. Use the pre-aggregated scalar attributes instead:
+  //   occurrenceStartTimestampMin — earliest occurrence start across all dates
+  //   occurrenceEndTimestampMax  — latest occurrence end across all dates
+  // For a date-range filter this gives: events whose earliest start is >= from
+  // AND whose latest end is <= to, which correctly surfaces single-day and
+  // multi-day events that fall within the requested window.
+  const numericFilters: string[] = [];
+  if (typeof dateFrom === "number") {
+    numericFilters.push(`occurrenceStartTimestampMin >= ${dateFrom}`);
+  }
+  if (typeof dateTo === "number") {
+    numericFilters.push(`occurrenceEndTimestampMax <= ${dateTo}`);
   }
 
   const hasGeo = typeof lat === "number" && typeof lng === "number";
 
   const base: Record<string, unknown> = {
     filters: filters.join(" AND "),
-    // numericFilters is an array of arrays — Algolia ANDs the outer array, ORs the inner.
     ...(numericFilters.length > 0 ? { numericFilters } : {}),
     getRankingInfo: hasGeo,
   };

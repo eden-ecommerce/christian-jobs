@@ -1,5 +1,5 @@
+import { EdenLogo } from "@components/common/EdenLogo";
 import type { CloudflareLocation } from "@lib/location/types";
-import Image from "next/image";
 
 const FOOTER_COLUMNS = [
   {
@@ -64,14 +64,7 @@ export function Footer({ geo }: FooterProps) {
           {/* Logo + tagline */}
           <div className="col-span-2 md:col-span-1">
             <a href="https://www.eden.co.uk" aria-label="Eden home">
-              <Image
-                src="/eden-logo.svg"
-                alt="Eden"
-                width={120}
-                height={87}
-                className="h-12 w-auto"
-                unoptimized
-              />
+              <EdenLogo className="h-12 w-auto" />
             </a>
             <p className="mt-3 max-w-[180px] text-xs leading-relaxed text-muted-foreground">
               The UK&apos;s favourite Christian bookshop — Bibles, books, gifts and Christian events.
