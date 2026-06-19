@@ -132,7 +132,7 @@ export function HeaderSearch() {
   return (
     <div ref={containerRef} className="relative mx-4 hidden flex-1 md:block">
       <form
-        action="https://www.eden.co.uk/search"
+        action="https://www.eden.co.uk/shop/search.php"
         method="get"
         role="search"
         onSubmit={handleSubmit}
@@ -145,7 +145,7 @@ export function HeaderSearch() {
           <input
             ref={inputRef}
             type="search"
-            name="q"
+            name="products[query]"
             value={query}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
@@ -243,7 +243,7 @@ export function HeaderSearch() {
           {/* See all */}
           <li role="option" aria-selected={false}>
             <a
-              href={`https://www.eden.co.uk/search?q=${encodeURIComponent(query)}`}
+              href={`https://www.eden.co.uk/shop/search.php?products%5Bquery%5D=${encodeURIComponent(query)}`}
               className="flex items-center justify-center border-t border-gray-100 px-5 py-3 text-sm text-primary hover:bg-gray-50"
             >
               See all results for &ldquo;{query}&rdquo; &rarr;
