@@ -1,5 +1,6 @@
 import { EventCard } from "@components/events/EventCard";
 import { LocationSearchBox } from "@components/events/LocationSearchBox";
+import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
 import { NsLink } from "@components/ns-link";
 import { buttonVariants } from "@components/ui/button";
 import { NAMESPACE_PATH } from "@lib/config";
@@ -131,11 +132,13 @@ export default async function EventsHomePage() {
             </div>
           ) : (
             <div className="mt-4 rounded-xl border border-dashed border-border p-10 text-center">
-              <p className="text-sm text-muted-foreground">
-                {upcoming.configured
-                  ? "No events to show right now. Please check back soon."
-                  : "Event search is not configured. Add your Algolia credentials to get started."}
-              </p>
+              {upcoming.configured ? (
+                <p className="text-sm text-muted-foreground">
+                  No events to show right now. Please check back soon.
+                </p>
+              ) : (
+                <IntegrationEnvError integration="algolia" className="border-0 bg-transparent" />
+              )}
               <NsLink
                 href={`${NAMESPACE_PATH}/browse`}
                 className={`${buttonVariants({ variant: "outline" })} mt-4`}

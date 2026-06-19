@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import { Search } from "lucide-react";
 import { NsLink } from "@components/ns-link";
+import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
 import { Breadcrumbs } from "@components/events/Breadcrumbs";
 import { EventCard } from "@components/events/EventCard";
 import { AdvancedFilters } from "@components/events/AdvancedFilters";
+import { EventsActiveFilterBar } from "@components/events/EventsActiveFilterBar";
 import { SearchPagination } from "@components/events/SearchPagination";
 import {
   searchEvents,
   type EventSort,
   type SearchEventsParams,
 } from "@lib/algolia/events";
-import { getAllTowns } from "@lib/locations";
+import { DEFAULT_LOCATION_RADIUS_METERS } from "@lib/algolia/constants";
 import { dateFromMs, dateToMs } from "@lib/date-range";
 import { NAMESPACE_PATH } from "@lib/config";
 
@@ -68,28 +70,33 @@ export default async function SearchPage({
   if (hasGeo) {
     params.lat = lat;
     params.lng = lng;
-    params.radiusMeters = radiusRaw ? Number(radiusRaw) : 40000;
+    params.radiusMeters = radiusRaw
+      ? Number(radiusRaw)
+      : DEFAULT_LOCATION_RADIUS_METERS;
   }
   if (onlineRaw === "true") params.online = true;
   if (onlineRaw === "false") params.online = false;
 
   const result = await searchEvents(params);
-  const towns = getAllTowns().map((t) => ({
-    name: t.name,
-    slug: t.slug,
-    lat: t.lat,
-    lng: t.lng,
-    countyName: t.countyName,
-    countySlug: t.countySlug,
-    regionName: t.regionName,
-    regionSlug: t.regionSlug,
-  }));
 
   const headline = place
     ? `Events near ${place}`
     : query
       ? `Results for “${query}”`
       : "All events";
+
+  if (!result.configured) {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <Breadcrumbs
+          items={[{ label: "Events", href: NAMESPACE_PATH }, { label: "Search" }]}
+        />
+        <div className="mt-8">
+          <IntegrationEnvError integration="algolia" />
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -102,17 +109,18 @@ export default async function SearchPage({
           {headline}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {result.configured
-            ? `${result.nbHits} ${result.nbHits === 1 ? "event" : "events"} found`
-            : "Search is not configured yet."}
+          {`${result.nbHits} ${result.nbHits === 1 ? "event" : "events"} found`}
         </p>
+      </div>
+
+      <div className="mt-4">
+        <EventsActiveFilterBar />
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[300px_1fr]">
         <AdvancedFilters
           categories={result.facets.categories}
           organisationTypes={result.facets.organisationTypes}
-          towns={towns}
           hasGeo={hasGeo}
         />
 

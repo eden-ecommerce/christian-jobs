@@ -53,6 +53,7 @@ export async function apiFetch<T>(
     !(typeof FormData !== "undefined" && body instanceof FormData);
 
   const response = await fetch(buildUrl(path), {
+    credentials: "include",
     ...rest,
     headers: {
       Accept: "application/json",

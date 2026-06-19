@@ -37,9 +37,8 @@ function SaveAllButton() {
   );
 }
 
-function SettingsFormPresenter({ initialValues }: SettingsFormPresenterProps) {
+function SettingsFormContent() {
   const [activeTab, setActiveTab] = useState<"general" | "preferences">("general");
-  const updateMutation = useUpdateSettings();
 
   const generalValidation = useFormValidationFields<
     SettingsFormValues,
@@ -50,6 +49,49 @@ function SettingsFormPresenter({ initialValues }: SettingsFormPresenterProps) {
     SettingsFormValues,
     (typeof settingsPreferencesFormFields)[number]
   >(settingsPreferencesFormFields);
+
+  const tabClass = (hasErrors: boolean, isActive: boolean) =>
+    cn(
+      "rounded-md px-3 py-1.5 text-sm font-medium",
+      isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
+      hasErrors && "text-destructive",
+    );
+
+  return (
+    <FormContainer>
+      <Form className="space-y-6">
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className={tabClass(generalValidation.hasErrors, activeTab === "general")}
+            onClick={() => setActiveTab("general")}
+          >
+            General
+          </button>
+          <button
+            type="button"
+            className={tabClass(
+              preferencesValidation.hasErrors,
+              activeTab === "preferences",
+            )}
+            onClick={() => setActiveTab("preferences")}
+          >
+            Preferences
+          </button>
+        </div>
+
+        {activeTab === "general" ? <GeneralSection /> : <PreferencesSection />}
+
+        <FormFooter>
+          <SaveAllButton />
+        </FormFooter>
+      </Form>
+    </FormContainer>
+  );
+}
+
+function SettingsFormPresenter({ initialValues }: SettingsFormPresenterProps) {
+  const updateMutation = useUpdateSettings();
 
   const handleSubmit = async (values: SettingsFormValues) => {
     const saveMode: SettingsSaveMode = values.saveMode;
@@ -74,13 +116,6 @@ function SettingsFormPresenter({ initialValues }: SettingsFormPresenterProps) {
     }
   };
 
-  const tabClass = (hasErrors: boolean, isActive: boolean) =>
-    cn(
-      "rounded-md px-3 py-1.5 text-sm font-medium",
-      isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
-      hasErrors && "text-destructive",
-    );
-
   return (
     <Formik
       initialValues={initialValues}
@@ -89,35 +124,7 @@ function SettingsFormPresenter({ initialValues }: SettingsFormPresenterProps) {
       enableReinitialize
       validateOnMount
     >
-      <FormContainer>
-        <Form className="space-y-6">
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className={tabClass(generalValidation.hasErrors, activeTab === "general")}
-              onClick={() => setActiveTab("general")}
-            >
-              General
-            </button>
-            <button
-              type="button"
-              className={tabClass(
-                preferencesValidation.hasErrors,
-                activeTab === "preferences",
-              )}
-              onClick={() => setActiveTab("preferences")}
-            >
-              Preferences
-            </button>
-          </div>
-
-          {activeTab === "general" ? <GeneralSection /> : <PreferencesSection />}
-
-          <FormFooter>
-            <SaveAllButton />
-          </FormFooter>
-        </Form>
-      </FormContainer>
+      <SettingsFormContent />
     </Formik>
   );
 }

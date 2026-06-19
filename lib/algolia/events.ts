@@ -1,7 +1,13 @@
 import "server-only";
 
 import { getAlgoliaSearchClient } from "@lib/algolia/client";
-import { organisationHubIndex } from "@lib/algolia/constants";
+import {
+  DEFAULT_LOCATION_RADIUS_METERS,
+  EVENTS_BASE_FILTER,
+  defaultHierarchicalSearchPreset,
+  organisationHubIndex,
+} from "@lib/algolia/constants";
+import { extractHierarchyLabel } from "@lib/algolia/hierarchical-filter";
 
 /**
  * Shape derived from live `organisationHub` browse (entityType:event).
@@ -52,11 +58,10 @@ function num(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-/** Strip the ":::id" suffix Algolia hierarchical facets append. */
+/** Strip hierarchical facet encoding (e.g. "Label:::id") for display. */
 export function cleanCategoryLabel(value: string | null): string | null {
   if (!value) return null;
-  const idx = value.indexOf(":::");
-  return idx === -1 ? value : value.slice(0, idx);
+  return extractHierarchyLabel(value, defaultHierarchicalSearchPreset.hierarchicalFacet);
 }
 
 function mapHit(raw: RawHit): EventHit {
@@ -104,8 +109,6 @@ function mapHit(raw: RawHit): EventHit {
   };
 }
 
-const EVENT_FILTER = "entityType:event";
-
 /** Sort options exposed in the UI. Date sorts are applied server-side in-memory. */
 export type EventSort = "relevance" | "distance" | "date_asc" | "date_desc";
 
@@ -114,7 +117,7 @@ export type SearchEventsParams = {
   /** Geo search origin. When set, results can be ranked by distance. */
   lat?: number;
   lng?: number;
-  /** Radius in metres. Default 40km. */
+  /** Radius in metres. Default from DEFAULT_LOCATION_RADIUS_METERS. */
   radiusMeters?: number;
   category?: string;
   organisationType?: string;
@@ -157,9 +160,9 @@ const EMPTY_RESULT: SearchEventsResult = {
 
 /** Build the shared Algolia params (filters, facets, numeric + geo) for a search. */
 function buildSearchParams(params: SearchEventsParams) {
-  const { lat, lng, radiusMeters = 40000, online, dateFrom, dateTo } = params;
+  const { lat, lng, radiusMeters = DEFAULT_LOCATION_RADIUS_METERS, online, dateFrom, dateTo } = params;
 
-  const filters = [EVENT_FILTER];
+  const filters = [EVENTS_BASE_FILTER];
   if (typeof online === "boolean") filters.push(`online:${online}`);
 
   const numericFilters: string[] = [];
@@ -244,8 +247,7 @@ export async function searchEvents(
   const response = await client.search([
     { indexName: organisationHubIndex, query, params: mainParams },
     { indexName: organisationHubIndex, query, params: facetParams },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ] as any);
+  ] as unknown as Parameters<typeof client.search>[0]);
 
   const main = response.results[0];
   const facetResult = response.results[1];
@@ -344,13 +346,12 @@ export async function getCategoryFacets(): Promise<CategoryFacet[]> {
       indexName: organisationHubIndex,
       query: "",
       params: {
-        filters: EVENT_FILTER,
+        filters: EVENTS_BASE_FILTER,
         hitsPerPage: 0,
         facets: ["categoryHierarchy.lvl0"],
       },
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ] as any);
+  ] as unknown as Parameters<typeof client.search>[0]);
 
   const result = response.results[0];
   if (!result || !("facets" in result) || !result.facets) return [];

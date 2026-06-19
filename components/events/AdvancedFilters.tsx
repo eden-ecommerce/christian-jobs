@@ -1,22 +1,21 @@
 "use client";
 
+import { EventsUserLocationFilter } from "@components/events/EventsUserLocationFilter";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
-import { ChevronDown, LocateFixed, Loader2 } from "lucide-react";
+import { useCallback, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { NAMESPACE_PATH } from "@lib/config";
 import {
   matchQuickRange,
   quickRangeDates,
   type QuickRange,
 } from "@lib/date-range";
-import type { TownOption } from "@components/events/LocationSearchBox";
 
 type Facet = { label: string; value: string; count: number };
 
 type Props = {
   categories: Facet[];
   organisationTypes: Facet[];
-  towns: TownOption[];
   hasGeo: boolean;
 };
 
@@ -26,8 +25,6 @@ const QUICK_RANGES: { label: string; value: QuickRange }[] = [
   { label: "This Weekend", value: "weekend" },
   { label: "Next 7 Days", value: "next7" },
 ];
-
-const POSTCODE_RE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
 
 function Section({
   title,
@@ -63,15 +60,10 @@ function Section({
 export function AdvancedFilters({
   categories,
   organisationTypes,
-  towns,
   hasGeo,
 }: Props) {
   const router = useRouter();
   const params = useSearchParams();
-
-  const [locationInput, setLocationInput] = useState(params.get("place") ?? "");
-  const [geoLoading, setGeoLoading] = useState(false);
-  const [geoError, setGeoError] = useState<string | null>(null);
 
   /** Apply a batch of param changes and navigate. null removes the key. */
   const apply = useCallback(
@@ -104,97 +96,6 @@ export function AdvancedFilters({
     Boolean(params.get("sort")) ||
     Boolean(params.get("online"));
 
-  const setGeo = useCallback(
-    (lat: number, lng: number, place: string) => {
-      apply({
-        lat: String(lat),
-        lng: String(lng),
-        place,
-        q: null,
-      });
-    },
-    [apply],
-  );
-
-  async function resolveLocation() {
-    const value = locationInput.trim();
-    if (!value) {
-      apply({ lat: null, lng: null, place: null });
-      return;
-    }
-    setGeoError(null);
-
-    // 1) UK postcode lookup via postcodes.io.
-    if (POSTCODE_RE.test(value)) {
-      setGeoLoading(true);
-      try {
-        const res = await fetch(
-          `https://api.postcodes.io/postcodes/${encodeURIComponent(value)}`,
-        );
-        const data = await res.json();
-        if (data?.result?.latitude) {
-          setGeo(
-            data.result.latitude,
-            data.result.longitude,
-            data.result.postcode ?? value,
-          );
-          return;
-        }
-        setGeoError("Postcode not found.");
-      } catch {
-        setGeoError("Could not look up that postcode.");
-      } finally {
-        setGeoLoading(false);
-      }
-      return;
-    }
-
-    // 2) Match a known UK town by name.
-    const match = towns.find(
-      (t) => t.name.toLowerCase() === value.toLowerCase(),
-    );
-    if (match) {
-      setGeo(match.lat, match.lng, match.name);
-      return;
-    }
-    const partial = towns.find((t) =>
-      t.name.toLowerCase().startsWith(value.toLowerCase()),
-    );
-    if (partial) {
-      setGeo(partial.lat, partial.lng, partial.name);
-      return;
-    }
-
-    // 3) Fall back to a free-text query.
-    apply({ q: value, lat: null, lng: null, place: null });
-  }
-
-  function useMyLocation() {
-    if (!navigator.geolocation) {
-      setGeoError("Geolocation is not supported by your browser.");
-      return;
-    }
-    setGeoLoading(true);
-    setGeoError(null);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setGeoLoading(false);
-        setLocationInput("My location");
-        setGeo(pos.coords.latitude, pos.coords.longitude, "My location");
-      },
-      () => {
-        setGeoLoading(false);
-        setGeoError("Could not get your location.");
-      },
-      { enableHighAccuracy: false, timeout: 8000 },
-    );
-  }
-
-  const townNames = useMemo(
-    () => Array.from(new Set(towns.map((t) => t.name))).sort(),
-    [towns],
-  );
-
   return (
     <aside
       className="flex flex-col gap-5 rounded-xl border border-border bg-card p-5"
@@ -220,46 +121,7 @@ export function AdvancedFilters({
       </div>
 
       <Section title="Location">
-        <datalist id="uk-towns">
-          {townNames.map((n) => (
-            <option key={n} value={n} />
-          ))}
-        </datalist>
-        <div className="flex flex-col gap-2">
-          <input
-            type="text"
-            list="uk-towns"
-            value={locationInput}
-            onChange={(e) => setLocationInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                resolveLocation();
-              }
-            }}
-            onBlur={resolveLocation}
-            placeholder="Enter postcode or location"
-            aria-label="Enter postcode or location"
-            autoComplete="off"
-            className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30"
-          />
-          <button
-            type="button"
-            onClick={useMyLocation}
-            disabled={geoLoading}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-input bg-background text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
-          >
-            {geoLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <LocateFixed className="h-4 w-4 text-primary" aria-hidden="true" />
-            )}
-            Use my current location
-          </button>
-          {geoError ? (
-            <p className="text-xs text-destructive">{geoError}</p>
-          ) : null}
-        </div>
+        <EventsUserLocationFilter />
       </Section>
 
       <Section title="Date Range">

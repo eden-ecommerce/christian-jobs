@@ -15,6 +15,7 @@ export const INTEGRATION_ENV_VARS = {
     "EDEN_PAYMENT_CLIENT_ID",
     "EDEN_PAYMENT_CLIENT_SECRET",
   ],
+  googleMaps: ["NEXT_PUBLIC_GOOGLE_MAPS_API_KEY"],
 } as const satisfies Record<string, readonly string[]>;
 
 export type IntegrationKey = keyof typeof INTEGRATION_ENV_VARS;
@@ -26,6 +27,7 @@ export const INTEGRATION_LABELS: Record<IntegrationKey, string> = {
   algolia: "Algolia Search",
   edenApi: "Eden API",
   edenOAuth: "Eden OAuth",
+  googleMaps: "Google Maps",
 };
 
 export function isAlgoliaEnvConfigured(): boolean {
@@ -44,4 +46,8 @@ export function isEdenOAuthEnvConfigured(): boolean {
       process.env.EDEN_PAYMENT_CLIENT_ID &&
       process.env.EDEN_PAYMENT_CLIENT_SECRET,
   );
+}
+
+export function isGoogleMapsEnvConfigured(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY);
 }
