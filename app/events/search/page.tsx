@@ -42,6 +42,7 @@ export default async function SearchPage({
   const latRaw = one(sp.lat);
   const lngRaw = one(sp.lng);
   const category = one(sp.category);
+  const uncategorisedRaw = one(sp.uncategorised);
   const org = one(sp.org);
   const onlineRaw = one(sp.online);
   const radiusRaw = one(sp.radius);
@@ -64,6 +65,7 @@ export default async function SearchPage({
   const params: SearchEventsParams = {
     query,
     category,
+    uncategorised: uncategorisedRaw === "true" ? true : undefined,
     organisationType: org,
     sort,
     page,
@@ -90,7 +92,9 @@ export default async function SearchPage({
     ? `Events near ${place}`
     : query
       ? `Results for "${query}"`
-      : pageContent?.title ?? "All Christian events";
+      : uncategorisedRaw === "true"
+        ? "Uncategorised events"
+        : pageContent?.title ?? "All Christian events";
 
   if (!result.configured) {
     return (

@@ -11,7 +11,7 @@ import { ArrowRight, MapPin, Search } from "lucide-react";
 export const revalidate = 1800;
 
 export default async function EventsHomePage() {
-  const [upcoming, categories] = await Promise.all([
+  const [upcoming, { categories, totalCount, uncategorisedCount }] = await Promise.all([
     searchEvents({ hitsPerPage: 6 }),
     getCategoryFacets(),
   ]);
@@ -64,6 +64,15 @@ export default async function EventsHomePage() {
               Browse by category
             </h2>
             <div className="mt-4 flex flex-wrap gap-2">
+              {/* See All chip */}
+              <NsLink
+                href={`${NAMESPACE_PATH}/search`}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+              >
+                See all
+                <span className="text-xs text-muted-foreground">{totalCount}</span>
+              </NsLink>
+
               {categories.map((cat) => (
                 <NsLink
                   key={cat.value}
@@ -74,6 +83,17 @@ export default async function EventsHomePage() {
                   <span className="text-xs text-muted-foreground">{cat.count}</span>
                 </NsLink>
               ))}
+
+              {/* Uncategorised chip — only shown when there are events without a category */}
+              {uncategorisedCount > 0 ? (
+                <NsLink
+                  href={`${NAMESPACE_PATH}/search?uncategorised=true`}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+                >
+                  Uncategorised
+                  <span className="text-xs text-muted-foreground">{uncategorisedCount}</span>
+                </NsLink>
+              ) : null}
             </div>
           </section>
         ) : null}

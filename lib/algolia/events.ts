@@ -131,6 +131,8 @@ export type SearchEventsParams = {
   /** Radius in metres. Default from DEFAULT_LOCATION_RADIUS_METERS. */
   radiusMeters?: number;
   category?: string;
+  /** When true, only return events with no category set. */
+  uncategorised?: boolean;
   organisationType?: string;
   online?: boolean;
   /** Inclusive lower bound, ms since epoch (matches nextOccurrenceStartTimestamp). */
@@ -229,6 +231,7 @@ export async function searchEvents(
   const {
     query = "",
     category,
+    uncategorised,
     organisationType,
     sort = "relevance",
     page = 0,
@@ -236,6 +239,16 @@ export async function searchEvents(
   } = params;
 
   const { base, hasGeo } = buildSearchParams(params);
+
+  // When `uncategorised` is true, filter to events with no category at any level.
+  // Algolia doesn't support "attribute does not exist" natively, but we can rely
+  // on the facet count mismatch: events missing categoryHierarchy.lvl0 will have
+  // zero counts. We pass an empty filters string here so they are included, and
+  // exclude all events that DO have a category by negating the facet.
+  if (uncategorised) {
+    const existingFilters = base.filters as string;
+    base.filters = `${existingFilters} AND NOT _exists_:categoryHierarchy.lvl0`;
+  }
 
   const selectionFilters: string[][] = [];
   if (category) selectionFilters.push(categoryFacetFilter(category));
@@ -427,10 +440,16 @@ export async function getEventsByIds(ids: string[]): Promise<EventHit[]> {
 
 export type CategoryFacet = { label: string; value: string; count: number };
 
-/** Top-level category facets for browse chips. */
-export async function getCategoryFacets(): Promise<CategoryFacet[]> {
+export type CategoryFacetsResult = {
+  categories: CategoryFacet[];
+  totalCount: number;
+  uncategorisedCount: number;
+};
+
+/** Top-level category facets for browse chips, plus total and uncategorised counts. */
+export async function getCategoryFacets(): Promise<CategoryFacetsResult> {
   const client = getAlgoliaSearchClient();
-  if (!client) return [];
+  if (!client) return { categories: [], totalCount: 0, uncategorisedCount: 0 };
 
   const response = await client.search([
     {
@@ -445,14 +464,23 @@ export async function getCategoryFacets(): Promise<CategoryFacet[]> {
   ] as unknown as Parameters<typeof client.search>[0]);
 
   const result = response.results[0];
-  if (!result || !("facets" in result) || !result.facets) return [];
+  if (!result || !("facets" in result) || !result.facets) {
+    return { categories: [], totalCount: 0, uncategorisedCount: 0 };
+  }
+
+  const totalCount = ("nbHits" in result ? (result.nbHits as number) : 0) ?? 0;
 
   const facet = result.facets["categoryHierarchy.lvl0"] ?? {};
-  return Object.entries(facet)
+  const categories = Object.entries(facet)
     .map(([value, count]) => ({
       value,
       label: cleanCategoryLabel(value) ?? value,
       count: count as number,
     }))
     .sort((a, b) => b.count - a.count);
+
+  const categorisedCount = categories.reduce((sum, c) => sum + c.count, 0);
+  const uncategorisedCount = Math.max(0, totalCount - categorisedCount);
+
+  return { categories, totalCount, uncategorisedCount };
 }

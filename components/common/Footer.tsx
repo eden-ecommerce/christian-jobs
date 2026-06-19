@@ -1,3 +1,5 @@
+import type { CloudflareLocation } from "@lib/location/types";
+
 const FOOTER_COLUMNS = [
   {
     heading: "Shop",
@@ -29,8 +31,12 @@ const FOOTER_COLUMNS = [
   },
 ];
 
+type FooterProps = {
+  geo?: CloudflareLocation;
+};
+
 /** Eden.co.uk-style footer. */
-export function Footer() {
+export function Footer({ geo }: FooterProps) {
   return (
     <footer className="mt-16 border-t border-border bg-secondary text-secondary-foreground">
       <div className="mx-auto max-w-6xl px-4 py-12">
@@ -69,6 +75,15 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Eden.co.uk. Event data provided for
             information only. Always confirm details with the event organiser.
           </p>
+          {geo ? (
+            <p className="mt-2 text-[11px] text-gray-400">
+              Location detected via {geo.source === "cloudflare" ? "Cloudflare" : "default"}
+              {" — "}
+              {geo.city ?? "unknown city"}, {geo.country ?? "unknown country"}
+              {" · "}
+              {geo.latitude.toFixed(4)}, {geo.longitude.toFixed(4)}
+            </p>
+          ) : null}
         </div>
       </div>
     </footer>
