@@ -137,6 +137,7 @@ export function JobSearchFilters({
         lvl2={categoryLvl2}
         lvl3={categoryLvl3}
         lvl4={categoryLvl4}
+        label="Job Categories"
       />
 
       <Section title="Organisation Type">

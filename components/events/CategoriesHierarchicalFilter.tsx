@@ -13,6 +13,7 @@ type Props = {
   lvl2: EventFacet[];
   lvl3: EventFacet[];
   lvl4: EventFacet[];
+  label?: string;
 };
 
 /**
@@ -20,7 +21,7 @@ type Props = {
  * Reads/writes the `category` search param to drive the server query.
  * Separator between hierarchy levels is " > " (Algolia convention).
  */
-export function CategoriesHierarchicalFilter({ lvl0, lvl1, lvl2, lvl3, lvl4 }: Props) {
+export function CategoriesHierarchicalFilter({ lvl0, lvl1, lvl2, lvl3, lvl4, label = "Event Categories" }: Props) {
   const [open, setOpen] = useState(true);
   const router = useRouter();
   const params = useSearchParams();
@@ -79,7 +80,7 @@ export function CategoriesHierarchicalFilter({ lvl0, lvl1, lvl2, lvl3, lvl4 }: P
         className="flex w-full items-center justify-between py-1 text-left"
       >
         <span className="text-sm font-semibold text-foreground">
-          Event Categories
+          {label}
         </span>
         <ChevronDown
           className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
