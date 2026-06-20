@@ -38,8 +38,8 @@ const CASE_STUDIES: CaseStudy[] = [
     solution:
       "The day-planner gave every delegate a personal, filterable schedule with live updates and push reminders, while live translation opened sessions to an international audience.",
     quote:
-      "The day-planner and push notifications transformed how delegates experience our convention. Everything our team needs to run a 10,000-person event now lives in one place.",
-    author: "Event Director, Keswick Convention",
+      "The reaction from delegates has been brilliant. People keep telling us the app made a vast, three-week convention feel personal and easy to navigate — and the live updates took real pressure off the team on the ground.",
+    author: "The Eden Events team",
     stats: [
       { value: "10,000+", label: "Delegates served" },
       { value: "3 weeks", label: "Continuous programme" },
@@ -56,8 +56,8 @@ const CASE_STUDIES: CaseStudy[] = [
     solution:
       "Arrival-date filtering tailored the programme to each booking automatically, and in-app maintenance requests took pressure off the front desk.",
     quote:
-      "Arrival-date filtering was the game-changer. Guests arriving mid-week instantly see exactly what's on during their stay, and maintenance requests no longer pile up at the front desk.",
-    author: "Site Director, Spring Harvest Holidays",
+      "Guests took to arrival-date filtering straight away — nobody had to wonder what was on during their stay. The feedback we've heard about the personalised programme and in-app maintenance requests has been fantastic.",
+    author: "The Eden Events team",
     stats: [
       { value: "365 days", label: "Year-round operation" },
       { value: "100%", label: "Stays personalised" },
