@@ -28,7 +28,7 @@ const FOOTER_COLUMNS = [
       { text: "Contact us", href: "https://www.eden.co.uk/contact" },
       { text: "Christian Events", href: "https://www.eden.co.uk/christian-jobs" },
       { text: "Christian.Gifts", href: "https://christian.gifts" },
-      { text: "Promote your event — free", href: "https://hub.eden.co.uk/dashboard/event-journey" },
+      { text: "Post a job vacancy — free", href: "https://hub.eden.co.uk/dashboard/job-journey" },
     ],
   },
   {
@@ -36,7 +36,7 @@ const FOOTER_COLUMNS = [
     links: [
       { text: "Delivery info", href: "https://www.eden.co.uk/help/delivery" },
       { text: "Christian Jobs", href: "https://www.eden.co.uk/jobs" },
-      { text: "Christian.events", href: "https://christian.events" },
+      { text: "Christian.Work", href: "https://christian.work" },
       { text: "Christian360.com", href: "https://christian360.com" },
     ],
   },
@@ -62,7 +62,7 @@ export function Footer() {
               <EdenLogo className="h-12 w-auto" />
             </a>
             <p className="mt-3 max-w-[180px] text-xs leading-relaxed text-muted-foreground">
-              The UK&apos;s favourite Christian bookshop — Bibles, books, gifts and Christian events.
+              The UK&apos;s favourite Christian bookshop — Bibles, books, gifts and Christian resources.
             </p>
           </div>
 
@@ -104,8 +104,8 @@ export function Footer() {
       {/* Copyright bar */}
       <div className="border-t border-gray-200 bg-[#1a3d2b] px-4 py-4 text-center">
         <p className="text-xs text-white/70">
-          &copy; {new Date().getFullYear()} Eden.co.uk. Event data provided for
-          information only. Always confirm details with the event organiser.
+          &copy; {new Date().getFullYear()} Eden.co.uk. Job listings provided for
+          information only. Always confirm details directly with the employer.
         </p>
       </div>
     </footer>

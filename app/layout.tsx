@@ -12,35 +12,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Default OG image used when a page doesn't supply its own.
-// Absolute URL required by the OG spec — metadataBase resolves relative paths.
-const DEFAULT_OG_IMAGE = "https://www.eden.co.uk/christian-jobs/og-default.png";
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.eden.co.uk"),
   title: {
-    default: "Christian Events Near You | Eden.co.uk",
-    template: "%s | Eden Events",
+    default: "Christian Jobs | Eden.co.uk",
+    template: "%s | Eden Christian Jobs",
   },
   description:
-    "Find Christian events, conferences, training and gatherings across the UK. Search by location or browse by region, county and town.",
+    "Find meaningful Christian jobs at churches, charities and faith-based organisations across the UK. Search by location or browse by category.",
   openGraph: {
-    siteName: "Eden Events",
+    siteName: "Christian Jobs — Eden.co.uk",
     locale: "en_GB",
     type: "website",
-    images: [
-      {
-        url: DEFAULT_OG_IMAGE,
-        width: 1200,
-        height: 630,
-        alt: "Christian Events — Eden.co.uk",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     site: "@edencouk",
-    images: [DEFAULT_OG_IMAGE],
   },
   // Use Eden's own favicon so the browser tab matches the main site.
   icons: {
