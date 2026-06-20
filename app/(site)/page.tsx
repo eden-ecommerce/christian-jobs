@@ -1,93 +1,70 @@
-import { EventCard } from "@components/events/EventCard";
-import { HomeLocationSearch } from "@components/events/HomeLocationSearch";
+import { JobCard } from "@components/jobs/JobCard";
 import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
 import { NsLink } from "@components/ns-link";
 import { buttonVariants } from "@components/ui/button";
 import { NAMESPACE_PATH } from "@lib/config";
-import { getCategoryFacets, searchEvents } from "@lib/algolia/events";
-import { getLocationStats, getRegions } from "@lib/locations";
-import { FavouritesCard, PromoteEventBanner } from "@components/events/PromoteEventBanner";
-import { buildEventListJsonLd, buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
+import { getJobCategoryFacets, searchJobs } from "@lib/algolia/jobs";
+import { PostJobBanner, SavedJobsCard } from "@components/jobs/PromoteJobBanner";
+import { buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
 import type { Metadata } from "next";
-import { ArrowRight, MapPin, Search } from "lucide-react";
+import { ArrowRight, Briefcase, Search } from "lucide-react";
+import { HomeLocationSearch } from "@components/events/HomeLocationSearch";
 
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
-  title: "Christian Events Near You | Eden.co.uk",
+  title: "Christian Jobs | Eden.co.uk",
   description:
-    "Find Christian events, conferences, training and worship nights across the UK. Browse by location or search by category.",
+    "Find meaningful Christian jobs at churches, charities and faith-based organisations across the UK. Browse by category or search by location.",
   alternates: { canonical: "https://www.eden.co.uk/christian-jobs" },
   openGraph: {
-    title: "Christian Events Near You | Eden.co.uk",
+    title: "Christian Jobs | Eden.co.uk",
     description:
-      "Find Christian events, conferences, training and worship nights across the UK.",
+      "Find meaningful Christian jobs at churches, charities and faith-based organisations across the UK.",
     url: "https://www.eden.co.uk/christian-jobs",
     type: "website",
-    images: [
-      {
-        url: "https://www.eden.co.uk/christian-jobs/og-default.png",
-        width: 1200,
-        height: 630,
-        alt: "Christian Events — Eden.co.uk",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Christian Events Near You | Eden.co.uk",
+    title: "Christian Jobs | Eden.co.uk",
     description:
-      "Find Christian events, conferences, training and worship nights across the UK.",
-    images: ["https://www.eden.co.uk/christian-jobs/og-default.png"],
+      "Find meaningful Christian jobs at churches, charities and faith-based organisations across the UK.",
   },
 };
 
-export default async function EventsHomePage() {
-  const [upcoming, { categories, totalCount, uncategorisedCount }] = await Promise.all([
-    searchEvents({ hitsPerPage: 6 }),
-    getCategoryFacets(),
+export default async function ChristianJobsHomePage() {
+  const [recent, { categories, totalCount, uncategorisedCount }] = await Promise.all([
+    searchJobs({ hitsPerPage: 6, sort: "date_desc" }),
+    getJobCategoryFacets(),
   ]);
 
-  const regions = getRegions();
-  const stats = getLocationStats();
-
-  const listJsonLd = buildEventListJsonLd(
-    upcoming.hits,
-    "Upcoming Christian Events",
-    "https://www.eden.co.uk/christian-jobs"
-  );
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Eden", url: "https://www.eden.co.uk" },
-    { name: "Events", url: "https://www.eden.co.uk/christian-jobs" },
+    { name: "Christian Jobs", url: "https://www.eden.co.uk/christian-jobs" },
   ]);
 
   return (
     <main>
-      <script {...jsonLdScriptProps(listJsonLd)} />
       <script {...jsonLdScriptProps(breadcrumbJsonLd)} />
+
       {/* Hero */}
       <section className="border-b border-border bg-accent/40">
         <div className="mx-auto max-w-4xl px-4 py-14 text-center sm:py-20">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-primary">
-            <MapPin className="h-3.5 w-3.5" /> UK Christian Events Directory
+            <Briefcase className="h-3.5 w-3.5" /> UK Christian Jobs Directory
           </span>
           <h1 className="mt-5 text-balance text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Find Christian events happening near you
+            Find meaningful Christian jobs near you
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Conferences, training, worship nights and community gatherings from
-            churches and charities across the UK. Search by town or browse by
-            region.
+            Roles at churches, charities and faith-based organisations across the
+            UK. Search by location or browse by category.
           </p>
 
           <div className="mx-auto mt-8 max-w-2xl">
             <HomeLocationSearch />
           </div>
 
-          <p className="mt-4 text-sm text-muted-foreground">
-            Browsing {stats.towns.toLocaleString()} towns across {stats.regions}{" "}
-            UK nations and {stats.counties} counties.
-          </p>
           <div className="mt-4">
             <NsLink
               href={`${NAMESPACE_PATH}/search`}
@@ -108,7 +85,6 @@ export default async function EventsHomePage() {
               Browse by category
             </h2>
             <div className="mt-4 flex flex-wrap gap-2">
-              {/* See All chip */}
               <NsLink
                 href={`${NAMESPACE_PATH}/search`}
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
@@ -128,7 +104,6 @@ export default async function EventsHomePage() {
                 </NsLink>
               ))}
 
-              {/* Uncategorised chip — only shown when there are events without a category */}
               {uncategorisedCount > 0 ? (
                 <NsLink
                   href={`${NAMESPACE_PATH}/search?uncategorised=true`}
@@ -142,50 +117,19 @@ export default async function EventsHomePage() {
           </section>
         ) : null}
 
-        {/* Browse by region */}
-        <section className="mb-12">
-          <div className="flex items-end justify-between gap-4">
-            <h2 className="text-lg font-semibold text-foreground">
-              Browse by location
-            </h2>
-            <NsLink
-              href={`${NAMESPACE_PATH}/browse`}
-              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-            >
-              All locations <ArrowRight className="h-4 w-4" />
-            </NsLink>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {regions.map((region) => (
-              <NsLink
-                key={region.slug}
-                href={`${NAMESPACE_PATH}/browse/${region.slug}`}
-                className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary"
-              >
-                <span className="text-base font-semibold text-foreground">
-                  {region.name}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {region.counties.length} counties
-                </span>
-              </NsLink>
-            ))}
-          </div>
-        </section>
-
-        {/* Promote CTA + Favourites */}
+        {/* Post a job + saved jobs CTA */}
         <section className="mb-12">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
-            <PromoteEventBanner />
-            <FavouritesCard />
+            <PostJobBanner />
+            <SavedJobsCard />
           </div>
         </section>
 
-        {/* Upcoming events */}
+        {/* Recent jobs */}
         <section>
           <div className="flex items-end justify-between gap-4">
             <h2 className="text-lg font-semibold text-foreground">
-              Upcoming events
+              Latest jobs
             </h2>
             <NsLink
               href={`${NAMESPACE_PATH}/search`}
@@ -195,26 +139,26 @@ export default async function EventsHomePage() {
             </NsLink>
           </div>
 
-          {upcoming.hits.length > 0 ? (
+          {recent.hits.length > 0 ? (
             <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {upcoming.hits.map((event) => (
-                <EventCard key={event.objectID} event={event} />
+              {recent.hits.map((job) => (
+                <JobCard key={job.objectID} job={job} />
               ))}
             </div>
           ) : (
             <div className="mt-4 rounded-xl border border-dashed border-border p-10 text-center">
-              {upcoming.configured ? (
+              {recent.configured ? (
                 <p className="text-sm text-muted-foreground">
-                  No events to show right now. Please check back soon.
+                  No jobs to show right now. Please check back soon.
                 </p>
               ) : (
                 <IntegrationEnvError integration="algolia" className="border-0 bg-transparent" />
               )}
               <NsLink
-                href={`${NAMESPACE_PATH}/browse`}
+                href={`${NAMESPACE_PATH}/search`}
                 className={`${buttonVariants({ variant: "outline" })} mt-4`}
               >
-                Browse by location
+                Search all jobs
               </NsLink>
             </div>
           )}

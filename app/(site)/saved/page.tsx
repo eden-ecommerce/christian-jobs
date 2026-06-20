@@ -1,6 +1,5 @@
 import { SavedJobsPageClient } from "@components/jobs/SavedJobsPageClient";
 import { NsLink } from "@components/ns-link";
-import { NAMESPACE_PATH } from "@lib/config";
 import type { Metadata } from "next";
 import { ArrowLeft, Bookmark } from "lucide-react";
 
@@ -15,7 +14,7 @@ export default function SavedJobsPage() {
     <main className="mx-auto max-w-6xl px-4 py-10">
       {/* Back link */}
       <NsLink
-        href={NAMESPACE_PATH}
+        href="/"
         className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />

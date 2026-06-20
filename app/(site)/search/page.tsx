@@ -3,24 +3,18 @@ import { Search } from "lucide-react";
 import { NsLink } from "@components/ns-link";
 import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
 import { Breadcrumbs } from "@components/events/Breadcrumbs";
-import { EventCard } from "@components/events/EventCard";
-import { EventSearchFilters } from "@components/events/EventSearchFilters";
-import { EventsActiveFilterBar } from "@components/events/EventsActiveFilterBar";
+import { JobCard } from "@components/jobs/JobCard";
+import { JobSearchFilters } from "@components/jobs/JobSearchFilters";
+import { JobsActiveFilterBar } from "@components/jobs/JobsActiveFilterBar";
 import { SearchPagination } from "@components/events/SearchPagination";
-import { NoResultsCarousels } from "@components/events/NoResultsCarousels";
-import { PortableText } from "@components/ui/PortableText";
-import { FavouritesCard, PromoteEventBanner } from "@components/events/PromoteEventBanner";
+import { PostJobBanner, SavedJobsCard } from "@components/jobs/PromoteJobBanner";
 import {
-  searchEvents,
-  type EventSort,
-  type SearchEventsParams,
-} from "@lib/algolia/events";
+  searchJobs,
+  type JobSort,
+  type SearchJobsParams,
+} from "@lib/algolia/jobs";
 import { DEFAULT_LOCATION_RADIUS_METERS } from "@lib/algolia/constants";
-import { dateFromMs, dateToMs } from "@lib/date-range";
-import { NAMESPACE_PATH } from "@lib/config";
-import { getSearchPageContent } from "@lib/sanity/get-search-page";
-import { isSanityEnvConfigured } from "@lib/env-configured.server";
-import { buildEventListJsonLd, buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
+import { buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -33,26 +27,23 @@ export async function generateMetadata({
   const query = Array.isArray(sp.q) ? sp.q[0] : sp.q;
   const category = Array.isArray(sp.category) ? sp.category[0] : sp.category;
   const place = Array.isArray(sp.place) ? sp.place[0] : sp.place;
-  const hasFilters = !!(
-    query || category || place || sp.from || sp.to || sp.online || sp.org
-  );
+  const hasFilters = !!(query || category || place || sp.org);
 
   const title = place
-    ? `Christian events near ${place}`
+    ? `Christian jobs near ${place}`
     : query
-      ? `"${query}" — Christian events`
+      ? `"${query}" — Christian jobs`
       : category
-        ? `${category} Christian events`
-        : "Search Christian events";
+        ? `${category} Christian jobs`
+        : "Search Christian jobs";
 
   const description = place
-    ? `Browse Christian events near ${place} — conferences, training, worship and community gatherings.`
-    : "Search thousands of Christian events across the UK by location, date, category or organisation.";
+    ? `Browse Christian jobs near ${place} — churches, charities and faith-based organisations.`
+    : "Search Christian jobs across the UK by location, category or organisation.";
 
   return {
     title,
     description,
-    // Filtered/paginated search URLs should not be indexed
     ...(hasFilters
       ? { robots: { index: false, follow: true } }
       : {
@@ -62,18 +53,6 @@ export async function generateMetadata({
             description,
             url: "https://www.eden.co.uk/christian-jobs/search",
             type: "website",
-            images: [
-              {
-                url: "https://www.eden.co.uk/christian-jobs/og-default.png",
-                width: 1200,
-                height: 630,
-                alt: "Christian Events — Eden.co.uk",
-              },
-            ],
-          },
-          twitter: {
-            card: "summary_large_image",
-            images: ["https://www.eden.co.uk/christian-jobs/og-default.png"],
           },
         }),
   };
@@ -83,7 +62,7 @@ function one(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
-export default async function SearchPage({
+export default async function JobSearchPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
@@ -100,9 +79,7 @@ export default async function SearchPage({
   const onlineRaw = one(sp.online);
   const radiusRaw = one(sp.radius);
   const pageRaw = one(sp.page);
-  const fromRaw = one(sp.from);
-  const toRaw = one(sp.to);
-  const sortRaw = one(sp.sort) as EventSort | undefined;
+  const sortRaw = one(sp.sort) as JobSort | undefined;
 
   const lat = latRaw ? Number(latRaw) : undefined;
   const lng = lngRaw ? Number(lngRaw) : undefined;
@@ -113,9 +90,9 @@ export default async function SearchPage({
     Number.isFinite(lng);
 
   const page = pageRaw ? Math.max(0, Number(pageRaw) - 1) : 0;
-  const sort: EventSort = sortRaw ?? (hasGeo ? "distance" : "date_asc");
+  const sort: JobSort = sortRaw ?? (hasGeo ? "distance" : "relevance");
 
-  const params: SearchEventsParams = {
+  const params: SearchJobsParams = {
     query,
     category,
     uncategorised: uncategorisedRaw === "true" ? true : undefined,
@@ -123,37 +100,30 @@ export default async function SearchPage({
     sort,
     page,
     hitsPerPage: 12,
-    dateFrom: dateFromMs(fromRaw),
-    dateTo: dateToMs(toRaw),
   };
   if (hasGeo) {
     params.lat = lat;
     params.lng = lng;
-    params.radiusMeters = radiusRaw
-      ? Number(radiusRaw)
-      : DEFAULT_LOCATION_RADIUS_METERS;
+    params.radiusMeters = radiusRaw ? Number(radiusRaw) : DEFAULT_LOCATION_RADIUS_METERS;
   }
   if (onlineRaw === "true") params.online = true;
   if (onlineRaw === "false") params.online = false;
 
-  const [result, pageContent] = await Promise.all([
-    searchEvents(params),
-    isSanityEnvConfigured() ? getSearchPageContent() : Promise.resolve(null),
-  ]);
+  const result = await searchJobs(params);
 
   const headline = place
-    ? `Events near ${place}`
+    ? `Jobs near ${place}`
     : query
       ? `Results for "${query}"`
       : uncategorisedRaw === "true"
-        ? "Uncategorised events"
-        : pageContent?.title ?? "All Christian events";
+        ? "Uncategorised jobs"
+        : "All Christian jobs";
 
   if (!result.configured) {
     return (
       <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
         <Breadcrumbs
-          items={[{ label: "Events", href: NAMESPACE_PATH }, { label: "Search" }]}
+          items={[{ label: "Christian Jobs", href: "/" }, { label: "Search" }]}
         />
         <div className="mt-8">
           <IntegrationEnvError integration="algolia" />
@@ -164,55 +134,40 @@ export default async function SearchPage({
 
   const noResults = result.hits.length === 0;
 
-  const listJsonLd = !noResults
-    ? buildEventListJsonLd(
-        result.hits,
-        headline,
-        "https://www.eden.co.uk/christian-jobs/search"
-      )
-    : null;
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Eden", url: "https://www.eden.co.uk" },
-    { name: "Events", url: "https://www.eden.co.uk/christian-jobs" },
+    { name: "Christian Jobs", url: "https://www.eden.co.uk/christian-jobs" },
     { name: "Search", url: "https://www.eden.co.uk/christian-jobs/search" },
   ]);
 
   return (
     <main className="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
-      {listJsonLd && <script {...jsonLdScriptProps(listJsonLd)} />}
       <script {...jsonLdScriptProps(breadcrumbJsonLd)} />
       <Breadcrumbs
-        items={[{ label: "Events", href: NAMESPACE_PATH }, { label: "Search" }]}
+        items={[{ label: "Christian Jobs", href: "/" }, { label: "Search" }]}
       />
 
-      {/* Sanity page title + markdown description */}
       <div className="mt-4 flex flex-col gap-1">
         <h1 className="text-pretty text-2xl font-bold text-foreground sm:text-3xl">
           {headline}
         </h1>
-        {pageContent?.description ? (
-          <div className="prose prose-sm max-w-2xl text-muted-foreground">
-            <PortableText value={pageContent.description} />
-          </div>
-        ) : null}
         <p className="mt-1 text-sm font-medium text-muted-foreground">
           {result.nbHits.toLocaleString()}{" "}
-          {result.nbHits === 1 ? "event" : "events"} found
+          {result.nbHits === 1 ? "job" : "jobs"} found
         </p>
       </div>
 
       <div className="mt-3">
-        <EventsActiveFilterBar />
+        <JobsActiveFilterBar />
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
-        <PromoteEventBanner />
-        <FavouritesCard />
+        <PostJobBanner />
+        <SavedJobsCard />
       </div>
 
-      {/* Filters on the left, results on the right — full width, minimal whitespace */}
       <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-[240px_1fr]">
-        <EventSearchFilters
+        <JobSearchFilters
           categories={result.facets.categories}
           categoryLvl1={result.facets.categoryLvl1}
           categoryLvl2={result.facets.categoryLvl2}
@@ -224,34 +179,30 @@ export default async function SearchPage({
 
         <div className="min-w-0">
           {noResults ? (
-            <>
-              <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-card px-6 py-12 text-center">
-                <Search
-                  className="h-8 w-8 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <p className="text-base font-medium text-foreground">
-                  No events match your search
-                </p>
-                <p className="max-w-sm text-sm text-muted-foreground">
-                  Try widening your distance, clearing filters, or browsing by
-                  region instead.
-                </p>
-                <NsLink
-                  href={`${NAMESPACE_PATH}/browse`}
-                  className="mt-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-                >
-                  Browse by location
-                </NsLink>
-              </div>
-
-              <NoResultsCarousels />
-            </>
+            <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-card px-6 py-12 text-center">
+              <Search
+                className="h-8 w-8 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <p className="text-base font-medium text-foreground">
+                No jobs match your search
+              </p>
+              <p className="max-w-sm text-sm text-muted-foreground">
+                Try widening your distance, clearing filters, or browsing all
+                categories instead.
+              </p>
+              <NsLink
+                href="/"
+                className="mt-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+              >
+                Browse all jobs
+              </NsLink>
+            </div>
           ) : (
             <>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {result.hits.map((event) => (
-                  <EventCard key={event.objectID} event={event} />
+                {result.hits.map((job) => (
+                  <JobCard key={job.objectID} job={job} />
                 ))}
               </div>
               <SearchPagination
@@ -265,5 +216,3 @@ export default async function SearchPage({
     </main>
   );
 }
-
-

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { JobCard } from "@components/jobs/JobCard";
 import { NsLink } from "@components/ns-link";
 import { useSavedJobs } from "@lib/jobs/use-saved-jobs";
-import { NAMESPACE_PATH } from "@lib/config";
+import { apiUrl } from "@lib/config";
 import { cn } from "@lib/utils";
 import type { JobHit } from "@lib/algolia/jobs";
 import { Bookmark, Loader2 } from "lucide-react";
@@ -12,7 +12,8 @@ import useSWR from "swr";
 
 async function fetchSavedJobs(ids: string[]): Promise<JobHit[]> {
   if (ids.length === 0) return [];
-  const res = await fetch(`${NAMESPACE_PATH}/api/saved`, {
+  // Raw fetch does not apply Next.js basePath, so build the URL with apiUrl().
+  const res = await fetch(apiUrl("/api/saved"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ids }),
@@ -102,7 +103,7 @@ export function SavedJobsPageClient() {
           </p>
         </div>
         <NsLink
-          href={NAMESPACE_PATH}
+              href="/"
           className="mt-2 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           Browse jobs

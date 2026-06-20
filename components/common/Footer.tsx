@@ -26,7 +26,7 @@ const FOOTER_COLUMNS = [
     links: [
       { text: "Eden blog", href: "https://www.eden.co.uk/blog" },
       { text: "Contact us", href: "https://www.eden.co.uk/contact" },
-      { text: "Christian Events", href: "https://www.eden.co.uk/christian-jobs" },
+      { text: "Christian Jobs", href: "https://www.eden.co.uk/christian-jobs" },
       { text: "Christian.Gifts", href: "https://christian.gifts" },
       { text: "Post a job vacancy — free", href: "https://hub.eden.co.uk/dashboard/job-journey" },
     ],
