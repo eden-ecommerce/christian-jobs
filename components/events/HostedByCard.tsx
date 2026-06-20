@@ -56,24 +56,13 @@ export function HostedByCard({
 
   return (
     <div
-      className="mt-4 overflow-hidden rounded-xl border border-border bg-card"
+      className="mt-4 overflow-hidden rounded-lg border border-border bg-card"
       style={
         accentHex
           ? { borderTopColor: accentHex, borderTopWidth: "3px" }
           : undefined
       }
     >
-      {/* Banner strip — shown when the org has a banner image */}
-      {org?.bannerUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={org.bannerUrl}
-          alt=""
-          className="h-16 w-full object-cover"
-          aria-hidden="true"
-        />
-      )}
-
       <div className="p-4">
         {/* Header row */}
         <div className="flex items-center gap-3">

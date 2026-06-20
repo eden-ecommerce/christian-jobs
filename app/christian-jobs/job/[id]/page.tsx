@@ -123,56 +123,27 @@ export default async function JobPage({ params }: Props) {
       <div className="mt-4 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
         <article>
           {/* Header */}
-          <div className="flex items-start gap-4">
-            {logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={logoUrl}
-                alt={job.organisationName ?? ""}
-                className="h-16 w-16 shrink-0 rounded-xl border border-border bg-white object-contain p-1"
-              />
-            ) : (
-              <div
-                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-border"
-                style={
-                  accentHex
-                    ? { backgroundColor: accentHex + "18" }
-                    : undefined
-                }
-              >
-                <Building2
-                  className="h-8 w-8"
-                  aria-hidden="true"
-                  style={
-                    accentHex
-                      ? { color: accentHex }
-                      : { color: "hsl(var(--muted-foreground) / 0.4)" }
-                  }
-                />
-              </div>
+          <div>
+            <h1 className="text-balance text-2xl font-bold text-foreground sm:text-3xl">
+              {job.title}
+            </h1>
+            {job.organisationName && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {orgHref ? (
+                  <a
+                    href={orgHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium hover:underline"
+                    style={accentHex ? { color: accentHex } : undefined}
+                  >
+                    {job.organisationName}
+                  </a>
+                ) : (
+                  <span className="font-medium text-foreground">{job.organisationName}</span>
+                )}
+              </p>
             )}
-            <div className="min-w-0 flex-1">
-              <h1 className="text-balance text-2xl font-bold text-foreground sm:text-3xl">
-                {job.title}
-              </h1>
-              {job.organisationName && (
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {orgHref ? (
-                    <a
-                      href={orgHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium hover:underline"
-                      style={accentHex ? { color: accentHex } : undefined}
-                    >
-                      {job.organisationName}
-                    </a>
-                  ) : (
-                    <span className="font-medium text-foreground">{job.organisationName}</span>
-                  )}
-                </p>
-              )}
-            </div>
           </div>
 
           {/* Category badge */}
