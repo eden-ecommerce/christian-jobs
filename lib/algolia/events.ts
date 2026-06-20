@@ -488,6 +488,8 @@ export type OrgCategory = {
   parentId: number | null;
 };
 
+export type RgbColor = { r: number; g: number; b: number };
+
 export type OrganisationHit = {
   objectID: string;
   id: string;
@@ -500,6 +502,10 @@ export type OrganisationHit = {
   yearFounded: number | null;
   logoUrl: string | null;
   bannerUrl: string | null;
+  /** Dominant colour palette extracted from the logo image (RGB). */
+  logoPalette: RgbColor[];
+  /** Dominant colour palette extracted from the banner image (RGB). */
+  bannerPalette: RgbColor[];
   tags: string[];
   categories: OrgCategory[];
 };
@@ -520,6 +526,24 @@ function parseJsonField(value: unknown): Record<string, unknown> {
   if (typeof value === "object" && !Array.isArray(value))
     return value as Record<string, unknown>;
   return {};
+}
+
+/** Parse a palette array from a logo/banner field value. */
+function parsePalette(field: Record<string, unknown>): RgbColor[] {
+  if (!Array.isArray(field.palette)) return [];
+  return (field.palette as unknown[]).reduce<RgbColor[]>((acc, item) => {
+    if (item && typeof item === "object") {
+      const c = item as Record<string, unknown>;
+      if (
+        typeof c.r === "number" &&
+        typeof c.g === "number" &&
+        typeof c.b === "number"
+      ) {
+        acc.push({ r: c.r, g: c.g, b: c.b });
+      }
+    }
+    return acc;
+  }, []);
 }
 
 function mapOrgHit(raw: RawHit): OrganisationHit {
@@ -562,6 +586,8 @@ function mapOrgHit(raw: RawHit): OrganisationHit {
     yearFounded: typeof raw.yearFounded === "number" ? raw.yearFounded : null,
     logoUrl: str(logo.url),
     bannerUrl: str(banner.url),
+    logoPalette: parsePalette(logo),
+    bannerPalette: parsePalette(banner),
     tags,
     categories,
   };
