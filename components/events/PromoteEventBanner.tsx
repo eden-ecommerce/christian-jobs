@@ -45,13 +45,13 @@ export function PromoteEventBanner() {
 }
 
 /**
- * Card shown alongside PromoteEventBanner when the user has saved events.
- * Reads localStorage — renders nothing until hydrated or when no favourites.
+ * Card shown alongside PromoteEventBanner linking to saved events.
+ * Always visible; the count updates in real time as favourites are added or
+ * removed anywhere on the page (shared favourites store).
  */
 export function FavouritesCard() {
-  const { ids, hydrated } = useFavourites();
-
-  if (!hydrated || ids.length === 0) return null;
+  const { ids } = useFavourites();
+  const count = ids.length;
 
   return (
     <Link
@@ -59,25 +59,39 @@ export function FavouritesCard() {
       className="flex flex-col justify-between rounded-xl border border-rose-200 bg-rose-50 px-6 py-5 transition-colors hover:border-rose-300 hover:bg-rose-100"
     >
       <div className="flex items-start gap-3">
-        <Heart
-          className="mt-0.5 h-5 w-5 shrink-0 fill-rose-500 text-rose-500"
-          aria-hidden="true"
-        />
+        <span className="relative mt-0.5 shrink-0">
+          <Heart
+            className="h-5 w-5 fill-rose-500 text-rose-500"
+            aria-hidden="true"
+          />
+          {count > 0 ? (
+            <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold tabular-nums text-white">
+              {count}
+            </span>
+          ) : null}
+        </span>
         <div>
           <p className="text-sm font-semibold text-foreground">
             Your saved events
           </p>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            You have{" "}
-            <span className="font-medium text-rose-600">
-              {ids.length} {ids.length === 1 ? "event" : "events"}
-            </span>{" "}
-            saved to your favourites.
+            {count === 0 ? (
+              "Tap the heart on any event to save it here."
+            ) : (
+              <>
+                You have{" "}
+                <span className="font-medium text-rose-600">
+                  {count} {count === 1 ? "event" : "events"}
+                </span>{" "}
+                saved to your favourites.
+              </>
+            )}
           </p>
         </div>
       </div>
       <p className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-rose-600">
-        View saved events <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        {count === 0 ? "View favourites" : "View saved events"}{" "}
+        <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </p>
     </Link>
   );
