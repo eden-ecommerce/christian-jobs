@@ -43,8 +43,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const description =
     event.description?.slice(0, 155).replace(/\s+$/, "") || undefined;
-  const canonicalUrl = `https://www.eden.co.uk/events/${event.id}`;
-  const DEFAULT_OG = "https://www.eden.co.uk/events/og-default.png";
+  const canonicalUrl = `https://www.eden.co.uk/christian-jobs/${event.id}`;
+  const DEFAULT_OG = "https://www.eden.co.uk/christian-jobs/og-default.png";
   const image = event.thumbnailUrl ?? DEFAULT_OG;
 
   return {
@@ -144,9 +144,9 @@ export default async function EventPage({ params }: Props) {
 
   const eventJsonLd = buildEventJsonLd(event);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
-    { name: "Events", url: "https://www.eden.co.uk/events" },
-    { name: "Search", url: "https://www.eden.co.uk/events/search" },
-    { name: event.title, url: `https://www.eden.co.uk/events/${event.id}` },
+    { name: "Events", url: "https://www.eden.co.uk/christian-jobs" },
+    { name: "Search", url: "https://www.eden.co.uk/christian-jobs/search" },
+    { name: event.title, url: `https://www.eden.co.uk/christian-jobs/${event.id}` },
   ]);
 
   return (
@@ -402,7 +402,7 @@ export default async function EventPage({ params }: Props) {
               )}
               <FavouriteButton eventId={event.id} variant="full" />
               <ShareButton
-                url={`https://www.eden.co.uk/events/${event.id}`}
+                url={`https://www.eden.co.uk/christian-jobs/${event.id}`}
                 title={event.title}
               />
               {orgHref && (

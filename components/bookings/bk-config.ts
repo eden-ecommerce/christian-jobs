@@ -1,8 +1,10 @@
-export const BK_PATH = "/events/bookings";
+// Internal link paths — no namespace prefix; Next.js `basePath` prepends
+// /christian-jobs automatically via next/link.
+export const BK_PATH = "/bookings";
 
 export const BOOKINGS_DEMO_HREF = BK_PATH + "/pricing";
-export const EVENT_MANAGER_HREF = "/events/event-manager";
-export const TICKETING_HREF = "/events/ticketing";
+export const EVENT_MANAGER_HREF = "/event-manager";
+export const TICKETING_HREF = "/ticketing";
 
 export function bkHref(path: string) {
   return BK_PATH + path;

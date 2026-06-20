@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { EventCard } from "@components/events/EventCard";
 import { NsLink } from "@components/ns-link";
 import { useFavourites } from "@lib/favourites/use-favourites";
-import { NAMESPACE_PATH } from "@lib/config";
+import { BASE_PATH } from "@lib/config";
 import { cn } from "@lib/utils";
 import type { EventHit } from "@lib/algolia/events";
 import { Heart, Loader2 } from "lucide-react";
@@ -12,14 +12,13 @@ import useSWR from "swr";
 
 async function fetchFavourites(ids: string[]): Promise<EventHit[]> {
   if (ids.length === 0) return [];
-  // Root-relative, namespaced URL. The favourites route lives under the
-  // namespace (app/events/api/favourites) because the Cloudflare Worker only
-  // forwards /events/* to this deployment — a top-level /api/* path is
-  // unreachable through the eden.co.uk proxy. A relative URL resolves against
-  // the current page origin in every environment:
-  //   dev  -> http://localhost:3000/events/api/favourites
-  //   prod -> https://www.eden.co.uk/events/api/favourites
-  const res = await fetch(`${NAMESPACE_PATH}/api/favourites`, {
+  // Same-origin URL, manually prefixed with BASE_PATH. Raw `fetch()` does not
+  // apply Next.js `basePath`, so we add it so the request resolves against the
+  // current page origin on every host:
+  //   preview      -> <preview-host>/christian-jobs/api/favourites
+  //   *.vercel.app -> christian-jobs-*.vercel.app/christian-jobs/api/favourites
+  //   prod (proxy) -> www.eden.co.uk/christian-jobs/api/favourites
+  const res = await fetch(`${BASE_PATH}/api/favourites`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ids }),
@@ -119,7 +118,7 @@ export function FavouritesPageClient() {
           </p>
         </div>
         <NsLink
-          href={NAMESPACE_PATH}
+          href="/"
           className="mt-2 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           Browse events

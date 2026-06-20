@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 // Default OG image used when a page doesn't supply its own.
 // Absolute URL required by the OG spec — metadataBase resolves relative paths.
-const DEFAULT_OG_IMAGE = "https://www.eden.co.uk/events/og-default.png";
+const DEFAULT_OG_IMAGE = "https://www.eden.co.uk/christian-jobs/og-default.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.eden.co.uk"),

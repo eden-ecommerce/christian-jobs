@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   title: "Event Ticketing for Churches & Charities",
   description:
     "Sell tickets, check people in and manage your events — all from the same platform that runs everything else. No percentage fees on your ticket revenue.",
-  alternates: { canonical: `https://www.eden.co.uk${tkHref("")}` },
+  alternates: { canonical: `https://www.eden.co.uk/christian-jobs${tkHref("")}` },
 };
 
 const STEPS = [
@@ -241,7 +241,7 @@ export default function TicketingOverviewPage() {
             </p>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
               Christian360 Bookings lets attendees reserve prayer and pastoral appointments inside the app — safeguarding rules enforced automatically, volunteer availability collected with a weekly magic link.{" "}
-              <NsLink href="/events/bookings" className="font-semibold text-primary underline underline-offset-2">
+              <NsLink href="/bookings" className="font-semibold text-primary underline underline-offset-2">
                 Explore Bookings
               </NsLink>
               .

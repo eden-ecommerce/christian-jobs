@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "App for Retreats & Holiday Parks",
   description:
     "Welcome year-round guests with arrival-date filtering, on-site maintenance requests and personalised daily planners. Book a demo for your retreat or holiday park.",
-  alternates: { canonical: `https://www.eden.co.uk${EM_PATH}/retreats` },
+  alternates: { canonical: `https://www.eden.co.uk/christian-jobs${EM_PATH}/retreats` },
 };
 
 const FEATURES: FeatureItem[] = [

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "Event App for Conferences & Festivals",
   description:
     "Run large-scale Christian conferences and festivals with multi-stage programmes, live translation, click & collect and push notifications. Book a demo.",
-  alternates: { canonical: `https://www.eden.co.uk${EM_PATH}/conferences` },
+  alternates: { canonical: `https://www.eden.co.uk/christian-jobs${EM_PATH}/conferences` },
 };
 
 const FEATURES: FeatureItem[] = [

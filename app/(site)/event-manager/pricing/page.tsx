@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Pricing",
   description:
     "Simple, tiered pricing for Christian360 Events — affordable plans for smaller churches and enterprise capabilities for major conferences and festivals.",
-  alternates: { canonical: `https://www.eden.co.uk${EM_PATH}/pricing` },
+  alternates: { canonical: `https://www.eden.co.uk/christian-jobs${EM_PATH}/pricing` },
 };
 
 const FAQS = [
@@ -69,7 +69,7 @@ export default function PricingPage() {
             </p>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
               Christian360 Ticketing has its own simple fee-free plans starting at £19/month.{" "}
-              <NsLink href="/events/ticketing/pricing" className="font-semibold text-primary underline underline-offset-2">
+              <NsLink href="/ticketing/pricing" className="font-semibold text-primary underline underline-offset-2">
                 View Ticketing pricing
               </NsLink>
               {" "}— or add it to your Event Manager plan at any time.

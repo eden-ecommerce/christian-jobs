@@ -30,12 +30,12 @@ export const metadata: Metadata = {
   title: "Event Management & Mobile App for Christian Events",
   description:
     "Christian360 Events is the all-in-one event management platform and mobile app for conferences, churches, retreats and holiday parks. Book a demo today.",
-  alternates: { canonical: `https://www.eden.co.uk${EM_PATH}` },
+  alternates: { canonical: `https://www.eden.co.uk/christian-jobs${EM_PATH}` },
   openGraph: {
     title: "Christian360 Events — Event Management & Mobile App",
     description:
       "The flexible event management platform and mobile app for Christian conferences, churches, retreats and holiday parks.",
-    url: `https://www.eden.co.uk${EM_PATH}`,
+    url: `https://www.eden.co.uk/christian-jobs${EM_PATH}`,
     type: "website",
   },
 };
@@ -184,7 +184,7 @@ export default function EventManagerHome() {
                 </p>
               </div>
               <NsLink
-                href="/events/ticketing"
+                href="/ticketing"
                 className={cn(buttonVariants({ variant: "outline", size: "sm" }), "self-start")}
               >
                 Explore Ticketing
@@ -201,7 +201,7 @@ export default function EventManagerHome() {
                 </p>
               </div>
               <NsLink
-                href="/events/bookings"
+                href="/bookings"
                 className={cn(buttonVariants({ variant: "outline", size: "sm" }), "self-start")}
               >
                 Explore Bookings

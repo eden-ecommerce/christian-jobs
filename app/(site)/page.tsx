@@ -17,16 +17,16 @@ export const metadata: Metadata = {
   title: "Christian Events Near You | Eden.co.uk",
   description:
     "Find Christian events, conferences, training and worship nights across the UK. Browse by location or search by category.",
-  alternates: { canonical: "https://www.eden.co.uk/events" },
+  alternates: { canonical: "https://www.eden.co.uk/christian-jobs" },
   openGraph: {
     title: "Christian Events Near You | Eden.co.uk",
     description:
       "Find Christian events, conferences, training and worship nights across the UK.",
-    url: "https://www.eden.co.uk/events",
+    url: "https://www.eden.co.uk/christian-jobs",
     type: "website",
     images: [
       {
-        url: "https://www.eden.co.uk/events/og-default.png",
+        url: "https://www.eden.co.uk/christian-jobs/og-default.png",
         width: 1200,
         height: 630,
         alt: "Christian Events — Eden.co.uk",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     title: "Christian Events Near You | Eden.co.uk",
     description:
       "Find Christian events, conferences, training and worship nights across the UK.",
-    images: ["https://www.eden.co.uk/events/og-default.png"],
+    images: ["https://www.eden.co.uk/christian-jobs/og-default.png"],
   },
 };
 
@@ -54,11 +54,11 @@ export default async function EventsHomePage() {
   const listJsonLd = buildEventListJsonLd(
     upcoming.hits,
     "Upcoming Christian Events",
-    "https://www.eden.co.uk/events"
+    "https://www.eden.co.uk/christian-jobs"
   );
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Eden", url: "https://www.eden.co.uk" },
-    { name: "Events", url: "https://www.eden.co.uk/events" },
+    { name: "Events", url: "https://www.eden.co.uk/christian-jobs" },
   ]);
 
   return (

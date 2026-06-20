@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "Case Studies",
   description:
     "See how Keswick Convention and Spring Harvest Holidays use Christian360 Events to run their gatherings.",
-  alternates: { canonical: `https://www.eden.co.uk${EM_PATH}/case-studies` },
+  alternates: { canonical: `https://www.eden.co.uk/christian-jobs${EM_PATH}/case-studies` },
 };
 
 type CaseStudy = {

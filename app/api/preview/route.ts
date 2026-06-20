@@ -1,17 +1,17 @@
 import { getServerEnv } from "@lib/env-server";
-import { NAMESPACE_PATH } from "@lib/config";
 import { isSanityDraftPreviewAllowed } from "@lib/sanity/draft-preview.server";
 import { draftMode } from "next/headers";
 import { redirect } from "next/navigation";
 
+// Paths are namespace-relative; Next.js `basePath` prepends /christian-jobs.
 const PREVIEW_TYPE_PATHS: Record<string, (slug: string | null) => string | null> = {
-  home: () => NAMESPACE_PATH,
-  page: (slug) => (slug ? `${NAMESPACE_PATH}/${slug}` : null),
+  home: () => "/",
+  page: (slug) => (slug ? `/${slug}` : null),
 };
 
 export const GET = async (request: Request) => {
   if (!isSanityDraftPreviewAllowed()) {
-    redirect(NAMESPACE_PATH);
+    redirect("/");
   }
 
   const { searchParams } = new URL(request.url);
@@ -19,21 +19,21 @@ export const GET = async (request: Request) => {
   const env = getServerEnv();
 
   if (!token || token !== env.SANITY_PREVIEW_TOKEN) {
-    redirect(NAMESPACE_PATH);
+    redirect("/");
   }
 
   const type = searchParams.get("type");
   const slug = searchParams.get("slug");
 
   if (!type) {
-    redirect(NAMESPACE_PATH);
+    redirect("/");
   }
 
   const resolvePath = PREVIEW_TYPE_PATHS[type];
   const url = resolvePath ? resolvePath(slug) : null;
 
   if (!url) {
-    redirect(NAMESPACE_PATH);
+    redirect("/");
   }
 
   const draft = await draftMode();

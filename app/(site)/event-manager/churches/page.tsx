@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "Church App for Weekly Life & Talks Archive",
   description:
     "An affordable, easy-to-manage church app with a searchable talks archive, service planner, small groups and push notifications. Book a demo for your church.",
-  alternates: { canonical: `https://www.eden.co.uk${EM_PATH}/churches` },
+  alternates: { canonical: `https://www.eden.co.uk/christian-jobs${EM_PATH}/churches` },
 };
 
 const FEATURES: FeatureItem[] = [

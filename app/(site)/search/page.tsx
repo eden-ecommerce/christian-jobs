@@ -56,15 +56,15 @@ export async function generateMetadata({
     ...(hasFilters
       ? { robots: { index: false, follow: true } }
       : {
-          alternates: { canonical: "https://www.eden.co.uk/events/search" },
+          alternates: { canonical: "https://www.eden.co.uk/christian-jobs/search" },
           openGraph: {
             title,
             description,
-            url: "https://www.eden.co.uk/events/search",
+            url: "https://www.eden.co.uk/christian-jobs/search",
             type: "website",
             images: [
               {
-                url: "https://www.eden.co.uk/events/og-default.png",
+                url: "https://www.eden.co.uk/christian-jobs/og-default.png",
                 width: 1200,
                 height: 630,
                 alt: "Christian Events — Eden.co.uk",
@@ -73,7 +73,7 @@ export async function generateMetadata({
           },
           twitter: {
             card: "summary_large_image",
-            images: ["https://www.eden.co.uk/events/og-default.png"],
+            images: ["https://www.eden.co.uk/christian-jobs/og-default.png"],
           },
         }),
   };
@@ -168,13 +168,13 @@ export default async function SearchPage({
     ? buildEventListJsonLd(
         result.hits,
         headline,
-        "https://www.eden.co.uk/events/search"
+        "https://www.eden.co.uk/christian-jobs/search"
       )
     : null;
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Eden", url: "https://www.eden.co.uk" },
-    { name: "Events", url: "https://www.eden.co.uk/events" },
-    { name: "Search", url: "https://www.eden.co.uk/events/search" },
+    { name: "Events", url: "https://www.eden.co.uk/christian-jobs" },
+    { name: "Search", url: "https://www.eden.co.uk/christian-jobs/search" },
   ]);
 
   return (
