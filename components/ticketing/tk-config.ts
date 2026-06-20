@@ -1,7 +1,7 @@
 import { NAMESPACE_PATH } from "@lib/config";
 import { EM_PATH } from "@components/event-manager/em-config";
 
-/** Absolute path to the Ticketing microsite root, e.g. "/events/ticketing". */
+/** Namespace-relative path to the Ticketing microsite root, e.g. "/ticketing". */
 export const TK_PATH = `${NAMESPACE_PATH}/ticketing`;
 
 /** Build an internal href within the Ticketing microsite. */

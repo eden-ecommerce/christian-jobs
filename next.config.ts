@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
-import { BASE_PATH } from "@lib/constants";
-import { ALLOWED_ORIGIN, CORS_HEADERS } from "@lib/cors";
+// Relative imports (not @lib/* tsconfig aliases): next.config.ts is loaded by
+// Node's native TS resolver, which does not understand path aliases.
+import { BASE_PATH } from "./lib/constants.ts";
+import { ALLOWED_ORIGIN, CORS_HEADERS } from "./lib/cors.ts";
 
 const nextConfig: NextConfig = {
   // Mount the whole app under /christian-jobs. Next serves every route and

@@ -1,6 +1,6 @@
 import { assetUrl, NAMESPACE_PATH } from "@lib/config";
 
-/** Absolute path to the Event Manager microsite root, e.g. "/events/event-manager". */
+/** Namespace-relative path to the Event Manager microsite root, e.g. "/event-manager". */
 export const EM_PATH = `${NAMESPACE_PATH}/event-manager`;
 
 /** Build an internal href within the microsite. */
