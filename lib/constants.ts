@@ -12,15 +12,15 @@
 
 /**
  * Canonical proxy origin. The app is served behind the Eden Cloudflare Worker
- * at https://www.eden.co.uk/events, so `/_next/static/*` must resolve as
- *   https://www.eden.co.uk/events/_next/static/…
- * The Worker forwards /events/* back to this deployment.
+ * at https://www.eden.co.uk/christian-jobs, so `/_next/static/*` must resolve as
+ *   https://www.eden.co.uk/christian-jobs/_next/static/…
+ * The Worker forwards /christian-jobs/* back to this deployment.
  */
-export const ASSET_PRODUCTION_ORIGIN = "https://www.eden.co.uk/events";
+export const ASSET_PRODUCTION_ORIGIN = "https://www.eden.co.uk/christian-jobs";
 export const ASSET_DEV_ORIGIN = "http://localhost:3000";
 
 /** API origin (may differ from assets) */
-export const API_PRODUCTION_ORIGIN = "https://www.eden.co.uk/events";
+export const API_PRODUCTION_ORIGIN = "https://www.eden.co.uk/christian-jobs";
 export const API_DEV_ORIGIN = "http://localhost:3000";
 
 // Origin resolution:
