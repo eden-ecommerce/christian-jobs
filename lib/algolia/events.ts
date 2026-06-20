@@ -68,12 +68,12 @@ function num(value: unknown): number | null {
 export { cleanCategoryLabel } from "@lib/algolia/category-label";
 
 function mapHit(raw: RawHit): EventHit {
-  const location = (raw.location ?? {}) as Record<string, unknown>;
-  const geoloc = (raw._geoloc ?? {}) as Record<string, unknown>;
-  const thumbnail = (raw.thumbnail ?? {}) as Record<string, unknown>;
-  const logo = (raw.logo ?? {}) as Record<string, unknown>;
-  const hierarchy = (raw.categoryHierarchy ?? {}) as Record<string, unknown>;
-  const ranking = (raw._rankingInfo ?? {}) as Record<string, unknown>;
+  const location = parseJsonField(raw.location);
+  const geoloc = parseJsonField(raw._geoloc);
+  const thumbnail = parseJsonField(raw.thumbnail);
+  const logo = parseJsonField(raw.logo);
+  const hierarchy = parseJsonField(raw.categoryHierarchy);
+  const ranking = parseJsonField(raw._rankingInfo);
 
   return {
     objectID: String(raw.objectID ?? ""),
@@ -507,9 +507,27 @@ export type OrganisationHit = {
   bannerUrl: string | null;
 };
 
+/** Parse a field that may be a JSON string or already a plain object. */
+function parseJsonField(value: unknown): Record<string, unknown> {
+  if (!value) return {};
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed))
+        return parsed as Record<string, unknown>;
+    } catch {
+      // not valid JSON — ignore
+    }
+    return {};
+  }
+  if (typeof value === "object" && !Array.isArray(value))
+    return value as Record<string, unknown>;
+  return {};
+}
+
 function mapOrgHit(raw: RawHit): OrganisationHit {
-  const logo = (raw.logo ?? {}) as Record<string, unknown>;
-  const banner = (raw.banner ?? {}) as Record<string, unknown>;
+  const logo = parseJsonField(raw.logo);
+  const banner = parseJsonField(raw.banner);
   return {
     objectID: String(raw.objectID ?? ""),
     id: String(raw.id ?? ""),
