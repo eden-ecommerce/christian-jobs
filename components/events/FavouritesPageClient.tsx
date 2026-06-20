@@ -10,10 +10,9 @@ import useSWR from "swr";
 
 async function fetchFavourites(ids: string[]): Promise<EventHit[]> {
   if (ids.length === 0) return [];
-  // apiUrl() resolves to the correct origin+basePath in all environments:
-  // dev → http://localhost:3000/api/favourites
-  // production proxy → https://www.eden.co.uk/events/api/favourites
-  const res = await fetch(apiUrl("/events/api/favourites"), {
+  // API_BASE_URL already includes the /events prefix in production, so the
+  // path here is just "/api/favourites" (no namespace duplication).
+  const res = await fetch(apiUrl("/api/favourites"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ids }),

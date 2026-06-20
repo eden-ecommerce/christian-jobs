@@ -19,6 +19,7 @@ import { EventCard } from "@components/events/EventCard";
 import { ShareButton } from "@components/events/ShareButton";
 import { FavouriteButton } from "@components/events/FavouriteButton";
 import { PromoteEventSidebarCta } from "@components/events/PromoteEventBanner";
+import { HostedByCard } from "@components/events/HostedByCard";
 import { getEventById, getOrganisationById, searchEvents } from "@lib/algolia/events";
 import { formatDateRange, formatPrice } from "@lib/format";
 import { NAMESPACE_PATH } from "@lib/config";
@@ -190,95 +191,13 @@ export default async function EventPage({ params }: Props) {
           </h1>
 
           {event.organisationName && (
-            <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card">
-              {/* Org banner image */}
-              {org?.bannerUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={org.bannerUrl}
-                  alt=""
-                  className="h-24 w-full object-cover"
-                  aria-hidden="true"
-                />
-              )}
-
-              <div className="flex items-start gap-4 p-4">
-                {/* Org logo — prefer Algolia org record, fall back to event field */}
-                {(org?.logoUrl ?? event.organiserLogo) && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={(org?.logoUrl ?? event.organiserLogo)!}
-                    alt={event.organisationName}
-                    className={`h-14 w-14 shrink-0 rounded-lg border border-border object-contain bg-white p-1 ${org?.bannerUrl ? "-mt-8 ring-2 ring-white" : ""}`}
-                  />
-                )}
-
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Hosted by
-                  </p>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                    {orgHref ? (
-                      <a
-                        href={orgHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-base font-semibold text-foreground underline-offset-2 hover:underline"
-                      >
-                        {event.organisationName}
-                      </a>
-                    ) : (
-                      <span className="text-base font-semibold text-foreground">
-                        {event.organisationName}
-                      </span>
-                    )}
-                    {(org?.organisationType ?? event.organisationType) && (
-                      <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium capitalize text-muted-foreground">
-                        {org?.organisationType ?? event.organisationType}
-                      </span>
-                    )}
-                    {org?.yearFounded && (
-                      <span className="text-xs text-muted-foreground">
-                        Est. {org.yearFounded}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Bio — mission preferred over generic description */}
-                  {(org?.mission ?? org?.description) && (
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {org.mission ?? org.description}
-                    </p>
-                  )}
-
-                  {/* Links row */}
-                  <div className="mt-3 flex flex-wrap items-center gap-3">
-                    {org?.website && (
-                      <a
-                        href={org.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-2 hover:underline"
-                      >
-                        <Globe className="h-3.5 w-3.5" aria-hidden="true" />
-                        Website
-                      </a>
-                    )}
-                    {orgHref && (
-                      <a
-                        href={orgHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
-                      >
-                        <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        View profile on Eden
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <HostedByCard
+              organisationName={event.organisationName}
+              organisationType={event.organisationType}
+              organiserLogo={event.organiserLogo}
+              orgHref={orgHref}
+              org={org}
+            />
           )}
 
           {event.description && (
