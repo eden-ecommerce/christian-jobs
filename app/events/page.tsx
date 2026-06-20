@@ -6,7 +6,7 @@ import { buttonVariants } from "@components/ui/button";
 import { NAMESPACE_PATH } from "@lib/config";
 import { getCategoryFacets, searchEvents } from "@lib/algolia/events";
 import { getLocationStats, getRegions } from "@lib/locations";
-import { PromoteEventBanner } from "@components/events/PromoteEventBanner";
+import { FavouritesCard, PromoteEventBanner } from "@components/events/PromoteEventBanner";
 import { buildEventListJsonLd, buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
 import type { Metadata } from "next";
 import { ArrowRight, MapPin, Search } from "lucide-react";
@@ -164,9 +164,12 @@ export default async function EventsHomePage() {
           </div>
         </section>
 
-        {/* Promote CTA */}
+        {/* Promote CTA + Favourites */}
         <section className="mb-12">
-          <PromoteEventBanner />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
+            <PromoteEventBanner />
+            <FavouritesCard />
+          </div>
         </section>
 
         {/* Upcoming events */}

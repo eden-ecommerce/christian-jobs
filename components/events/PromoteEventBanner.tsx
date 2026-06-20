@@ -1,4 +1,9 @@
-import { ArrowRight, Megaphone } from "lucide-react";
+"use client" // FavouritesCard reads localStorage via useFavourites
+
+import { useFavourites } from "@lib/favourites/use-favourites";
+import { ArrowRight, Heart, Megaphone } from "lucide-react";
+import Link from "next/link";
+import { NAMESPACE_PATH } from "@lib/config";
 
 const PROMOTE_HREF = "https://hub.eden.co.uk/dashboard/event-journey";
 
@@ -36,6 +41,45 @@ export function PromoteEventBanner() {
         </a>
       </div>
     </div>
+  );
+}
+
+/**
+ * Card shown alongside PromoteEventBanner when the user has saved events.
+ * Reads localStorage — renders nothing until hydrated or when no favourites.
+ */
+export function FavouritesCard() {
+  const { ids, hydrated } = useFavourites();
+
+  if (!hydrated || ids.length === 0) return null;
+
+  return (
+    <Link
+      href={`${NAMESPACE_PATH}/favourites`}
+      className="flex flex-col justify-between rounded-xl border border-rose-200 bg-rose-50 px-6 py-5 transition-colors hover:border-rose-300 hover:bg-rose-100"
+    >
+      <div className="flex items-start gap-3">
+        <Heart
+          className="mt-0.5 h-5 w-5 shrink-0 fill-rose-500 text-rose-500"
+          aria-hidden="true"
+        />
+        <div>
+          <p className="text-sm font-semibold text-foreground">
+            Your saved events
+          </p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            You have{" "}
+            <span className="font-medium text-rose-600">
+              {ids.length} {ids.length === 1 ? "event" : "events"}
+            </span>{" "}
+            saved to your favourites.
+          </p>
+        </div>
+      </div>
+      <p className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-rose-600">
+        View saved events <ArrowRight className="h-4 w-4" aria-hidden="true" />
+      </p>
+    </Link>
   );
 }
 
