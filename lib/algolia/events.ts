@@ -553,21 +553,14 @@ export async function getOrganisationById(
   const client = getAlgoliaSearchClient();
   if (!client) return null;
 
-  const response = await client.search([
-    {
+  try {
+    // Organisation objectIDs are prefixed: "organisation:<uuid>"
+    const raw = await client.getObject({
       indexName: organisationHubIndex,
-      query: "",
-      params: {
-        // UUID values containing hyphens must be quoted in Algolia filters —
-        // an unquoted UUID is parsed as arithmetic and matches nothing.
-        filters: `entityType:organisation AND id:"${organisationId}"`,
-        hitsPerPage: 1,
-      },
-    },
-  ] as unknown as Parameters<typeof client.search>[0]);
-
-  const result = response.results[0];
-  if (!result || !("hits" in result) || !result.hits.length) return null;
-
-  return mapOrgHit(result.hits[0] as RawHit);
+      objectID: `organisation:${organisationId}`,
+    });
+    return mapOrgHit(raw as RawHit);
+  } catch {
+    return null;
+  }
 }
