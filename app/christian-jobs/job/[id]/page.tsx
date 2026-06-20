@@ -19,6 +19,7 @@ import { SaveJobButton } from "@components/jobs/SaveJobButton";
 import { PostJobSidebarCta } from "@components/jobs/PromoteJobBanner";
 import { HostedByCard } from "@components/events/HostedByCard";
 import { getJobById, getOrganisationById, searchJobs } from "@lib/algolia/jobs";
+import { validateBrandingColor, pickOrgAccentColor, contrastForeground } from "@lib/org-color";
 import { NAMESPACE_PATH } from "@lib/config";
 import { buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
 
@@ -61,6 +62,16 @@ export default async function JobPage({ params }: Props) {
   const org = job.organisationId
     ? await getOrganisationById(job.organisationId)
     : null;
+
+  // Resolve the best accent colour: validated hex from job hit first,
+  // then palette-derived from the org record.
+  const accentHex =
+    validateBrandingColor(job.organisationBrandingColour) ??
+    (org ? pickOrgAccentColor(org.logoPalette, org.bannerPalette) : null);
+  const accentFg = accentHex ? contrastForeground(accentHex) : null;
+
+  // Logo URL — prefer org-level logo, fall back to hit-level fields.
+  const logoUrl = org?.logoUrl ?? job.logoUrl ?? job.organiserLogo;
 
   const location = [
     job.locationName,
@@ -113,16 +124,31 @@ export default async function JobPage({ params }: Props) {
         <article>
           {/* Header */}
           <div className="flex items-start gap-4">
-            {job.organiserLogo ? (
+            {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={job.organiserLogo}
+                src={logoUrl}
                 alt={job.organisationName ?? ""}
                 className="h-16 w-16 shrink-0 rounded-xl border border-border bg-white object-contain p-1"
               />
             ) : (
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-border bg-muted">
-                <Building2 className="h-8 w-8 text-muted-foreground/40" aria-hidden="true" />
+              <div
+                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-border"
+                style={
+                  accentHex
+                    ? { backgroundColor: accentHex + "18" }
+                    : undefined
+                }
+              >
+                <Building2
+                  className="h-8 w-8"
+                  aria-hidden="true"
+                  style={
+                    accentHex
+                      ? { color: accentHex }
+                      : { color: "hsl(var(--muted-foreground) / 0.4)" }
+                  }
+                />
               </div>
             )}
             <div className="min-w-0 flex-1">
@@ -136,7 +162,8 @@ export default async function JobPage({ params }: Props) {
                       href={orgHref}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-primary hover:underline"
+                      className="font-medium hover:underline"
+                      style={accentHex ? { color: accentHex } : undefined}
                     >
                       {job.organisationName}
                     </a>
@@ -150,7 +177,14 @@ export default async function JobPage({ params }: Props) {
 
           {/* Category badge */}
           {job.categoryLvl0 && (
-            <span className="mt-4 inline-flex items-center rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+            <span
+              className="mt-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+              style={
+                accentHex && accentFg
+                  ? { backgroundColor: accentHex, color: accentFg }
+                  : { backgroundColor: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }
+              }
+            >
               {job.categoryLvl0}
             </span>
           )}
@@ -158,6 +192,7 @@ export default async function JobPage({ params }: Props) {
           {/* Organisation card */}
           {job.organisationName && (
             <HostedByCard
+              byLabel="Posted by"
               organisationName={job.organisationName}
               organisationType={job.organisationType}
               organiserLogo={job.organiserLogo}
@@ -315,7 +350,12 @@ export default async function JobPage({ params }: Props) {
               href={job.externalUrl ?? "https://www.eden.co.uk"}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 block w-full rounded-md bg-primary px-4 py-2.5 text-center text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              className="mt-5 block w-full rounded-md px-4 py-2.5 text-center text-sm font-semibold transition-opacity hover:opacity-90"
+              style={
+                accentHex && accentFg
+                  ? { backgroundColor: accentHex, color: accentFg }
+                  : { backgroundColor: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }
+              }
             >
               {job.externalUrl ? "Apply now" : "View on Eden"}
             </a>
