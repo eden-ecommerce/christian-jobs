@@ -113,7 +113,7 @@ function HomePlainSearch() {
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit()}
           placeholder="Enter a town, city or postcode…"
-          aria-label="Search events by location"
+          aria-label="Search jobs by location"
           className="h-14 w-full rounded-full border border-border bg-card pl-12 pr-4 text-base text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
       </div>
