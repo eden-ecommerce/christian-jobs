@@ -58,26 +58,11 @@ export function HostedByCard({
     <div
       className="mt-4 overflow-hidden rounded-lg border border-border bg-card"
       style={
-        accentHex && !org?.bannerUrl
+        accentHex
           ? { borderTopColor: accentHex, borderTopWidth: "3px" }
           : undefined
       }
     >
-      {/* Accent strip + banner — the accent strip sits above the banner image */}
-      {accentHex && org?.bannerUrl && (
-        <div style={{ backgroundColor: accentHex, height: "4px" }} />
-      )}
-      {/* Banner image — block removes the inline baseline whitespace gap */}
-      {org?.bannerUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={org.bannerUrl}
-          alt=""
-          className="block h-28 w-full object-cover"
-          aria-hidden="true"
-        />
-      )}
-
       <div className="p-4">
         {/* Header row */}
         <div className="flex items-center gap-3">
