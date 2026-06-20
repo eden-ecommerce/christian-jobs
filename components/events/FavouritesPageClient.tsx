@@ -3,16 +3,21 @@
 import { EventCard } from "@components/events/EventCard";
 import { NsLink } from "@components/ns-link";
 import { useFavourites } from "@lib/favourites/use-favourites";
-import { NAMESPACE_PATH, apiUrl } from "@lib/config";
+import { NAMESPACE_PATH } from "@lib/config";
 import type { EventHit } from "@lib/algolia/events";
 import { Heart, Loader2 } from "lucide-react";
 import useSWR from "swr";
 
 async function fetchFavourites(ids: string[]): Promise<EventHit[]> {
   if (ids.length === 0) return [];
-  // API_BASE_URL already includes the /events prefix in production, so the
-  // path here is just "/api/favourites" (no namespace duplication).
-  const res = await fetch(apiUrl("/api/favourites"), {
+  // Root-relative, namespaced URL. The favourites route lives under the
+  // namespace (app/events/api/favourites) because the Cloudflare Worker only
+  // forwards /events/* to this deployment — a top-level /api/* path is
+  // unreachable through the eden.co.uk proxy. A relative URL resolves against
+  // the current page origin in every environment:
+  //   dev  -> http://localhost:3000/events/api/favourites
+  //   prod -> https://www.eden.co.uk/events/api/favourites
+  const res = await fetch(`${NAMESPACE_PATH}/api/favourites`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ids }),
