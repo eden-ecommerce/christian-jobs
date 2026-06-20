@@ -36,6 +36,9 @@ export const DEFAULT_LOCATION_RADIUS_METERS = 50_000;
 /** Base filter for event searches on organisationHub. */
 export const EVENTS_BASE_FILTER = "entityType:event AND published:true";
 
+/** Base filter for job searches on organisationHub. */
+export const JOBS_BASE_FILTER = "entityType:job AND published:true";
+
 export type AlgoliaIndexPreset = {
   indexName: AlgoliaIndexName;
   baseFilter: string;
@@ -109,6 +112,17 @@ export const algoliaIndexPresets = {
   organisationHubEvents: {
     indexName: ALGOLIA_INDEXES.organisationHub,
     baseFilter: EVENTS_BASE_FILTER,
+    attributesToRetrieve: eventAttributesToRetrieve,
+    hierarchicalFacet: {
+      facetRoot: "categoryHierarchy",
+      depth: 5,
+      separator: " > ",
+      labelIdDelimiter: ":::",
+    },
+  },
+  organisationHubJobs: {
+    indexName: ALGOLIA_INDEXES.organisationHub,
+    baseFilter: JOBS_BASE_FILTER,
     attributesToRetrieve: eventAttributesToRetrieve,
     hierarchicalFacet: {
       facetRoot: "categoryHierarchy",
