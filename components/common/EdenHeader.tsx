@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { text: "Cards", href: "https://www.eden.co.uk/cards" },
   { text: "Top 50", href: "https://www.eden.co.uk/top-50" },
   { text: "Christian Jobs", href: "/", internal: true },
+  { text: "Jobs Blog", href: "/blog", internal: true },
 ];
 
 const USP_ITEMS = [

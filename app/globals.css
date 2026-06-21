@@ -2,8 +2,14 @@
 /* TEMPORARILY DISABLED: scans the private @christian-360/next-design package
    for Tailwind classes. Re-enable when the package is wired back in. */
 /* @source "../node_modules/@christian-360/next-design"; */
+/* blog-kit ships raw TSX with Tailwind classes — scan it so its utility
+   classes (and the `prose` styles it relies on) are generated. */
+@source "../node_modules/@eden-ecommerce/blog-kit/src";
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+
+/* Typography plugin powers the `prose` classes used by the article body. */
+@plugin '@tailwindcss/typography';
 
 @custom-variant dark (&:is(.dark *));
 
