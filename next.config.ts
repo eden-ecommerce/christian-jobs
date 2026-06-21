@@ -1,9 +1,15 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
-import { ASSET_BASE_URL } from "@lib/constants";
+import { BASE_PATH } from "@lib/constants";
 import { ALLOWED_ORIGIN, CORS_HEADERS } from "@lib/cors";
 
 const nextConfig: NextConfig = {
+  // Mount the whole app under /christian-jobs. Next serves every route and
+  // every `/_next/*` asset under this prefix, RELATIVE to the current origin.
+  // This is what makes the build work identically on the v0 preview, the raw
+  // *.vercel.app domain, and the eden.co.uk Cloudflare Worker proxy — no
+  // hardcoded asset origin required.
+  basePath: BASE_PATH,
   // Expose SENTRY_DATASET to client bundles at build time (not a secret).
   env: {
     SENTRY_DATASET: process.env.SENTRY_DATASET ?? "",
@@ -18,11 +24,9 @@ const nextConfig: NextConfig = {
     // "@christian-360/next-design",
     // "@christian-360/sanity",
   ],
-  // Only prefix assets in production (behind the Cloudflare Worker). In
-  // development assets MUST be served from the same origin the page is served
-  // from — hardcoding `http://localhost:3000` here breaks the v0 preview and
-  // any proxied/sandbox host because the browser can't reach localhost.
-  assetPrefix: process.env.NODE_ENV === "production" ? ASSET_BASE_URL : undefined,
+  // No `assetPrefix`: `basePath` already serves `/_next/*` under
+  // /christian-jobs on the same origin as the page, which resolves correctly
+  // on every host (preview, *.vercel.app, and the eden.co.uk proxy).
   // v0 iterates quickly — builds tolerate TS errors during dev.
   // Before deploy: run `pnpm predeploy` (ts-check + lint + build) and fix all errors.
   typescript: {

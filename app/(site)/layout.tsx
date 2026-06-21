@@ -3,7 +3,7 @@ import { getCloudflareLocation } from "@lib/location/get-cloudflare-location.ser
 
 export const dynamic = "force-dynamic";
 
-export default async function ChristianJobsLayout({
+export default async function SiteLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

@@ -9,7 +9,7 @@
 import type { EventHit } from "@lib/algolia/events";
 
 const EDEN_URL = "https://www.eden.co.uk";
-const EVENTS_URL = `${EDEN_URL}/events`;
+const EVENTS_URL = `${EDEN_URL}/christian-jobs`;
 
 /** Build a schema.org Event object for a single EventHit. */
 export function buildEventJsonLd(event: EventHit): Record<string, unknown> {

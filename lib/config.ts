@@ -1,52 +1,67 @@
 /**
  * ──────────────────────────────────────────────────────────────────────────
- * REPLACE: Per-project configuration
+ * Per-project configuration
  * ──────────────────────────────────────────────────────────────────────────
  *
- * This app is deployed behind a Cloudflare Worker that routes by the FIRST
- * URL segment (e.g. `/churches` → this app instance).
+ * This app is mounted under a single path namespace via the Next.js
+ * `basePath` (see `BASE_PATH` in `@lib/constants` and `next.config.ts`). In
+ * production it is served behind the Eden Cloudflare Worker at
+ * https://www.eden.co.uk/christian-jobs.
  *
- * Every app built from this template MUST be mounted under a single namespace.
- * When starting a new project:
- *   1. Rename the `app/REPLACE` folder to your real namespace
- *      (e.g. `app/churches`).
- *   2. Update `NAMESPACE` below to match.
- *   3. Set `ASSET_PRODUCTION_ORIGIN` and `API_PRODUCTION_ORIGIN` in `lib/constants.ts`.
- *
- * Anything marked `REPLACE` in this file is intentional and must be addressed
- * before the project is considered ready.
+ * Because `basePath` automatically prefixes every `next/link` href,
+ * `redirect()` and `next/image` src, internal navigation paths are written
+ * WITHOUT the namespace prefix. For absolute SEO URLs, use `SITE_URL`.
  */
 
-import { API_BASE_URL, ASSET_BASE_URL } from "@lib/constants";
+import { BASE_PATH, SITE_URL } from "@lib/constants";
 
-export { API_BASE_URL, ASSET_BASE_URL };
+export { BASE_PATH, SITE_URL };
 
-/** The single URL namespace this app is mounted under (no leading slash). */
+/** Human-readable namespace this app is mounted under. */
 export const NAMESPACE = "christian-jobs";
 
-/** Absolute path prefix for the namespace, e.g. "/churches". */
-export const NAMESPACE_PATH = `/${NAMESPACE}`;
+/**
+ * Internal-link path prefix.
+ *
+ * Empty on purpose: Next.js `basePath` (BASE_PATH) prepends the namespace to
+ * every `next/link` href, `redirect()` and `next/image` src automatically.
+ * Build internal hrefs WITHOUT the prefix, e.g. `${NAMESPACE_PATH}/search`
+ * resolves to "/search", which Next.js serves at "/christian-jobs/search".
+ *
+ * For a bare home link, use "/" (not NAMESPACE_PATH). For absolute SEO URLs,
+ * use `SITE_URL`.
+ */
+export const NAMESPACE_PATH = "";
 
 /**
- * Build an absolute URL for a static asset in `/public` (metadata, dynamic paths).
- * For images prefer `import x from "@public/file.png"` with `next/image` and `unoptimized`.
+ * Build a same-origin URL for a static asset in `/public`.
  *
- * @example assetUrl("/logo.png") -> "https://assets.example.com/logo.png"
+ * Returns a `basePath`-prefixed root-relative path (e.g.
+ * "/christian-jobs/logo.png"). Use for raw `<img>`/`fetch` references. Prefer
+ * `import x from "@public/file.png"` with `next/image`, which adds `basePath`
+ * itself — do NOT pass an `assetUrl()` result to `next/image` or the prefix
+ * will be doubled.
+ *
+ * @example assetUrl("/logo.png") -> "/christian-jobs/logo.png"
  */
 export function assetUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `${ASSET_BASE_URL}${normalized}`;
+  return `${BASE_PATH}${normalized}`;
 }
 
 /**
- * Build a fully-qualified API URL. Use in `fetch-*.ts` when you need the URL
- * string; prefer `apiFetch(path)` which calls this internally.
+ * Build a same-origin URL for this app's own API routes.
  *
- * @example apiUrl("/api/health") -> "http://localhost:3000/api/health" (dev)
+ * Returns a `basePath`-prefixed root-relative path so client-side `fetch`
+ * hits the correct route on whatever host is serving the page (preview,
+ * *.vercel.app, or the eden.co.uk proxy). Raw `fetch()` does NOT apply
+ * `basePath`, so it must be added here.
+ *
+ * @example apiUrl("/api/health") -> "/christian-jobs/api/health"
  */
 export function apiUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE_URL}${normalized}`;
+  return `${BASE_PATH}${normalized}`;
 }

@@ -14,7 +14,6 @@ import {
   type SearchJobsParams,
 } from "@lib/algolia/jobs";
 import { DEFAULT_LOCATION_RADIUS_METERS } from "@lib/algolia/constants";
-import { NAMESPACE_PATH } from "@lib/config";
 import { buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -124,7 +123,7 @@ export default async function JobSearchPage({
     return (
       <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8">
         <Breadcrumbs
-          items={[{ label: "Christian Jobs", href: NAMESPACE_PATH }, { label: "Search" }]}
+          items={[{ label: "Christian Jobs", href: "/" }, { label: "Search" }]}
         />
         <div className="mt-8">
           <IntegrationEnvError integration="algolia" />
@@ -145,7 +144,7 @@ export default async function JobSearchPage({
     <main className="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
       <script {...jsonLdScriptProps(breadcrumbJsonLd)} />
       <Breadcrumbs
-        items={[{ label: "Christian Jobs", href: NAMESPACE_PATH }, { label: "Search" }]}
+        items={[{ label: "Christian Jobs", href: "/" }, { label: "Search" }]}
       />
 
       <div className="mt-4 flex flex-col gap-1">
@@ -193,7 +192,7 @@ export default async function JobSearchPage({
                 categories instead.
               </p>
               <NsLink
-                href={NAMESPACE_PATH}
+                href="/"
                 className="mt-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
               >
                 Browse all jobs

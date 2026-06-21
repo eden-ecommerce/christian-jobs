@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { JobCard } from "@components/jobs/JobCard";
 import { NsLink } from "@components/ns-link";
 import { useSavedJobs } from "@lib/jobs/use-saved-jobs";
-import { NAMESPACE_PATH } from "@lib/config";
+import { apiUrl } from "@lib/config";
 import { cn } from "@lib/utils";
 import type { JobHit } from "@lib/algolia/jobs";
 import { Bookmark, Loader2 } from "lucide-react";
@@ -12,7 +12,8 @@ import useSWR from "swr";
 
 async function fetchSavedJobs(ids: string[]): Promise<JobHit[]> {
   if (ids.length === 0) return [];
-  const res = await fetch(`${NAMESPACE_PATH}/api/saved`, {
+  // Raw fetch does not apply Next.js basePath, so build the URL with apiUrl().
+  const res = await fetch(apiUrl("/api/saved"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ids }),
@@ -30,13 +31,10 @@ function SavedJobCard({
   onRemoved: (id: string) => void;
 }) {
   const { isSaved } = useSavedJobs();
-  const [leaving, setLeaving] = useState(false);
 
-  const saved = isSaved(job.id);
-
-  useEffect(() => {
-    if (!saved) setLeaving(true);
-  }, [saved]);
+  // Derived directly from saved state: once a job is unsaved it animates out,
+  // and onTransitionEnd removes it. No effect/state needed.
+  const leaving = !isSaved(job.id);
 
   return (
     <div
@@ -65,16 +63,19 @@ export function SavedJobsPageClient() {
     { revalidateOnFocus: false },
   );
 
+  // Accumulate fetched jobs so a card stays mounted (to animate out) even after
+  // it's removed from saved ids. Uses React's "adjust state during render"
+  // pattern instead of an effect: when a new `jobs` array arrives, merge any
+  // additions immediately during render.
   const [displayed, setDisplayed] = useState<JobHit[]>([]);
+  const [lastJobs, setLastJobs] = useState<JobHit[] | undefined>(undefined);
 
-  useEffect(() => {
-    if (!jobs) return;
-    setDisplayed((prev) => {
-      const seen = new Set(prev.map((j) => j.id));
-      const additions = jobs.filter((j) => !seen.has(j.id));
-      return additions.length > 0 ? [...prev, ...additions] : prev;
-    });
-  }, [jobs]);
+  if (jobs && jobs !== lastJobs) {
+    setLastJobs(jobs);
+    const seen = new Set(displayed.map((j) => j.id));
+    const additions = jobs.filter((j) => !seen.has(j.id));
+    if (additions.length > 0) setDisplayed((prev) => [...prev, ...additions]);
+  }
 
   const handleRemoved = (id: string) => {
     setDisplayed((prev) => prev.filter((j) => j.id !== id));
@@ -102,7 +103,7 @@ export function SavedJobsPageClient() {
           </p>
         </div>
         <NsLink
-          href={NAMESPACE_PATH}
+              href="/"
           className="mt-2 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           Browse jobs

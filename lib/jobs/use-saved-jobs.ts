@@ -1,6 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from "react";
+
+// Mount detector: returns false during SSR and the initial client render,
+// then true once hydrated — without calling setState inside an effect.
+const noopSubscribe = () => () => {};
 
 export const STORAGE_KEY = "eden_saved_jobs";
 
@@ -68,8 +72,11 @@ function setSavedJobs(next: string[]) {
 export function useSavedJobs() {
   const ids = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
+  const hydrated = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
 
   const toggle = useCallback((jobId: string) => {
     const current = getSnapshot();
