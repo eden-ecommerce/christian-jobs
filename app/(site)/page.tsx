@@ -1,10 +1,12 @@
 import { JobCard } from "@components/jobs/JobCard";
 import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
+import { Breadcrumbs } from "@components/common/Breadcrumbs";
 import { NsLink } from "@components/ns-link";
 import { buttonVariants } from "@components/ui/button";
 import { NAMESPACE_PATH } from "@lib/config";
 import { getJobCategoryFacets, searchJobs } from "@lib/algolia/jobs";
 import { PostJobBanner, SavedJobsCard } from "@components/jobs/PromoteJobBanner";
+import { BlogArticleCarousel } from "@components/blog/BlogArticleCarousel";
 import { buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
 import type { Metadata } from "next";
 import { ArrowRight, Briefcase, Search } from "lucide-react";
@@ -78,6 +80,16 @@ export default async function ChristianJobsHomePage() {
       </section>
 
       <div className="mx-auto max-w-6xl px-4 py-12">
+        {/* Breadcrumb trail */}
+        <div className="mb-8">
+          <Breadcrumbs
+            items={[
+              { label: "Eden", href: "https://www.eden.co.uk" },
+              { label: "Christian Jobs" },
+            ]}
+          />
+        </div>
+
         {/* Categories */}
         {categories.length > 0 ? (
           <section className="mb-12">
@@ -124,6 +136,9 @@ export default async function ChristianJobsHomePage() {
             <SavedJobsCard />
           </div>
         </section>
+
+        {/* Blog article carousel */}
+        <BlogArticleCarousel />
 
         {/* Recent jobs */}
         <section>

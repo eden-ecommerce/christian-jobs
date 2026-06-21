@@ -3,6 +3,7 @@ import { getArticlesByTag } from "@eden-ecommerce/blog-kit";
 import { BlogListingPage } from "@eden-ecommerce/blog-kit/components";
 import { isSanityEnvConfigured } from "@lib/env-configured.server";
 import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
+import { Breadcrumbs } from "@components/common/Breadcrumbs";
 import { CHRISTIAN_JOBS_TAG } from "@lib/blog";
 
 export const dynamic = "force-dynamic";
@@ -33,12 +34,23 @@ export default async function BlogPage() {
   const articles = await getArticlesByTag(CHRISTIAN_JOBS_TAG);
 
   return (
-    <BlogListingPage
-      articles={articles}
-      tags={[]}
-      activeTag={null}
-      heading="Christian Jobs Articles"
-      description="Advice, encouragement and inspiration for your calling — from finding the right role to thriving in Christian ministry and charity work."
-    />
+    <>
+      <div className="mx-auto max-w-screen-xl px-4 pt-6 sm:px-6 lg:px-8">
+        <Breadcrumbs
+          items={[
+            { label: "Eden", href: "https://www.eden.co.uk" },
+            { label: "Christian Jobs", href: "/" },
+            { label: "Jobs Blog" },
+          ]}
+        />
+      </div>
+      <BlogListingPage
+        articles={articles}
+        tags={[]}
+        activeTag={null}
+        heading="Christian Jobs Articles"
+        description="Advice, encouragement and inspiration for your calling — from finding the right role to thriving in Christian ministry and charity work."
+      />
+    </>
   );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Search } from "lucide-react";
 import { NsLink } from "@components/ns-link";
 import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
-import { Breadcrumbs } from "@components/events/Breadcrumbs";
+import { Breadcrumbs } from "@components/common/Breadcrumbs";
 import { JobCard } from "@components/jobs/JobCard";
 import { JobSearchFilters } from "@components/jobs/JobSearchFilters";
 import { JobsActiveFilterBar } from "@components/jobs/JobsActiveFilterBar";
