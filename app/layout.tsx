@@ -55,9 +55,8 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col font-sans antialiased">
         <QueryProvider>
           <EdenHeader
-            namespacePath="/christian-jobs"
-            namespaceLinkText="Christian Jobs"
-            extraNavLinks={[{ text: "Jobs Blog", href: "/blog" }]}
+            namespacePath="/blog"
+            namespaceLinkText="Jobs Blog"
             algoliaAppId={process.env.NEXT_PUBLIC_ALGOLIA_APP_ID}
             algoliaSearchKey={process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY}
           />
