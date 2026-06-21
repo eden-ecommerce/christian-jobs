@@ -66,9 +66,9 @@ export default async function ArticlePage({
 
   if (!article) notFound();
 
-  // Tag guard: getArticleBySlug is NOT tag-filtered, so without this anyone
-  // could reach any Eden article by guessing its id. This site is
-  // christian-jobs-only — anything else is a 404.
+  // TODO (blog-kit@0.1.1): replace with getArticleBySlug(id, { requiredTag: CHRISTIAN_JOBS_TAG })
+  // which returns null automatically when the tag doesn't match — removes the need
+  // for isChristianJobsArticle and the separate getArticlesByTag call below.
   if (!isChristianJobsArticle(article)) notFound();
 
   // Redirect legacy / non-canonical paths (e.g. /blog/<id>) to the canonical
@@ -79,9 +79,9 @@ export default async function ArticlePage({
     permanentRedirect(canonical);
   }
 
-  // Related reading scoped to the same tag. getRelatedArticles' "latest" list
-  // spans all tags, so we build the cross-promotion set from the tag-scoped
-  // article list to keep every link on-topic.
+  // TODO (blog-kit@0.1.1): replace with getRelatedArticles(article, { scopeToTag: CHRISTIAN_JOBS_TAG })
+  // For now, build related from the tag-scoped list to keep every link on-topic
+  // (getRelatedArticles "latest" bucket spans all tags in the dataset).
   const tagArticles = await getArticlesByTag(CHRISTIAN_JOBS_TAG);
   const others = tagArticles.filter((a) => a.slug !== article.slug);
   const relatedArticles = {

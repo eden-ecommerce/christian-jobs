@@ -15,8 +15,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@eden-ecommerce/site-chrome':
-        specifier: ^0.1.0
-        version: 0.1.0(lucide-react@1.20.0(react@19.2.4))(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: ^0.1.1
+        version: 0.1.1(lucide-react@1.20.0(react@19.2.4))(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@portabletext/react':
         specifier: ^6.2.0
         version: 6.2.0(react@19.2.4)
@@ -381,8 +381,8 @@ packages:
       react: '>=19'
       react-dom: '>=19'
 
-  '@eden-ecommerce/site-chrome@0.1.0':
-    resolution: {integrity: sha512-ZuFvIlSEk4Zk5F8fuQrABJX4CrCBAmtloJ2xWSLjrff1ZMulXOdE1fsid2w0gIiP4XYyz1v51DCOWyn6k1/cng==, tarball: https://npm.pkg.github.com/download/@eden-ecommerce/site-chrome/0.1.0/b41c96d045a56b7f385cc23024d7efb2e1aebd2c}
+  '@eden-ecommerce/site-chrome@0.1.1':
+    resolution: {integrity: sha512-T1YnTQvmqB4qJG2+UUk0FQR1sSZWTvITMdlerPwYSlEGYa6W7s7dseyxBpWyvnxLlBO/Hg8gKPfe9hRb/oJ33w==, tarball: https://npm.pkg.github.com/download/@eden-ecommerce/site-chrome/0.1.1/4294b6341d3ab8ce8e82eb7ab4087fcdf86793fa}
     peerDependencies:
       lucide-react: '>=0.400'
       next: '>=15'
@@ -4246,7 +4246,7 @@ snapshots:
       server-only: 0.0.1
       zod: 3.25.76
 
-  '@eden-ecommerce/site-chrome@0.1.0(lucide-react@1.20.0(react@19.2.4))(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@eden-ecommerce/site-chrome@0.1.1(lucide-react@1.20.0(react@19.2.4))(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       lucide-react: 1.20.0(react@19.2.4)
       next: 16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
