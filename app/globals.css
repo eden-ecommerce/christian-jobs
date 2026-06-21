@@ -2,9 +2,9 @@
 /* TEMPORARILY DISABLED: scans the private @christian-360/next-design package
    for Tailwind classes. Re-enable when the package is wired back in. */
 /* @source "../node_modules/@christian-360/next-design"; */
-/* blog-kit ships raw TSX with Tailwind classes — scan it so its utility
-   classes (and the `prose` styles it relies on) are generated. */
+/* Eden packages ship raw TSX — scan them so Tailwind generates their utility classes. */
 @source "../node_modules/@eden-ecommerce/blog-kit/src";
+@source "../node_modules/@eden-ecommerce/site-chrome/src";
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 

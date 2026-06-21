@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
     "@algolia/client-common",
     // Ships raw TS/TSX source, so Next must transpile it as part of this build.
     "@eden-ecommerce/blog-kit",
+    "@eden-ecommerce/site-chrome",
     // TEMPORARILY DISABLED: private @christian-360/* packages (unreachable
     // registry). Re-enable when the packages are wired back in.
     // "@christian-360/next-design",
