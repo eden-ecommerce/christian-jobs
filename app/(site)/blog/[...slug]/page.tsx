@@ -8,6 +8,7 @@ import {
 import { ArticleDetailPage } from "@eden-ecommerce/blog-kit/components";
 import { isSanityEnvConfigured } from "@lib/env-configured.server";
 import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
+import { Breadcrumbs } from "@components/common/Breadcrumbs";
 import { CHRISTIAN_JOBS_TAG, isChristianJobsArticle } from "@lib/blog";
 
 export const dynamic = "force-dynamic";
@@ -89,10 +90,22 @@ export default async function ArticlePage({
   };
 
   return (
-    <ArticleDetailPage
-      article={article}
-      relatedArticles={relatedArticles}
-      carouselProductMap={new Map()}
-    />
+    <>
+      <div className="mx-auto max-w-screen-xl px-4 pt-6 sm:px-6 lg:px-8">
+        <Breadcrumbs
+          items={[
+            { label: "Eden", href: "https://www.eden.co.uk" },
+            { label: "Christian Jobs", href: "/" },
+            { label: "Jobs Blog", href: "/blog" },
+            { label: article.title },
+          ]}
+        />
+      </div>
+      <ArticleDetailPage
+        article={article}
+        relatedArticles={relatedArticles}
+        carouselProductMap={new Map()}
+      />
+    </>
   );
 }

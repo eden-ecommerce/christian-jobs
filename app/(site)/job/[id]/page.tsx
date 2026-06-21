@@ -12,7 +12,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { NsLink } from "@components/ns-link";
-import { Breadcrumbs } from "@components/events/Breadcrumbs";
+import { Breadcrumbs } from "@components/common/Breadcrumbs";
 import { JobCard } from "@components/jobs/JobCard";
 import { ShareButton } from "@components/events/ShareButton";
 import { SaveJobButton } from "@components/jobs/SaveJobButton";
