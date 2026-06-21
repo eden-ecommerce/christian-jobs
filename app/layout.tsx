@@ -1,5 +1,7 @@
-import { EdenHeader } from "@components/common/EdenHeader";
-import { Footer } from "@components/common/Footer";
+import {
+  EdenHeader,
+  Footer,
+} from "@eden-ecommerce/site-chrome/components";
 import { QueryProvider } from "@providers/query-provider";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
@@ -52,7 +54,11 @@ export default function RootLayout({
     >
       <body className="flex min-h-screen flex-col font-sans antialiased">
         <QueryProvider>
-          <EdenHeader />
+          <EdenHeader
+              namespacePath="/christian-jobs"
+              algoliaAppId={process.env.NEXT_PUBLIC_ALGOLIA_APP_ID}
+              algoliaSearchKey={process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY}
+            />
           <div className="flex-1">{children}</div>
           <Footer />
         </QueryProvider>
