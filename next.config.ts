@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { BASE_PATH } from "@lib/constants";
 import { ALLOWED_ORIGIN, CORS_HEADERS } from "@lib/cors";
+
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   // Mount the whole app under /christian-jobs. Next serves every route and
@@ -10,6 +14,9 @@ const nextConfig: NextConfig = {
   // *.vercel.app domain, and the eden.co.uk Cloudflare Worker proxy — no
   // hardcoded asset origin required.
   basePath: BASE_PATH,
+  turbopack: {
+    root: projectRoot,
+  },
   // Expose SENTRY_DATASET to client bundles at build time (not a secret).
   env: {
     SENTRY_DATASET: process.env.SENTRY_DATASET ?? "",
@@ -19,6 +26,9 @@ const nextConfig: NextConfig = {
   },
   transpilePackages: [
     "@algolia/client-common",
+    // Turbopack + pnpm: bundle OTel hook packages so hashed externals resolve in dev.
+    "import-in-the-middle",
+    "require-in-the-middle",
     // Ships raw TS/TSX source, so Next must transpile it as part of this build.
     "@eden-ecommerce/blog-kit",
     "@eden-ecommerce/site-chrome",
@@ -41,6 +51,16 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "cdn.sanity.io" },
       { protocol: "https", hostname: "*.amazonaws.com" },
     ],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: BASE_PATH,
+        permanent: true,
+        basePath: false,
+      },
+    ];
   },
   async headers() {
     return [

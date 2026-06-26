@@ -37,7 +37,7 @@ function HomeLocationSearchInner() {
         lng: String(resolved.longitude),
         place: resolved.label,
       });
-      router.push(`${NAMESPACE_PATH}/search?${params.toString()}`);
+      router.push(`${NAMESPACE_PATH}/?${params.toString()}`);
     },
     [router, setLocation],
   );
@@ -63,9 +63,9 @@ function HomeLocationSearchInner() {
               lng: String(location.longitude),
               place: location.label,
             });
-            router.push(`${NAMESPACE_PATH}/search?${params.toString()}`);
+            router.push(`${NAMESPACE_PATH}/?${params.toString()}`);
           } else {
-            router.push(`${NAMESPACE_PATH}/search`);
+            router.push(`${NAMESPACE_PATH}/`);
           }
         }}
         className="inline-flex h-14 shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-6 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
@@ -97,9 +97,9 @@ function HomePlainSearch() {
 
   function submit() {
     if (value.trim()) {
-      router.push(`${NAMESPACE_PATH}/search?q=${encodeURIComponent(value.trim())}`);
+      router.push(`${NAMESPACE_PATH}/?q=${encodeURIComponent(value.trim())}`);
     } else {
-      router.push(`${NAMESPACE_PATH}/search`);
+      router.push(`${NAMESPACE_PATH}/`);
     }
   }
 

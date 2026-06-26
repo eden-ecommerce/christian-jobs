@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eden Jobs CTA – Option F Refined</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f0f0eb;
+    padding: 48px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .section {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #aaa;
+  }
+  .note {
+    font-size: 12px;
+    color: #999;
+    line-height: 1.6;
+  }
+
+  /* ── Shared card base ── */
+  .cta {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    transition: box-shadow 0.25s, transform 0.2s;
+  }
+  .cta:hover {
+    box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+  .main-row {
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .text h3 { font-size: 15px; font-weight: 700; color: #111; }
+  .text p { font-size: 12px; color: #888; margin-top: 3px; }
+
+  .price-block {
+    margin-left: auto;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .was-price {
+    font-size: 11px;
+    color: #ccc;
+    text-decoration: line-through;
+    display: block;
+    text-align: right;
+  }
+  .now-price {
+    font-size: 26px;
+    font-weight: 900;
+    color: #1a6b3c;
+    display: block;
+    min-width: 52px;
+    text-align: right;
+    transition: color 0.3s;
+  }
+  .sub-label {
+    font-size: 10px;
+    color: #bbb;
+    display: block;
+    text-align: right;
+    margin-top: 1px;
+    opacity: 0;
+    transition: opacity 0.4s ease 0.2s;
+  }
+  .sub-label.visible { opacity: 1; }
+
+  .arrow-col {
+    color: #1a6b3c;
+    font-size: 18px;
+    transition: transform 0.2s;
+    margin-left: 12px;
+    flex-shrink: 0;
+  }
+  .cta:hover .arrow-col { transform: translateX(4px); }
+
+  /* Variant A – strikethrough competitor price */
+  /* Variant B – no strikethrough, just lands on £0 */
+  /* Variant C – ends on "free" not £0 */
+
+</style>
+</head>
+<body>
+
+<!-- VARIANT 1: Counts down from £99, lands on £0 with "It's absolutely free" sub-label -->
+<div class="section">
+  <div class="section-label">Variant 1 — Counts to £0, sub-label fades in</div>
+  <a class="cta" href="#">
+    <div class="main-row">
+      <div style="font-size:22px; flex-shrink:0;">💼</div>
+      <div class="text">
+        <h3>Post a vacancy</h3>
+        <p>Reach thousands of job seekers at churches &amp; charities</p>
+      </div>
+      <div class="price-block">
+        <span class="was-price">others charge £99+</span>
+        <span class="now-price" id="counter1">£99</span>
+        <span class="sub-label" id="sub1">It's absolutely free</span>
+      </div>
+      <div class="arrow-col">→</div>
+    </div>
+  </a>
+  <div class="note">Counts down, lands on £0, then "It's absolutely free" fades in quietly underneath. The strikethrough gives context — makes free feel meaningful, not vague.</div>
+</div>
+
+<!-- VARIANT 2: No strikethrough. Cleaner. Lands on "free" as the word -->
+<div class="section">
+  <div class="section-label">Variant 2 — Counts to £0, no competitor reference</div>
+  <a class="cta" href="#">
+    <div class="main-row">
+      <div style="font-size:22px; flex-shrink:0;">💼</div>
+      <div class="text">
+        <h3>Post a vacancy</h3>
+        <p>Reach thousands of job seekers at churches &amp; charities</p>
+      </div>
+      <div class="price-block">
+        <span class="was-price" style="visibility:hidden;">placeholder</span>
+        <span class="now-price" id="counter2">£99</span>
+        <span class="sub-label" id="sub2">It's absolutely free</span>
+      </div>
+      <div class="arrow-col">→</div>
+    </div>
+  </a>
+  <div class="note">Cleaner — no competitor call-out, just the countdown itself. Lands on £0 and the sub-label appears. Less pointed, more generous feeling.</div>
+</div>
+
+<!-- VARIANT 3: Counts down, lands on the word FREE (not £0) -->
+<div class="section">
+  <div class="section-label">Variant 3 — Counts down, lands on the word "free"</div>
+  <a class="cta" href="#">
+    <div class="main-row">
+      <div style="font-size:22px; flex-shrink:0;">💼</div>
+      <div class="text">
+        <h3>Post a vacancy</h3>
+        <p>Reach thousands of job seekers at churches &amp; charities</p>
+      </div>
+      <div class="price-block">
+        <span class="was-price" style="visibility:hidden;">placeholder</span>
+        <span class="now-price" id="counter3" style="font-size:22px;">£99</span>
+        <span class="sub-label" id="sub3">Yep, absolutely free</span>
+      </div>
+      <div class="arrow-col">→</div>
+    </div>
+  </a>
+  <div class="note">"Yep, absolutely free" — a little more conversational. Lands on the word rather than a price. Feels warm and slightly disarming.</div>
+</div>
+
+<script>
+  function runCounter(counterId, subId, endOnWord) {
+    const el = document.getElementById(counterId);
+    const sub = document.getElementById(subId);
+    let val = 99;
+
+    setTimeout(() => {
+      const interval = setInterval(() => {
+        val -= 3;
+        if (val <= 0) {
+          clearInterval(interval);
+          if (endOnWord) {
+            el.textContent = 'free';
+            el.style.fontSize = '22px';
+          } else {
+            el.textContent = '£0';
+          }
+          sub.classList.add('visible');
+        } else {
+          el.textContent = '£' + val;
+        }
+      }, 26);
+    }, 900);
+  }
+
+  runCounter('counter1', 'sub1', false);
+  runCounter('counter2', 'sub2', false);
+  runCounter('counter3', 'sub3', true);
+</script>
+
+</body>
+</html>

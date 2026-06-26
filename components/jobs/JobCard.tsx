@@ -1,5 +1,8 @@
+"use client";
+
 import { NsLink } from "@components/ns-link";
 import { SaveJobButton } from "@components/jobs/SaveJobButton";
+import { usePostedLabel } from "@hooks/jobs/use-posted-label";
 import { NAMESPACE_PATH } from "@lib/config";
 import type { JobHit } from "@lib/algolia/jobs";
 import { locationLine, formatDistance } from "@lib/format";
@@ -9,17 +12,7 @@ import { MapPin, BanknoteIcon, Clock, CalendarDays } from "lucide-react";
 export function JobCard({ job }: { job: JobHit }) {
   const location = locationLine(job);
   const distance = formatDistance(job.distanceMeters);
-
-  // Posted label
-  const postedLabel = (() => {
-    if (!job.postedTimestamp) return null;
-    const diffDays = Math.floor((Date.now() - job.postedTimestamp) / 86_400_000);
-    if (diffDays === 0) return "Posted today";
-    if (diffDays === 1) return "Posted yesterday";
-    if (diffDays < 7) return `Posted ${diffDays} days ago`;
-    if (diffDays < 30) return `Posted ${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) === 1 ? "" : "s"} ago`;
-    return `Posted ${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) === 1 ? "" : "s"} ago`;
-  })();
+  const postedLabel = usePostedLabel(job.postedTimestamp);
 
   // Closing date label
   const closesLabel = (() => {

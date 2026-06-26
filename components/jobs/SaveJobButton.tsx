@@ -52,8 +52,8 @@ export function SaveJobButton({ jobId, variant = "icon", className = "" }: Props
       aria-pressed={saved}
       className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
         saved
-          ? "bg-primary text-primary-foreground"
-          : "bg-white/80 text-foreground backdrop-blur-sm hover:bg-white hover:text-primary"
+          ? "bg-[#2d6a4f] text-white"
+          : "bg-[#F3F4F6] text-muted-foreground hover:bg-[#E5E7EB] hover:text-[#2d6a4f]"
       } ${className}`}
     >
       <Bookmark

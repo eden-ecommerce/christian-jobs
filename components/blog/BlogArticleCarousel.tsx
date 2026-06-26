@@ -10,10 +10,10 @@ function ArticleCarouselCard({ article }: { article: Article }) {
   const tag = article.tags[0] ?? null;
 
   return (
-    <article className="group flex w-64 shrink-0 flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md sm:w-72">
+    <article className="group flex w-64 shrink-0 flex-col sm:w-72">
       {article.thumbnailUrl ? (
         <NsLink href={href} tabIndex={-1} aria-hidden>
-          <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
             <Image
               src={article.thumbnailUrl}
               alt={article.thumbnail?.alt ?? article.title}
@@ -24,11 +24,11 @@ function ArticleCarouselCard({ article }: { article: Article }) {
           </div>
         </NsLink>
       ) : (
-        <div className="flex aspect-[16/9] w-full items-center justify-center bg-accent/40">
+        <div className="flex aspect-[16/9] w-full items-center justify-center rounded-lg bg-accent/40">
           <BookOpen className="h-8 w-8 text-muted-foreground/40" aria-hidden />
         </div>
       )}
-      <div className="flex flex-1 flex-col gap-1.5 p-4">
+      <div className="flex flex-1 flex-col gap-1.5 pt-3">
         {tag && (
           <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">
             {tag}
@@ -71,7 +71,7 @@ export async function BlogArticleCarousel() {
   if (articles.length === 0) return null;
 
   return (
-    <section className="mb-12" aria-labelledby="blog-carousel-heading">
+    <section className="py-8" aria-labelledby="blog-carousel-heading">
       <div className="flex items-end justify-between gap-4">
         <div>
           <h2

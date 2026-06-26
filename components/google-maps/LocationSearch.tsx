@@ -12,6 +12,7 @@ const AUTOCOMPLETE_OPTIONS: google.maps.places.AutocompleteOptions = {
 type LocationSearchProps = {
   defaultValue?: string;
   onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
+  onInputChange?: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -20,6 +21,7 @@ type LocationSearchProps = {
 export function LocationSearch({
   defaultValue = "",
   onPlaceSelect,
+  onInputChange,
   placeholder = "Search for a location…",
   disabled = false,
   className,
@@ -56,6 +58,7 @@ export function LocationSearch({
       ref={inputRef}
       type="search"
       defaultValue={defaultValue}
+      onChange={(e) => onInputChange?.(e.target.value)}
       placeholder={placeholder}
       disabled={disabled}
       aria-label="Location search"

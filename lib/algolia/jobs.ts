@@ -7,6 +7,7 @@ import {
   organisationHubIndex,
 } from "@lib/algolia/constants";
 import { cleanCategoryLabel } from "@lib/algolia/category-label";
+import { isHybridWork } from "@lib/jobs/format-job";
 
 /**
  * Shape derived from live `organisationHub` browse (entityType:job).
@@ -31,6 +32,8 @@ export type JobHit = {
   closingDateTimestamp: number | null;
   /** When the job was posted (ms timestamp) */
   postedTimestamp: number | null;
+  /** When the job was added to the index (ms timestamp) */
+  createdTimestamp: number | null;
   online: boolean;
   externalUrl: string | null;
   organisationId: string | null;
@@ -66,6 +69,21 @@ function num(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+/** Parse ms timestamps from numeric or ISO-8601 index fields. */
+function timestampMs(value: unknown): number | null {
+  const asNumber = num(value);
+  if (asNumber !== null) return asNumber;
+  if (typeof value === "string" && value.length > 0) {
+    const parsed = Date.parse(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function jobAddedTimestamp(job: JobHit): number | null {
+  return job.createdTimestamp ?? job.postedTimestamp;
+}
+
 export { cleanCategoryLabel } from "@lib/algolia/category-label";
 
 /** Parse a field that may be a JSON string or already a plain object. */
@@ -94,6 +112,14 @@ function mapHit(raw: RawHit): JobHit {
   const hierarchy = parseJsonField(raw.categoryHierarchy);
   const ranking = parseJsonField(raw._rankingInfo);
 
+  const createdTimestamp =
+    timestampMs(raw.createdAt) ?? timestampMs(raw.updatedAt);
+  const postedTimestamp =
+    timestampMs(raw.postedAt) ??
+    timestampMs(raw.postedTimestamp) ??
+    timestampMs(raw.nextOccurrenceStartTimestamp) ??
+    createdTimestamp;
+
   return {
     objectID: String(raw.objectID ?? ""),
     id: String(raw.id ?? ""),
@@ -103,9 +129,13 @@ function mapHit(raw: RawHit): JobHit {
     jobType: str(raw.jobType) ?? str(raw.contractType),
     schedule: str(raw.schedule),
     applicationInstructions: str(raw.applicationInstructions),
-    closingDate: str(raw.closingDate) ?? str(raw.endDate),
-    closingDateTimestamp: num(raw.closingDateTimestamp) ?? num(raw.nextOccurrenceEndTimestamp),
-    postedTimestamp: num(raw.postedTimestamp) ?? num(raw.nextOccurrenceStartTimestamp),
+    closingDate: str(raw.closingDate) ?? str(raw.closingAt) ?? str(raw.endDate),
+    closingDateTimestamp:
+      num(raw.closingAtTimestamp) ??
+      num(raw.closingDateTimestamp) ??
+      num(raw.nextOccurrenceEndTimestamp),
+    postedTimestamp,
+    createdTimestamp,
     online: raw.online === true,
     externalUrl: str(raw.externalUrl),
     organisationId: str(raw.organisationId),
@@ -138,6 +168,8 @@ function mapHit(raw: RawHit): JobHit {
 /** Sort options exposed in the UI. */
 export type JobSort = "relevance" | "distance" | "date_asc" | "date_desc";
 
+export type DatePostedFilter = "24h" | "week" | "month";
+
 export type SearchJobsParams = {
   query?: string;
   /** Geo search origin. When set, results can be ranked by distance. */
@@ -148,8 +180,16 @@ export type SearchJobsParams = {
   category?: string;
   /** When true, only return jobs with no category set. */
   uncategorised?: boolean;
+  /** @deprecated Use organisationTypes for multi-select. */
   organisationType?: string;
+  organisationTypes?: string[];
+  contractTypes?: string[];
+  denominations?: string[];
+  minSalary?: number;
+  datePosted?: DatePostedFilter;
+  /** @deprecated Prefer workType — kept for direct API use. */
   online?: boolean;
+  workType?: "onsite" | "hybrid" | "remote";
   sort?: JobSort;
   page?: number;
   hitsPerPage?: number;
@@ -164,6 +204,8 @@ export type JobFacets = {
   categoryLvl3: JobFacet[];
   categoryLvl4: JobFacet[];
   organisationTypes: JobFacet[];
+  contractTypes: JobFacet[];
+  denominations: JobFacet[];
 };
 
 export type SearchJobsResult = {
@@ -182,6 +224,8 @@ const EMPTY_FACETS: JobFacets = {
   categoryLvl3: [],
   categoryLvl4: [],
   organisationTypes: [],
+  contractTypes: [],
+  denominations: [],
 };
 
 const EMPTY_RESULT: SearchJobsResult = {
@@ -195,10 +239,9 @@ const EMPTY_RESULT: SearchJobsResult = {
 
 /** Build the shared Algolia params for a job search. */
 function buildSearchParams(params: SearchJobsParams) {
-  const { lat, lng, radiusMeters = DEFAULT_LOCATION_RADIUS_METERS, online } = params;
+  const { lat, lng, radiusMeters = DEFAULT_LOCATION_RADIUS_METERS } = params;
 
   const filters = [JOBS_BASE_FILTER];
-  if (typeof online === "boolean") filters.push(`online:${online}`);
 
   const hasGeo = typeof lat === "number" && typeof lng === "number";
 
@@ -218,6 +261,30 @@ function categoryFacetFilter(category: string): string[] {
   return levels.map((l) => `categoryHierarchy.lvl${l}:${category}`);
 }
 
+function datePostedCutoff(datePosted: DatePostedFilter): number {
+  const now = Date.now();
+  switch (datePosted) {
+    case "24h":
+      return now - 86_400_000;
+    case "week":
+      return now - 7 * 86_400_000;
+    case "month":
+      return now - 30 * 86_400_000;
+  }
+}
+
+function parseSalaryMinimum(salary: string | null): number | null {
+  if (!salary) return null;
+  const normalised = salary.toLowerCase();
+  if (normalised.includes("competitive") || normalised.includes("negotiable")) {
+    return null;
+  }
+  const match = salary.match(/£?\s*([\d,]+(?:\.\d+)?)/);
+  if (!match?.[1]) return null;
+  const value = Number(match[1].replace(/,/g, ""));
+  return Number.isFinite(value) ? value : null;
+}
+
 /**
  * Server-side job search supporting free-text, geo radius, category &
  * organisation-type facets, and sorting.
@@ -233,7 +300,14 @@ export async function searchJobs(
     category,
     uncategorised,
     organisationType,
-    sort = "relevance",
+    organisationTypes,
+    contractTypes,
+    denominations,
+    minSalary,
+    datePosted,
+    online,
+    workType,
+    sort = "date_desc",
     page = 0,
     hitsPerPage = 12,
   } = params;
@@ -247,17 +321,44 @@ export async function searchJobs(
 
   const selectionFilters: string[][] = [];
   if (category) selectionFilters.push(categoryFacetFilter(category));
-  if (organisationType) {
-    selectionFilters.push([`organisationType:${organisationType}`]);
+
+  const orgTypes =
+    organisationTypes?.length
+      ? organisationTypes
+      : organisationType
+        ? [organisationType]
+        : [];
+  if (orgTypes.length) {
+    selectionFilters.push(orgTypes.map((t) => `organisationType:${t}`));
+  }
+  if (denominations?.length) {
+    selectionFilters.push(denominations.map((d) => `denomination:${d}`));
   }
 
+  const numericFilters: string[] = [];
+
+  const resolvedWorkType =
+    workType ??
+    (online === true ? "remote" : online === false ? "onsite" : undefined);
+
   const sortByDate = sort === "date_asc" || sort === "date_desc";
+  const needsContractFilter = Boolean(contractTypes?.length);
+  const needsWorkTypeFilter = Boolean(resolvedWorkType);
+  const needsSalaryFilter = typeof minSalary === "number" && minSalary > 0;
+  const needsDatePostedFilter = Boolean(datePosted);
+  const needsClientProcessing =
+    sortByDate ||
+    needsSalaryFilter ||
+    needsContractFilter ||
+    needsWorkTypeFilter ||
+    needsDatePostedFilter;
 
   const mainParams: Record<string, unknown> = {
     ...base,
-    facetFilters: selectionFilters,
-    hitsPerPage: sortByDate ? 1000 : hitsPerPage,
-    page: sortByDate ? 0 : page,
+    facetFilters: selectionFilters.length ? selectionFilters : undefined,
+    numericFilters: numericFilters.length ? numericFilters : undefined,
+    hitsPerPage: needsClientProcessing ? 1000 : hitsPerPage,
+    page: needsClientProcessing ? 0 : page,
   };
 
   const facetParams: Record<string, unknown> = {
@@ -270,6 +371,8 @@ export async function searchJobs(
       "categoryHierarchy.lvl3",
       "categoryHierarchy.lvl4",
       "organisationType",
+      "jobType",
+      "denomination",
     ],
   };
 
@@ -291,15 +394,51 @@ export async function searchJobs(
   let resolvedPage = main.page ?? 0;
   let nbPages = main.nbPages ?? 1;
 
+  if (needsContractFilter) {
+    hits = hits.filter(
+      (hit) => hit.jobType && contractTypes!.includes(hit.jobType),
+    );
+    nbHits = hits.length;
+  }
+
+  if (needsWorkTypeFilter) {
+    hits = hits.filter((hit) => {
+      if (resolvedWorkType === "remote") return hit.online;
+      if (resolvedWorkType === "hybrid") return isHybridWork(hit);
+      return !hit.online && !isHybridWork(hit);
+    });
+    nbHits = hits.length;
+  }
+
+  if (needsSalaryFilter) {
+    hits = hits.filter((hit) => {
+      const min = parseSalaryMinimum(hit.salary);
+      return min === null || min >= minSalary!;
+    });
+    nbHits = hits.length;
+  }
+
+  if (needsDatePostedFilter) {
+    const cutoff = datePostedCutoff(datePosted!);
+    hits = hits.filter((hit) => {
+      const ts = jobAddedTimestamp(hit);
+      return ts !== null && ts >= cutoff;
+    });
+    nbHits = hits.length;
+  }
+
   if (sortByDate) {
     const dir = sort === "date_asc" ? 1 : -1;
     hits.sort((a, b) => {
-      const at = a.postedTimestamp ?? Infinity * dir;
-      const bt = b.postedTimestamp ?? Infinity * dir;
+      const at = jobAddedTimestamp(a) ?? Infinity * dir;
+      const bt = jobAddedTimestamp(b) ?? Infinity * dir;
       if (at === bt) return 0;
       return at < bt ? -dir : dir;
     });
     nbHits = hits.length;
+  }
+
+  if (needsClientProcessing) {
     nbPages = Math.max(1, Math.ceil(nbHits / hitsPerPage));
     resolvedPage = Math.min(page, nbPages - 1);
     const start = resolvedPage * hitsPerPage;
@@ -372,6 +511,24 @@ function readFacets(result: unknown): JobFacets {
     }))
     .sort((a, b) => b.count - a.count);
 
+  const contractTypes = Object.entries(facets["jobType"] ?? {})
+    .map(([value, count]) => ({
+      value,
+      label: value
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/^./, (c) => c.toUpperCase()),
+      count,
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  const denominations = Object.entries(facets["denomination"] ?? {})
+    .map(([value, count]) => ({
+      value,
+      label: value,
+      count,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
   return {
     categories,
     categoryLvl1,
@@ -379,6 +536,8 @@ function readFacets(result: unknown): JobFacets {
     categoryLvl3,
     categoryLvl4,
     organisationTypes,
+    contractTypes,
+    denominations,
   };
 }
 
@@ -467,6 +626,47 @@ export async function getJobCategoryFacets(): Promise<CategoryFacetsResult> {
   const uncategorisedCount = Math.max(0, totalCount - categorisedCount);
 
   return { categories, totalCount, uncategorisedCount };
+}
+
+/** Featured jobs for carousel — most recently posted. */
+export async function getFeaturedJobs(limit = 8): Promise<JobHit[]> {
+  const result = await searchJobs({ hitsPerPage: limit, sort: "date_desc" });
+  return result.hits;
+}
+
+/** Charity organisation jobs for carousel. */
+export async function getCharityJobs(limit = 8): Promise<JobHit[]> {
+  const result = await searchJobs({
+    hitsPerPage: limit,
+    sort: "date_desc",
+    organisationTypes: ["charity"],
+  });
+  return result.hits;
+}
+
+/** Fetch filter facet options for the jobs browser. */
+export async function getJobFilterOptions(): Promise<JobFacets> {
+  const result = await searchJobs({ hitsPerPage: 1000, sort: "date_desc" });
+  const facets = { ...result.facets };
+
+  if (facets.contractTypes.length === 0 && result.hits.length > 0) {
+    const counts = new Map<string, number>();
+    for (const hit of result.hits) {
+      if (!hit.jobType) continue;
+      counts.set(hit.jobType, (counts.get(hit.jobType) ?? 0) + 1);
+    }
+    facets.contractTypes = [...counts.entries()]
+      .map(([value, count]) => ({
+        value,
+        label: value
+          .replace(/([a-z])([A-Z])/g, "$1 $2")
+          .replace(/^./, (c) => c.toUpperCase()),
+        count,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }
+
+  return facets;
 }
 
 // ---------------------------------------------------------------------------
