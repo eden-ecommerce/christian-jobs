@@ -1,7 +1,6 @@
 "use client";
 
-import { GoogleMapsProvider } from "@components/google-maps/GoogleMapsProvider";
-import { LocationSearch } from "@components/google-maps/LocationSearch";
+import { LocationSearch, type LocationSearchHandle } from "@components/google-maps/LocationSearch";
 import { useUserLocation } from "@hooks/google-maps/use-user-location";
 import { isGoogleMapsEnvConfigured } from "@lib/env-configured";
 import { userLocationFromPlace } from "@lib/google-maps/location-labels";
@@ -36,7 +35,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const POST_JOB_HREF = "https://hub.eden.co.uk/dashboard/job-journey";
 
@@ -101,14 +100,21 @@ function LocationSection({
   onLocationSearch: Props["onLocationSearch"];
 }) {
   const { setLocation } = useUserLocation();
-  const [label, setLabel] = useState(location);
+  const locationSearchRef = useRef<LocationSearchHandle>(null);
+  const plainLocationRef = useRef<HTMLInputElement>(null);
+  const mapsEnabled = isGoogleMapsEnvConfigured();
+
+  useEffect(() => {
+    if (!mapsEnabled && plainLocationRef.current) {
+      plainLocationRef.current.value = location;
+    }
+  }, [location, mapsEnabled]);
 
   const handlePlaceSelect = useCallback(
     (place: google.maps.places.PlaceResult) => {
       const resolved = userLocationFromPlace(place);
       if (!resolved) return;
       setLocation(resolved);
-      setLabel(resolved.label);
       onLocationSearch({
         label: resolved.label,
         lat: resolved.latitude,
@@ -118,14 +124,25 @@ function LocationSection({
     [setLocation, onLocationSearch],
   );
 
-  if (!isGoogleMapsEnvConfigured()) {
+  const submitFreeText = useCallback(() => {
+    const label = (
+      mapsEnabled
+        ? locationSearchRef.current?.getValue()
+        : plainLocationRef.current?.value
+    )?.trim();
+    if (label) {
+      onLocationSearch({ label });
+    }
+  }, [mapsEnabled, onLocationSearch]);
+
+  if (!mapsEnabled) {
     return (
       <input
+        ref={plainLocationRef}
         type="text"
-        value={label}
-        onChange={(e) => setLabel(e.target.value)}
+        defaultValue={location}
         onKeyDown={(e) => {
-          if (e.key === "Enter") onLocationSearch({ label: label.trim() });
+          if (e.key === "Enter") submitFreeText();
         }}
         placeholder="Enter postcode or location"
         className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm outline-none placeholder:text-muted-foreground focus:border-[#2d6a4f] focus:ring-2 focus:ring-[#2d6a4f]/15"
@@ -134,18 +151,16 @@ function LocationSection({
   }
 
   return (
-    <GoogleMapsProvider>
-      <LocationSearch
-        key={label}
-        defaultValue={label}
-        onPlaceSelect={handlePlaceSelect}
-        onInputChange={(value) => {
-          setLabel(value);
-        }}
-        placeholder="Enter postcode or location"
-        className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm focus:border-[#2d6a4f] focus:ring-2 focus:ring-[#2d6a4f]/15"
-      />
-    </GoogleMapsProvider>
+    <LocationSearch
+      ref={locationSearchRef}
+      initialLabel={location}
+      onPlaceSelect={handlePlaceSelect}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") submitFreeText();
+      }}
+      placeholder="Enter postcode or location"
+      className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm focus:border-[#2d6a4f] focus:ring-2 focus:ring-[#2d6a4f]/15"
+    />
   );
 }
 

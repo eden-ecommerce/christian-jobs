@@ -87,15 +87,8 @@ function UserLocationSearchInner({
 
   return (
     <div className="flex flex-col gap-2">
-      {value ? (
-        <p className="text-sm text-foreground">
-          <span className="text-muted-foreground">Location: </span>
-          {value.label}
-        </p>
-      ) : null}
       <LocationSearch
-        key={value?.label ?? ""}
-        defaultValue={value?.label ?? ""}
+        initialLabel={value?.label ?? ""}
         onPlaceSelect={handlePlaceSelect}
         placeholder={placeholder}
         disabled={isLocating}

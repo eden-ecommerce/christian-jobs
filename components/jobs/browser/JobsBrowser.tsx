@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { JobsSearchBar } from "@components/jobs/browser/JobsSearchBar";
 import { JobsPageHero } from "@components/jobs/browser/JobsPageHero";
+import { GoogleMapsProvider } from "@components/google-maps/GoogleMapsProvider";
 import { JobsFilterPills } from "@components/jobs/browser/JobsFilterPills";
 import { JobsFilterSidebar } from "@components/jobs/browser/JobsFilterSidebar";
 import { JobsListPane } from "@components/jobs/browser/JobsListPane";
@@ -12,6 +13,7 @@ import { JobDetailPanel } from "@components/jobs/browser/JobDetailPanel";
 import { JobsMobileDetail } from "@components/jobs/browser/JobsMobileDetail";
 import { JobsFeaturedCarousels } from "@components/jobs/browser/JobsFeaturedCarousels";
 import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
+import { isGoogleMapsEnvConfigured } from "@lib/env-configured";
 import { useJobDetail } from "@hooks/jobs/use-job-detail";
 import { useJobsInfiniteList } from "@hooks/jobs/use-jobs-infinite";
 import { getJobDetailQueryOptions } from "@hooks/jobs/get-options";
@@ -208,7 +210,7 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
 
   const showLandingSearch = isLatestJobsBrowse(urlState);
 
-  return (
+  const page = (
     <div className="font-[family-name:var(--font-outfit)] bg-[#F9FAFB]">
       <JobsPageHero />
 
@@ -313,4 +315,10 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
       />
     </div>
   );
+
+  if (isGoogleMapsEnvConfigured()) {
+    return <GoogleMapsProvider>{page}</GoogleMapsProvider>;
+  }
+
+  return page;
 }

@@ -49,8 +49,6 @@ export function EventsUserLocationFilter() {
 
   const handleLocationSelect = useCallback(
     (nextLocation: UserLocation) => {
-      // Clear first so UserLocationSearch re-mounts with new label (avoids stale input).
-      clearLocation();
       setLocation(nextLocation);
       applyGeo({
         lat: String(nextLocation.latitude),
@@ -59,7 +57,7 @@ export function EventsUserLocationFilter() {
         q: null,
       });
     },
-    [applyGeo, clearLocation, setLocation],
+    [applyGeo, setLocation],
   );
 
   const handleClear = useCallback(() => {
