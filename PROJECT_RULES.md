@@ -47,7 +47,7 @@ v0: read this first. Hidden Eden stuff AI can't guess from repo alone.
 - Private secrets → `getServerEnv()` from `@eden-ecommerce/lib/env-server` — server only
 - Eden platform API → `@eden-ecommerce/lib/eden/fetch` — app API → `apiFetch` + `API_BASE_URL`
 - Algolia fields + facets → `lib/algolia/constants.ts` from live discovery
-- Secrets in .env or host env — never commit .env
+- Secrets in `.env.local` (via `pnpm env:pull`) or Vercel dashboard — never commit `.env`
 
 ## Spec URLs
 

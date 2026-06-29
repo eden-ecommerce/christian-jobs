@@ -25,6 +25,8 @@
 | Hosting | Vercel (repo root); assets via Cloudflare Worker `assetPrefix` in production |
 | Registry | `@eden-ecommerce/common@0.3.3`, `@eden-ecommerce/lib@0.2.4` (semver pins in `package.json`) |
 
+Local env: `pnpm env:pull` → `.env.local` (after `vercel link`).
+
 Vercel needs `GITHUB_TOKEN` with `read:packages` for `@eden-ecommerce/*`. See [`docs/SETUP.md`](./SETUP.md).
 
 ## Production routes

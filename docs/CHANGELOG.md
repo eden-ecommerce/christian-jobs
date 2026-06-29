@@ -8,6 +8,11 @@ Maintained by `/review` for promotions. Use [`.cursor/skills/review/templates/DE
 
 <!-- Entries appended below, newest first -->
 
+## 2026-06-29 — env:pull script
+
+- Added `pnpm env:pull` → `vercel env pull .env.local`
+- Updated `docs/SETUP.md`, `PROJECT_RULES.md`, cursor rules
+
 ## 2026-06-29 — Restore v0-template guidance layer
 
 **Scope:** Re-align fork with v0-template dev reference after reimplement dropped sandbox/search/forms.

@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "ts-check": "tsc --noEmit",
     "predeploy": "pnpm ts-check && pnpm lint && pnpm build",
+    "env:pull": "vercel env pull .env.local",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui"
   },
