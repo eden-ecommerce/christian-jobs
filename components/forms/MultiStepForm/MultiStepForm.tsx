@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@lib/utils";
+import { cn } from "@eden-ecommerce/lib/utils";
 import {
   MultiStepFormProvider,
   type StepDefinition,

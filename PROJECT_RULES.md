@@ -4,12 +4,14 @@ v0: read this first. Hidden Eden stuff AI can't guess from repo alone.
 
 ## Deploy
 
-- Cloudflare Worker on eden.co.uk — first URL segment = this app's namespace
-- Set NAMESPACE in lib/config.ts — rename app/REPLACE to match
-- assetPrefix from ASSET_BASE_URL in lib/constants.ts — configure before first deploy
-- REPLACE in lib/constants.ts → ask user prod domain before asset or link work
+- Cloudflare Worker on eden.co.uk — first URL segment = this app's namespace (`christian-jobs`)
+- Set `NEXT_PUBLIC_NAMESPACE=christian-jobs` and `NEXT_PUBLIC_PRODUCTION_ORIGIN` in env (`constants/app.ts`)
+- User pages under `app/christian-jobs/`; `app/api/*` stays at root (Vercel-only)
+- `assetPrefix` from `ASSET_BASE_URL` in production (`next.config.ts`)
+- Header/footer via `components/sanity/*` + `@eden-ecommerce/common` blocks
+- Shared integrations → `@eden-ecommerce/lib`; feature code → `lib/jobs/`, `lib/blog/`, `components/`
 - No DB — HTTP APIs only, no Prisma or DATABASE_URL
-- /api/* CORS locked to https://www.eden.co.uk in lib/cors.ts
+- /api/* CORS locked to https://www.eden.co.uk (`@eden-ecommerce/lib/cors`)
 - v0 build tolerates TS errors — run pnpm predeploy before deploy
 
 ## Absolute paths
@@ -40,11 +42,11 @@ v0: read this first. Hidden Eden stuff AI can't guess from repo alone.
 
 ## Config map
 
-- Deploy origins → lib/constants.ts (ASSET_* and API_*)
-- Namespace → lib/config.ts (NAMESPACE, NAMESPACE_PATH, assetUrl, apiUrl)
-- Private secrets → lib/env-server.ts getServerEnv — server only
-- Eden platform API → lib/eden/fetch — app API → apiFetch + API_BASE_URL
-- Algolia fields + facets → lib/algolia/constants.ts from live discovery
+- Deploy origins + namespace → `constants/app.ts` (`NEXT_PUBLIC_*`)
+- URL helpers → `lib/config.ts` (`NAMESPACE_PATH`, `assetUrl`, `apiUrl`, `SITE_URL`)
+- Private secrets → `getServerEnv()` from `@eden-ecommerce/lib/env-server` — server only
+- Eden platform API → `@eden-ecommerce/lib/eden/fetch` — app API → `apiFetch` + `API_BASE_URL`
+- Algolia fields + facets → `lib/algolia/constants.ts` from live discovery
 - Secrets in .env or host env — never commit .env
 
 ## Spec URLs

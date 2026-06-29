@@ -1,6 +1,6 @@
 "use client";
 
-import { assertNever } from "@lib/assert-never";
+import { assertNever } from "@eden-ecommerce/lib/assert-never";
 import { Button } from "@components/ui/button";
 import { FormContainer } from "@components/forms/FormContainer";
 import { MultiStepForm } from "@components/forms/MultiStepForm/MultiStepForm";

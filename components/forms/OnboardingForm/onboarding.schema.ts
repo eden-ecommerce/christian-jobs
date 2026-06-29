@@ -1,4 +1,4 @@
-import { assertNever } from "@lib/assert-never";
+import { assertNever } from "@eden-ecommerce/lib/assert-never";
 import { z } from "zod";
 
 export enum OnboardingStep {

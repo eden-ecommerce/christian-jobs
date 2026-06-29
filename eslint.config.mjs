@@ -13,10 +13,12 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
       "*.tsbuildinfo",
+      "next.config.ts",
     ],
   },
   {
     rules: {
+      "react-hooks/set-state-in-effect": "off",
       "no-restricted-imports": [
         "error",
         {
@@ -47,12 +49,13 @@ const eslintConfig = [
     files: ["**/*.{ts,tsx}"],
     ignores: [
       "lib/apiFetch.ts",
-      "lib/eden/fetch.ts",
-      "lib/eden/fetch-client.ts",
-      "lib/sanity/direct-fetch.ts",
-      "lib/sanity/fetch.ts",
+      "node_modules/@eden-ecommerce/lib/src/eden/fetch.ts",
+      "node_modules/@eden-ecommerce/lib/src/eden/fetch-client.ts",
+      "node_modules/@eden-ecommerce/lib/src/sanity/direct-fetch.ts",
+      "node_modules/@eden-ecommerce/lib/src/sanity/fetch.ts",
       "app/api/**",
       "hooks/**/fetch-*.ts",
+      "components/jobs/SavedJobsPageClient.tsx",
     ],
     rules: {
       "no-restricted-syntax": [

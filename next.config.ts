@@ -1,66 +1,75 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { BASE_PATH } from "@lib/constants";
-import { ALLOWED_ORIGIN, CORS_HEADERS } from "@lib/cors";
+import { withSentryConfig } from "@sentry/nextjs";
+import { ASSET_BASE_URL, assertDeployEnvForProduction } from "./constants/app";
+import { ALLOWED_ORIGIN, CORS_HEADERS } from "@eden-ecommerce/lib/cors";
+
+assertDeployEnvForProduction();
+
+const SANITY_CDN_PROJECT_ID =
+  process.env.EDEN_SANITY_PROJECT_ID ?? "dc9143c3dc8ee44506ba";
+const SANITY_CDN_DATASET = process.env.EDEN_SANITY_DATASET ?? "next-eden";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
-  // Mount the whole app under /christian-jobs. Next serves every route and
-  // every `/_next/*` asset under this prefix, RELATIVE to the current origin.
-  // This is what makes the build work identically on the v0 preview, the raw
-  // *.vercel.app domain, and the eden.co.uk Cloudflare Worker proxy — no
-  // hardcoded asset origin required.
-  basePath: BASE_PATH,
-  turbopack: {
-    root: projectRoot,
-  },
-  // Expose SENTRY_DATASET to client bundles at build time (not a secret).
   env: {
     SENTRY_DATASET: process.env.SENTRY_DATASET ?? "",
+    NEXT_PUBLIC_NAMESPACE: process.env.NEXT_PUBLIC_NAMESPACE ?? "",
+    NEXT_PUBLIC_PRODUCTION_ORIGIN: process.env.NEXT_PUBLIC_PRODUCTION_ORIGIN ?? "",
+    NEXT_PUBLIC_DEV_ORIGIN: process.env.NEXT_PUBLIC_DEV_ORIGIN ?? "",
+  },
+  turbopack: {
+    root: projectRoot,
   },
   experimental: {
     optimizePackageImports: ["@sentry/nextjs"],
   },
   transpilePackages: [
     "@algolia/client-common",
-    // Turbopack + pnpm: bundle OTel hook packages so hashed externals resolve in dev.
     "import-in-the-middle",
     "require-in-the-middle",
-    // Ships raw TS/TSX source, so Next must transpile it as part of this build.
-    "@eden-ecommerce/blog-kit",
-    "@eden-ecommerce/site-chrome",
-    // TEMPORARILY DISABLED: private @christian-360/* packages (unreachable
-    // registry). Re-enable when the packages are wired back in.
-    // "@christian-360/next-design",
-    // "@christian-360/sanity",
+    "@eden-ecommerce/common",
+    "@eden-ecommerce/lib",
   ],
-  // No `assetPrefix`: `basePath` already serves `/_next/*` under
-  // /christian-jobs on the same origin as the page, which resolves correctly
-  // on every host (preview, *.vercel.app, and the eden.co.uk proxy).
-  // v0 iterates quickly — builds tolerate TS errors during dev.
-  // Before deploy: run `pnpm predeploy` (ts-check + lint + build) and fix all errors.
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  assetPrefix: process.env.NODE_ENV === "production" ? ASSET_BASE_URL : undefined,
   images: {
     unoptimized: true,
     remotePatterns: [
-      { protocol: "https", hostname: "cdn.sanity.io" },
-      { protocol: "https", hostname: "*.amazonaws.com" },
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+        pathname: `/images/${SANITY_CDN_PROJECT_ID}/${SANITY_CDN_DATASET}/**`,
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+        pathname: "/images/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.eden.co.uk",
+        pathname: "/images/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.eden.co.uk",
+        pathname: "/staticimages/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.eden.co.uk",
+        pathname: "/assets/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.amazonaws.com",
+      },
     ],
   },
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: BASE_PATH,
-        permanent: true,
-        basePath: false,
-      },
-    ];
+  typescript: {
+    ignoreBuildErrors: true,
   },
   async headers() {
     return [
@@ -78,15 +87,6 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // Security headers (CSP, HSTS, frame-ancestors) may be owned by the
-      // Cloudflare Worker or Vercel edge — confirm with infra before enabling:
-      // {
-      //   source: "/:path*",
-      //   headers: [
-      //     { key: "X-Content-Type-Options", value: "nosniff" },
-      //     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-      //   ],
-      // },
     ];
   },
 };

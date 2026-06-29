@@ -4,7 +4,7 @@ import {
   extractHierarchyLabel,
   isHierarchicalAttribute,
   type HierarchicalFacetConfig,
-} from "@lib/algolia/hierarchical-filter";
+} from "@eden-ecommerce/lib/algolia/hierarchical-filter";
 import { useCurrentRefinements } from "react-instantsearch";
 
 export type HierarchicalRefinementBadge = {

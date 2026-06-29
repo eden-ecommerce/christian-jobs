@@ -2,8 +2,8 @@
  * Query live Algolia index before editing attributes or facets below.
  * Field names are not inferrable — copy from index browse/search output.
  */
-import { ALGOLIA_INDEXES, type AlgoliaIndexName } from "@lib/algolia/client";
-import type { HierarchicalFacetConfig } from "@lib/algolia/hierarchical-filter";
+import { ALGOLIA_INDEXES, type AlgoliaIndexName } from "@eden-ecommerce/lib/algolia/client";
+import type { HierarchicalFacetConfig } from "@eden-ecommerce/lib/algolia/hierarchical-filter";
 
 export const productsIndex = ALGOLIA_INDEXES.products;
 export const organisationHubIndex = ALGOLIA_INDEXES.organisationHub;

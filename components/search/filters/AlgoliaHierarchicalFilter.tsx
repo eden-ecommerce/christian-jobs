@@ -8,7 +8,7 @@ import {
   DEFAULT_HIERARCHY_SEPARATOR,
   mapHierarchicalMenuItems,
   type HierarchicalFacetConfig,
-} from "@lib/algolia/hierarchical-filter";
+} from "@eden-ecommerce/lib/algolia/hierarchical-filter";
 import { useHierarchicalMenu } from "react-instantsearch";
 
 type AlgoliaHierarchicalFilterProps = {

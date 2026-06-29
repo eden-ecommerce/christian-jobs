@@ -4,7 +4,7 @@ import {
   SAMPLE_RATE,
   SENTRY_IGNORE_ERRORS,
   TRACE_SAMPLE_RATE,
-} from "@lib/sentry";
+} from "@eden-ecommerce/lib/sentry";
 
 init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,

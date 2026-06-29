@@ -1,10 +1,9 @@
 @import 'tailwindcss';
+@import '@eden-ecommerce/common/tailwind.css';
+@source "../node_modules/@eden-ecommerce/common/src";
 /* TEMPORARILY DISABLED: scans the private @christian-360/next-design package
    for Tailwind classes. Re-enable when the package is wired back in. */
 /* @source "../node_modules/@christian-360/next-design"; */
-/* Eden packages ship raw TSX — scan them so Tailwind generates their utility classes. */
-@source "../node_modules/@eden-ecommerce/blog-kit/src";
-@source "../node_modules/@eden-ecommerce/site-chrome/src";
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
@@ -55,6 +54,15 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --color-primary-700: rgb(39 128 2);
+  --color-primary-900: rgb(34 90 13);
+  --color-primary-950: rgb(12 51 0);
+  --color-copy-300: rgb(209 209 209);
+  --color-copy-500: rgb(136 136 136);
+  --color-copy-700: rgb(93 93 93);
+  --color-copy-800: rgb(79 79 79);
+  --color-copy-950: rgb(37 37 37);
+  --color-danger-600: rgb(211 47 47);
 }
 
 :root {
@@ -183,5 +191,11 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer components {
+  .header-info-bar {
+    background-color: rgb(34 90 13);
   }
 }

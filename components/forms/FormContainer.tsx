@@ -1,4 +1,4 @@
-import { cn } from "@lib/utils";
+import { cn } from "@eden-ecommerce/lib/utils";
 import { useFormikContext } from "formik";
 import type { ReactNode } from "react";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { FilterBadgePrimitive } from "@components/search/active-filters/FilterBadgePrimitive";
-import { isHierarchicalAttribute } from "@lib/algolia/hierarchical-filter";
+import { isHierarchicalAttribute } from "@eden-ecommerce/lib/algolia/hierarchical-filter";
 import { useCurrentRefinements } from "react-instantsearch";
 
 type RefinementBadgesProps = {

@@ -1,10 +1,29 @@
-import type { Article } from "@eden-ecommerce/blog-kit";
-
 /**
  * This site is christian-jobs-only: every blog surface is scoped to this single
  * Sanity tag. The listing fetches by it, and the article route guards against
  * it so off-topic articles can't be reached by guessing a URL.
  */
+
+import type { Article } from "@lib/blog/get-articles";
+
+export {
+  articleHref,
+  slugify,
+  type ArticleUrlParts,
+} from "@lib/blog/article-url";
+
+export {
+  getArticleBySlug,
+  getArticles,
+  getArticlesByTag,
+  getAllArticleSlugs,
+  getRelatedArticles,
+  type Article,
+  type ArticleThumbnail,
+  type Author,
+  type RelatedArticles,
+} from "@lib/blog/get-articles";
+
 export const CHRISTIAN_JOBS_TAG = "christian jobs";
 
 /** Case-insensitive check that an article carries the christian-jobs tag. */

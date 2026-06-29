@@ -1,13 +1,13 @@
 import "server-only";
 
-import { getAlgoliaSearchClient } from "@lib/algolia/client";
+import { getAlgoliaSearchClient } from "@eden-ecommerce/lib/algolia/client";
 import {
   DEFAULT_LOCATION_RADIUS_METERS,
   EVENTS_BASE_FILTER,
   defaultHierarchicalSearchPreset,
   organisationHubIndex,
 } from "@lib/algolia/constants";
-import { extractHierarchyLabel } from "@lib/algolia/hierarchical-filter";
+import { extractHierarchyLabel } from "@eden-ecommerce/lib/algolia/hierarchical-filter";
 import { cleanCategoryLabel } from "@lib/algolia/category-label";
 
 /**

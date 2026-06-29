@@ -2,7 +2,7 @@
 
 import { FilterBadgePrimitive } from "@components/search/active-filters/FilterBadgePrimitive";
 import { useHierarchicalRefinements } from "@hooks/algolia/use-hierarchical-refinements";
-import type { HierarchicalFacetConfig } from "@lib/algolia/hierarchical-filter";
+import type { HierarchicalFacetConfig } from "@eden-ecommerce/lib/algolia/hierarchical-filter";
 
 type HierarchicalRefinementBadgesProps = {
   hierarchicalFacet: HierarchicalFacetConfig;

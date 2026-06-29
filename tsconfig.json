@@ -29,6 +29,52 @@
       "@components/*": [
         "./components/*"
       ],
+      "@components/common/*": [
+        "./components/common/*"
+      ],
+      "@components/forms/*": [
+        "./components/forms/*"
+      ],
+      "@components/search/*": [
+        "./components/search/*"
+      ],
+      "@components/google-maps/*": [
+        "./components/google-maps/*"
+      ],
+      "@components/health/*": [
+        "./components/health/*"
+      ],
+      "@components/location/*": [
+        "./components/location/*"
+      ],
+      "@components/panels/*": [
+        "./components/panels/*"
+      ],
+      "@components/ns-link": [
+        "./components/ns-link.tsx"
+      ],
+      "@components/ui/*": [
+        "./components/ui/*",
+        "./node_modules/@eden-ecommerce/common/src/ui/*"
+      ],
+      "@components/fields/*": [
+        "./node_modules/@eden-ecommerce/common/src/fields/*"
+      ],
+      "@components/blocks/*": [
+        "./node_modules/@eden-ecommerce/common/src/blocks/*"
+      ],
+      "@components/text/*": [
+        "./node_modules/@eden-ecommerce/common/src/text/*"
+      ],
+      "@components/layout/*": [
+        "./node_modules/@eden-ecommerce/common/src/layout/*"
+      ],
+      "@components/foundations/*": [
+        "./node_modules/@eden-ecommerce/common/src/foundations/*"
+      ],
+      "@components/media/*": [
+        "./node_modules/@eden-ecommerce/common/src/media/*"
+      ],
       "@providers/*": [
         "./providers/*"
       ],
@@ -36,7 +82,8 @@
         "./hooks/*"
       ],
       "@lib/*": [
-        "./lib/*"
+        "./lib/*",
+        "./node_modules/@eden-ecommerce/lib/src/*"
       ],
       "@types/*": [
         "./types/*"
@@ -46,6 +93,12 @@
       ],
       "@public/*": [
         "./public/*"
+      ],
+      "@eden-ecommerce/lib/*": [
+        "./node_modules/@eden-ecommerce/lib/src/*"
+      ],
+      "@eden-ecommerce/common/*": [
+        "./node_modules/@eden-ecommerce/common/src/*"
       ]
     }
   },

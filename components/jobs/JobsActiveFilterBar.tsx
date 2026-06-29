@@ -2,7 +2,7 @@
 
 import { FilterBadgePrimitive } from "@components/search/active-filters/FilterBadgePrimitive";
 import { useUserLocation } from "@hooks/google-maps/use-user-location";
-import { extractHierarchyLabel } from "@lib/algolia/hierarchical-filter";
+import { extractHierarchyLabel } from "@eden-ecommerce/lib/algolia/hierarchical-filter";
 import { defaultHierarchicalSearchPreset } from "@lib/algolia/constants";
 import { NAMESPACE_PATH } from "@lib/config";
 import { useRouter, useSearchParams } from "next/navigation";

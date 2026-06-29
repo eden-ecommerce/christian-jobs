@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getAlgoliaSearchClient } from "@lib/algolia/client";
+import { getAlgoliaSearchClient } from "@eden-ecommerce/lib/algolia/client";
 import {
   DEFAULT_LOCATION_RADIUS_METERS,
   JOBS_BASE_FILTER,

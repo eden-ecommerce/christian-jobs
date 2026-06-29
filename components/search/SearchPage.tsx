@@ -11,7 +11,7 @@ import { LocationConfigure } from "@components/search/LocationConfigure";
 import { SearchBox } from "@components/search/SearchBox";
 import { LocationInitialiser } from "@components/location/LocationInitialiser";
 import type { HierarchicalAlgoliaIndexPreset } from "@lib/algolia/constants";
-import type { CloudflareLocation } from "@lib/location/types";
+import type { CloudflareLocation } from "@eden-ecommerce/lib/location/types";
 
 type SearchPageProps = {
   preset: HierarchicalAlgoliaIndexPreset;

@@ -5,7 +5,7 @@ import { LocationBadge } from "@components/search/active-filters/LocationBadge";
 import { RefinementBadges } from "@components/search/active-filters/RefinementBadges";
 import { useHierarchicalRefinements } from "@hooks/algolia/use-hierarchical-refinements";
 import { useUserLocation } from "@hooks/google-maps/use-user-location";
-import type { HierarchicalFacetConfig } from "@lib/algolia/hierarchical-filter";
+import type { HierarchicalFacetConfig } from "@eden-ecommerce/lib/algolia/hierarchical-filter";
 import { useClearRefinements, useCurrentRefinements } from "react-instantsearch";
 
 type ActiveFilterBadgesProps = {

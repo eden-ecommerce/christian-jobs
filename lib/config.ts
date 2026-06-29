@@ -1,67 +1,52 @@
 /**
- * ──────────────────────────────────────────────────────────────────────────
- * Per-project configuration
- * ──────────────────────────────────────────────────────────────────────────
- *
- * This app is mounted under a single path namespace via the Next.js
- * `basePath` (see `BASE_PATH` in `@lib/constants` and `next.config.ts`). In
- * production it is served behind the Eden Cloudflare Worker at
- * https://www.eden.co.uk/christian-jobs.
- *
- * Because `basePath` automatically prefixes every `next/link` href,
- * `redirect()` and `next/image` src, internal navigation paths are written
- * WITHOUT the namespace prefix. For absolute SEO URLs, use `SITE_URL`.
+ * Namespace URL helpers — origins and namespace come from `constants/app.ts` (env).
  */
 
-import { BASE_PATH, SITE_URL } from "@lib/constants";
+import {
+  API_BASE_URL,
+  ASSET_BASE_URL,
+  NAMESPACE,
+  NAMESPACE_PATH,
+  PRODUCTION_ORIGIN,
+} from "@/constants/app";
 
-export { BASE_PATH, SITE_URL };
+export { API_BASE_URL, ASSET_BASE_URL, NAMESPACE, NAMESPACE_PATH };
 
-/** Human-readable namespace this app is mounted under. */
-export const NAMESPACE = "christian-jobs";
+/** Canonical public origin including namespace — for SEO, JSON-LD, share URLs. */
+export const SITE_URL =
+  PRODUCTION_ORIGIN && NAMESPACE_PATH
+    ? `${PRODUCTION_ORIGIN}${NAMESPACE_PATH}`
+    : undefined;
 
 /**
- * Internal-link path prefix.
- *
- * Empty on purpose: Next.js `basePath` (BASE_PATH) prepends the namespace to
- * every `next/link` href, `redirect()` and `next/image` src automatically.
- * Build internal hrefs WITHOUT the prefix, e.g. `${NAMESPACE_PATH}/search`
- * resolves to "/search", which Next.js serves at "/christian-jobs/search".
- *
- * For a bare home link, use "/" (not NAMESPACE_PATH). For absolute SEO URLs,
- * use `SITE_URL`.
+ * Root-relative `/public` path. Namespace prefix applies in production only
+ * (Cloudflare Worker mount). In dev, Next serves `public/` from the site root.
  */
-export const NAMESPACE_PATH = "";
+export function publicAssetPath(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path;
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  if (process.env.NODE_ENV !== "production" || !NAMESPACE_PATH) {
+    return normalized;
+  }
+  return `${NAMESPACE_PATH}${normalized}`;
+}
 
 /**
- * Build a same-origin URL for a static asset in `/public`.
- *
- * Returns a `basePath`-prefixed root-relative path (e.g.
- * "/christian-jobs/logo.png"). Use for raw `<img>`/`fetch` references. Prefer
- * `import x from "@public/file.png"` with `next/image`, which adds `basePath`
- * itself — do NOT pass an `assetUrl()` result to `next/image` or the prefix
- * will be doubled.
- *
- * @example assetUrl("/logo.png") -> "/christian-jobs/logo.png"
+ * Build an absolute URL for a static asset in `/public` (metadata, dynamic paths).
+ * For images prefer `import x from "@public/file.png"` with `next/image` and `unoptimized`.
  */
 export function assetUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `${BASE_PATH}${normalized}`;
+  return ASSET_BASE_URL ? `${ASSET_BASE_URL}${normalized}` : normalized;
 }
 
 /**
- * Build a same-origin URL for this app's own API routes.
- *
- * Returns a `basePath`-prefixed root-relative path so client-side `fetch`
- * hits the correct route on whatever host is serving the page (preview,
- * *.vercel.app, or the eden.co.uk proxy). Raw `fetch()` does NOT apply
- * `basePath`, so it must be added here.
- *
- * @example apiUrl("/api/health") -> "/christian-jobs/api/health"
+ * Build a fully-qualified API URL. Use in `fetch-*.ts` when you need the URL
+ * string; prefer `apiFetch(path)` which calls this internally.
  */
 export function apiUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `${BASE_PATH}${normalized}`;
+  return API_BASE_URL ? `${API_BASE_URL}${normalized}` : normalized;
 }

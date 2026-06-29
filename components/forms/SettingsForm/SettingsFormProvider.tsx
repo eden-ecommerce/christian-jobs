@@ -1,7 +1,7 @@
 "use client";
 
 import { ErrorCard } from "@components/ui/ErrorCard";
-import { assertNever } from "@lib/assert-never";
+import { assertNever } from "@eden-ecommerce/lib/assert-never";
 import { FormContainer } from "@components/forms/FormContainer";
 import { FormFooter, FormSubmitButton } from "@components/forms/FormFooter";
 import { useFormValidationFields } from "@components/forms/useFormValidationFields";
@@ -19,7 +19,7 @@ import { useSettings, useUpdateSettings } from "@hooks/settings/use-settings";
 import { Form, Formik, useFormikContext } from "formik";
 import { useState } from "react";
 import { toFormikValidationSchema } from "zod-formik-adapter";
-import { cn } from "@lib/utils";
+import { cn } from "@eden-ecommerce/lib/utils";
 
 type SettingsFormPresenterProps = {
   initialValues: SettingsFormValues;

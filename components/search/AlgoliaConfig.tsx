@@ -2,7 +2,7 @@
 
 import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
 import { isAlgoliaEnvConfigured } from "@lib/env-configured";
-import { getAlgoliaSearchClient } from "@lib/algolia/client";
+import { getAlgoliaSearchClient } from "@eden-ecommerce/lib/algolia/client";
 import type { InstantSearchNextProps } from "react-instantsearch-nextjs";
 import { InstantSearchNext } from "react-instantsearch-nextjs";
 
