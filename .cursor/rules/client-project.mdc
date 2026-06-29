@@ -1,0 +1,30 @@
+---
+description: client app hidden traps — deploy, namespace, integrations. Canonical PROJECT_RULES.md.
+alwaysApply: true
+---
+
+# Eden client (repo root)
+
+Read `PROJECT_RULES.md` before integrations or deploy. **Flat single-app** — not a monorepo.
+
+* **Walls** — routes, hooks, providers, `constants/app.ts`, `lib/config.ts`. lib: import only — no fork fetch/env. common: props-only UI.
+
+* **Namespace** — pages `app/{NAMESPACE}/`; exceptions Vercel-only: `app/api/*`, `app/sandbox/*`, `app/v{n}/*`. Prod links `NAMESPACE_PATH`/`NsLink`; sandbox `SANDBOX_PATH`.
+
+* **Version routes** — `/v{n}/{feature}/…` never under namespace. Promote final → `/{NAMESPACE}/{feature}/…` via `/review`.
+
+* **Components** — common `fields/` primitives; client `components/{domain}/` reusable composition; `app/{route}/_components/` route biz wiring.
+
+* **Paths** — `assetUrl()`/`@public` assets; `apiFetch`/`apiUrl` app API — no raw `fetch("/api/…")`.
+
+* **Images** — `next/image` + `unoptimized={true}` always.
+
+* **Integrations** — curl live specs before Zod/UI. Map user terms → correct source (Sanity vs Algolia vs Eden API).
+
+* **Secrets** — `getServerEnv()` server-only — no `NEXT_PUBLIC_*` private creds.
+
+* **Deploy** — set `constants/app.ts` origins; `pnpm env:pull` → `.env.local`; `pnpm predeploy` before ship. Vercel: Root Directory empty, `GITHUB_TOKEN` (`read:packages`) + root `.npmrc`.
+
+* **Shared deps** — registry semver pins from GitHub Packages. Dev shared packages on v0-template. See `docs/ARCHITECTURE.md`.
+
+Doubt → `PROJECT_RULES.md` wins.

@@ -8,6 +8,44 @@ Maintained by `/review` for promotions. Use [`.cursor/skills/review/templates/DE
 
 <!-- Entries appended below, newest first -->
 
+## 2026-06-29 — Revert monorepo to flat single-app
+
+**Scope:** `apps/christian-jobs/` monorepo shell → flat Next app @ repo root.
+
+### Summary
+
+- App back at repo root — `app/`, `components/`, `lib/` at top level
+- Removed `pnpm-workspace.yaml` and `apps/christian-jobs/` subfolder
+- `pnpm env:pull` → `.env.local` @ root
+- `constants/app.ts`, `lib/config.ts` @ root
+- Docs + cursor rules updated for flat layout
+- Vercel Root Directory = empty (unchanged)
+
+### Deploy checklist
+
+- [ ] Vercel Root Directory empty (repo root)
+- [ ] `./scripts/use-registry-deps.sh` on main before deploy
+- [ ] `pnpm predeploy` green
+
+## 2026-06-29 — Monorepo migration
+
+**Scope:** Flat repo root → `apps/christian-jobs/` monorepo shell (v0-template pattern).
+
+### Summary
+
+- App moved to `apps/christian-jobs/` — package `christian-jobs-app`
+- Root `package.json` scripts filter `christian-jobs-app`
+- `pnpm env:pull` → `apps/christian-jobs/.env.local`
+- Added `scripts/dev-workspace.sh` + `scripts/use-registry-deps.sh`
+- Docs + cursor rules updated for monorepo paths
+- Copied v0-template `.cursor/skills/` tree
+
+### Deploy checklist
+
+- [ ] Vercel root dir `.` (unchanged)
+- [ ] `pnpm predeploy` green
+- [ ] `./scripts/use-registry-deps.sh` on main before deploy
+
 ## 2026-06-29 — env:pull script
 
 - Added `pnpm env:pull` → `vercel env pull .env.local`

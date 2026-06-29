@@ -1,0 +1,19 @@
+---
+description: Local dev iteration — skip check gates until push/review
+alwaysApply: true
+---
+
+# Dev workflow
+
+During implementation and UI iteration:
+
+- **Do not** run `pnpm ts-check`, `pnpm lint`, or `pnpm predeploy` unless the user asks, `/push`, or `/review`.
+- `pnpm dev` is sufficient for header/search/mega-nav/sandbox work.
+- Local env from Vercel: `pnpm env:pull` (after `vercel link` @ repo root) → `.env.local`.
+- Run `pnpm check` (or `pnpm ts-check` then `pnpm lint`) once before push/PR.
+
+## Shared packages
+
+Develop `@eden-ecommerce/common` / `lib` on **v0-template** (pnpm monorepo). This repo uses registry semver pins only — bump `package.json` after release.
+
+Fleet workflow → [v0-template `docs/SHARED_PACKAGES.md`](https://github.com/eden-ecommerce/v0-template/blob/main/docs/SHARED_PACKAGES.md).

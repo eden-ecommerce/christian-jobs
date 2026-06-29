@@ -1,30 +1,44 @@
 # PROJECT_RULES
 
-v0: read this first. Hidden Eden stuff AI can't guess from repo alone.
+v0: read first. Hidden Eden stuff AI can't guess from repo alone.
+
+## Flat app
+
+| Item | Path |
+|------|------|
+| Deploy app | repo root — `app/`, `components/`, `lib/` |
+| Env local | `.env.local` via `pnpm env:pull` |
+| Origins + namespace | `constants/app.ts` |
+| URL helpers | `lib/config.ts` |
+
+Registry pins in root `package.json` on `main`. Develop shared packages on v0-template.
+
+Fleet workflow → [v0-template `docs/SHARED_PACKAGES.md`](https://github.com/eden-ecommerce/v0-template/blob/main/docs/SHARED_PACKAGES.md).
 
 ## Deploy
 
-- Cloudflare Worker on eden.co.uk — first URL segment = this app's namespace (`christian-jobs`)
-- Set `NEXT_PUBLIC_NAMESPACE=christian-jobs` and `NEXT_PUBLIC_PRODUCTION_ORIGIN` in env (`constants/app.ts`)
-- User pages under `app/christian-jobs/`; `app/api/*` stays at root (Vercel-only)
+- CF Worker on eden.co.uk — first URL segment = namespace (`christian-jobs`)
+- Set `NEXT_PUBLIC_NAMESPACE=christian-jobs` + `NEXT_PUBLIC_PRODUCTION_ORIGIN` in env (`constants/app.ts`)
+- User pages under `app/christian-jobs/`; `app/api/*` at root (Vercel-only)
 - `assetPrefix` from `ASSET_BASE_URL` in production (`next.config.ts`)
 - Header/footer via `components/sanity/*` + `@eden-ecommerce/common` blocks
 - Shared integrations → `@eden-ecommerce/lib`; feature code → `lib/jobs/`, `lib/blog/`, `components/`
 - No DB — HTTP APIs only, no Prisma or DATABASE_URL
 - /api/* CORS locked to https://www.eden.co.uk (`@eden-ecommerce/lib/cors`)
 - v0 build tolerates TS errors — run pnpm predeploy before deploy
+- Vercel Root Directory = empty (repo root)
 
 ## Absolute paths
 
 - Root-relative URLs resolve to worker domain — not Vercel origin
-- Static assets → @public import or assetUrl() from lib/config
+- Static assets → @public import or assetUrl() from `lib/config.ts`
 - App API → apiFetch or apiUrl in lib/, hooks/fetch-*.ts, or app/api/
 - No raw fetch("/api/…") or hardcoded origins in components
 - @alias imports only — no ../ relative paths
 
 ## Links + images
 
-- Internal routes include namespace prefix — e.g. `/REPLACE/example` via NAMESPACE_PATH
+- Internal routes include namespace prefix — e.g. `/christian-jobs/…` via NAMESPACE_PATH
 - Internal nav → NsLink or next/link with full path — not root-relative without namespace
 - redirect → use NAMESPACE_PATH or full namespace path
 - External links → full https URL
@@ -37,7 +51,7 @@ v0: read this first. Hidden Eden stuff AI can't guess from repo alone.
 - Eden/C360 work → curl live spec URLs below before UI or Zod schemas
 - Algolia field + facet names from live index — not guesses
 - Zod from discovered payloads — .passthrough() for extra fields
-- Set all .env.example vars once — don't add incrementally
+- Set all `.env.example` vars once — don't add incrementally
 - Live external API on page → export const dynamic = "force-dynamic"
 
 ## Config map
@@ -68,7 +82,7 @@ curl -sS "https://fe0146ea-1dac-4d7d-89f3-127d40ababda:8ba66c2b-adcc-42d8-a772-2
 
 - Before wiring getters — curl GROQ against Sanity HTTP API to explore documents
 - Never hardcode Zod schemas before exploration — shape from live GROQ JSON only
-- Prefer fetchSanityDirect in lib/sanity/direct-fetch.ts — Eden proxy is legacy only
+- Prefer fetchSanityDirect in `lib/sanity/direct-fetch.ts` — Eden proxy is legacy only
 - Server creds: EDEN_SANITY_PROJECT_ID, DATASET, API_DEVELOPER_TOKEN in env-server
 - Studio URL → parse project ID, dataset, _type, _id from structure links
 - Header example: https://cms.eden.co.uk/dc9143c3dc8ee44506ba/next-eden/structure/global;header;a910d86a-938f-4282-89ed-271324205e51
@@ -102,6 +116,18 @@ curl -sG "https://dc9143c3dc8ee44506ba.api.sanity.io/v2021-10-21/data/query/next
 - Never import server-only lib into "use client" files
 - RSC can call lib getter → skip API route
 
+## Jobs vs blog (domain traps)
+
+| Domain | DAL | UI | Notes |
+|--------|-----|-----|-------|
+| Jobs | `lib/jobs/`, `lib/algolia/jobs.ts` | `components/jobs/` | Server Algolia + URL params — **not** InstantSearch |
+| Blog | `lib/blog/` | `app/christian-jobs/blog/` | Sanity GROQ + PortableText |
+| Search guidance | — | `components/search/` | InstantSearch reference — sandbox only |
+
+- Jobs browser: server-side Algolia via `/api/jobs/*` — don't wire InstantSearch to prod routes
+- Blog article URLs: `lib/blog/article-url.ts` — not jobs search params
+- Shared chrome: `components/sanity/*` — not domain-specific
+
 ## Cache
 
 - Server lib getters → React.cache() per-request dedup in RSC
@@ -121,7 +147,6 @@ curl -sG "https://dc9143c3dc8ee44506ba.api.sanity.io/v2021-10-21/data/query/next
 ## Ship
 
 - Grep prod HTML for zero root-relative src="/ or href="/_next
-- Replace all REPLACE* placeholders before deploy
 - Set ASSET_PRODUCTION_ORIGIN + API_PRODUCTION_ORIGIN to real domain
 - Eden admin provisions OAuth client + missing secrets
 - Run pnpm predeploy before deploy
@@ -162,7 +187,8 @@ Iterate before sign-off; Vercel-only; never under namespace.
 | RSC chrome + empty guard | components/common/Navbar.tsx |
 | React Query hook quartet | hooks/health/ |
 | Async UI guards | components/health/HealthStatusContainer.tsx |
-| Algolia InstantSearch | app/REPLACE/search/ |
+| Jobs browser (prod) | components/jobs/browser/, lib/algolia/jobs.ts |
+| Algolia InstantSearch (guidance) | app/sandbox/search/, components/search/ |
 | Debounced search input | components/search/SearchBox.tsx |
 | Sectional form + partial save | components/forms/SettingsForm/ |
 | Multistep nav + step safeParse | components/forms/OnboardingForm/, MultiStepForm/ |

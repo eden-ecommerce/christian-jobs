@@ -11,7 +11,7 @@ const SANITY_CDN_PROJECT_ID =
   process.env.EDEN_SANITY_PROJECT_ID ?? "dc9143c3dc8ee44506ba";
 const SANITY_CDN_DATASET = process.env.EDEN_SANITY_DATASET ?? "next-eden";
 
-const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+const clientDir = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   env: {
@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_DEV_ORIGIN: process.env.NEXT_PUBLIC_DEV_ORIGIN ?? "",
   },
   turbopack: {
-    root: projectRoot,
+    root: clientDir,
   },
   experimental: {
     optimizePackageImports: ["@sentry/nextjs"],

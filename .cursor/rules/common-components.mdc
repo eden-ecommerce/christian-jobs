@@ -1,0 +1,20 @@
+---
+description: common package rules — apply when editing eden-ecommerce/common repo.
+alwaysApply: false
+---
+
+# `@eden-ecommerce/common`
+
+> Source repo: `eden-ecommerce/common` (not a folder in `v0-template`).
+
+Canonical: `PROJECT_RULES.md` in the common repo.
+
+* **Props only** — no biz logic, fetch, env, `@eden-ecommerce/lib`. Generic API names — no product/blog/event domain.
+
+* **Dirs** — `foundations/` tokens; `layout/` space; `fields/` controls; `ui/` buttons/cards; `text/` PortableText/Markdown; `media/` loader slots; `blocks/` `Header/`, `Footer/`, `Navigation/`, Carousel.
+
+* **Block contracts** — see common repo `PROJECT_RULES.md` + `docs/CONTEXT.md`.
+
+* **Not here** — Formik/Zod/wizards → client `app/{route}/_components/`; FormField/MultiStepForm → client `components/forms/`; integrations → `@eden-ecommerce/lib`; routes/deploy → client.
+
+Publish flow: update `docs/CONTEXT.md` + changelog → tag `common-vX.Y.Z` → clients `pnpm update`.

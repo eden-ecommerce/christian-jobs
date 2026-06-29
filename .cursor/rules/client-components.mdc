@@ -1,0 +1,25 @@
+---
+description: client component placement traps — generic vs route biz UI.
+globs: components/**/*,app/**/_components/**/*
+alwaysApply: false
+---
+
+# Client component placement
+
+Canonical: `PROJECT_RULES.md` § component placement
+
+## Three tiers
+
+| Tier | Path | Ex |
+|------|------|-----|
+| Primitives | `@eden-ecommerce/common/fields/*` | Input, Label, Select |
+| Generic composition | `components/{domain}/` | `forms/`: FormField, MultiStepForm; `search/`: SearchBox, filters; `panels/`: PanelRenderer |
+| Route biz | `app/{route}/_components/` | providers, sections, submit wiring for that route |
+
+## Traps
+
+* `components/{domain}/` — reusable composition for that domain; props-in like common. No route wiring, domain Zod, or API hooks.
+* `components/forms/` — Formik wrappers/hooks only. No domain schemas or route sections.
+* `app/{route}/_components/` — route providers, sections, submit. Compose from `@components/{domain}/*` + `@components/fields/*`.
+* Zod/API types shared by UI + `app/api/*`/hooks → `lib/` — not `_components/`.
+* Route-only UI (sandbox hub, integration debug, onboarding demo) → `app/sandbox/_components/` — generic search/forms live in `components/{domain}/`.

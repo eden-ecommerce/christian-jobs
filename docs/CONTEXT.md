@@ -4,7 +4,7 @@
 
 ## Project scope
 
-**christian-jobs** — Eden jobs search and discovery on `www.eden.co.uk/christian-jobs`. Standalone Next.js app (repo root); forked from v0-template.
+**christian-jobs** — Eden jobs search and discovery on `www.eden.co.uk/christian-jobs`. Flat Next app @ repo root; forked from v0-template.
 
 | Layer | Path | Purpose |
 |-------|------|---------|
@@ -23,11 +23,11 @@
 | Public path | `/christian-jobs` (`NAMESPACE_PATH`) |
 | Production origin | `https://www.eden.co.uk` (`NEXT_PUBLIC_PRODUCTION_ORIGIN`) |
 | Hosting | Vercel (repo root); assets via Cloudflare Worker `assetPrefix` in production |
-| Registry | `@eden-ecommerce/common@0.3.3`, `@eden-ecommerce/lib@0.2.4` (semver pins in `package.json`) |
+| Registry | `@eden-ecommerce/common@0.3.3`, `@eden-ecommerce/lib@0.2.4` (semver pins in root `package.json`) |
 
-Local env: `pnpm env:pull` → `.env.local` (after `vercel link`).
+Local env: `pnpm env:pull` → `.env.local` (after `vercel link` @ repo root).
 
-Vercel needs `GITHUB_TOKEN` with `read:packages` for `@eden-ecommerce/*`. See [`docs/SETUP.md`](./SETUP.md).
+Vercel Root Directory = empty. Needs `GITHUB_TOKEN` with `read:packages` for `@eden-ecommerce/*`. See [`docs/SETUP.md`](./SETUP.md).
 
 ## Production routes
 
@@ -86,7 +86,7 @@ Scaffold at `app/v/layout.tsx` (same gate as sandbox). No feature routes in use 
 
 ## Registry pins
 
-| Package | Pin (`package.json`) |
+| Package | Pin (root `package.json`) |
 |---------|----------------------|
 | `@eden-ecommerce/common` | `0.3.3` |
 | `@eden-ecommerce/lib` | `0.2.4` |

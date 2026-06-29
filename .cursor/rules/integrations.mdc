@@ -1,0 +1,18 @@
+---
+description: lib package rules — apply when editing eden-ecommerce/lib repo.
+alwaysApply: false
+---
+
+# `@eden-ecommerce/lib`
+
+> Source repo: `eden-ecommerce/lib` (not a folder in `v0-template`).
+
+Workspace: `PROJECT_RULES.md` in lib repo · client wiring: root `PROJECT_RULES.md`
+
+* **Belongs** — Eden API, Sanity GROQ, Algolia, user-beacon, env guards, utils. Subpath exports `@eden-ecommerce/lib/sanity/get-header`.
+
+* **Not here** — React components, routes, `NAMESPACE_PATH`, deploy origins.
+
+* **Client consume** — server getters in lib; RSC import direct. Never server-only lib in `"use client"`.
+
+Fix upstream in `lib` repo → publish → `pnpm update` in consumers.

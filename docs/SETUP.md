@@ -1,27 +1,39 @@
 # Setup — christian-jobs
 
-Standalone Next.js app at repo root. Forked from v0-template.
+Flat Next app @ repo root. Forked from v0-template. No submodules.
+
+## Layout
+
+| Path | Role |
+|------|------|
+| root `package.json` | Scripts: dev, build, check, env:pull |
+| `app/`, `components/`, `lib/` | Deployable Next.js app |
+| `constants/app.ts` | Origins + namespace |
+| `lib/config.ts` | URL helpers |
+| `.env.local` | via `pnpm env:pull` |
+| `vercel.json` | Root install + build |
+
+Shared package dev on **v0-template** only. Bump semver pins here after release.
+
+Fleet shared packages → [v0-template `docs/SHARED_PACKAGES.md`](https://github.com/eden-ecommerce/v0-template/blob/main/docs/SHARED_PACKAGES.md).
 
 ## Install
 
 ```bash
 export GITHUB_TOKEN=ghp_...   # read:packages on eden-ecommerce org
-pnpm install
+pnpm install                  # @ repo root
 ```
 
 Pins: `@eden-ecommerce/common@0.3.3`, `@eden-ecommerce/lib@0.2.4` from GitHub Packages.
 
-## Environment variables
-
-After linking the Vercel project (`vercel link` from repo root):
+## Vercel + env
 
 ```bash
-pnpm env:pull
+vercel link                   # @ repo root
+pnpm env:pull                 # → .env.local @ root
 ```
 
-Runs `vercel env pull .env.local` — syncs vars from Vercel into `.env.local`. See `.env.example` for the full list.
-
-Add the same variables in the Vercel dashboard for Preview and Production.
+See `.env.example` for full var list. Mirror in Vercel Preview + Production.
 
 | Variable | Required for |
 | --- | --- |
@@ -41,14 +53,20 @@ Open [http://localhost:3000/christian-jobs](http://localhost:3000/christian-jobs
 
 Sandbox (dev reference): `/sandbox`, `/sandbox/search`, `/sandbox/form`.
 
+## Shared packages
+
+Develop `common`/`lib` on v0-template. After release, bump pins in `package.json` → `pnpm install`.
+
 ## Pre-deploy
 
 ```bash
 pnpm predeploy   # ts-check + lint + build
 ```
 
-## Shared packages
-
-Edit `@eden-ecommerce/common` and `@eden-ecommerce/lib` in their separate repos. Bump semver pins in `package.json` after publish.
-
 See [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md) and [`docs/CONTEXT.md`](./CONTEXT.md).
+
+## Vercel
+
+| Setting | Value |
+|---------|-------|
+| Root Directory | **empty** (repo root) |
