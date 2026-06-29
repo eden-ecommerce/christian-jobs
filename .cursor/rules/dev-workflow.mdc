@@ -14,6 +14,6 @@ During implementation and UI iteration:
 
 ## Shared packages
 
-Develop `@eden-ecommerce/common` / `lib` on **v0-template** (pnpm monorepo). This repo uses registry semver pins only — bump `package.json` after release.
+Develop `@eden-ecommerce/common` / `lib` in their **standalone repos**. This repo uses registry semver pins only — bump `package.json` after release.
 
 Fleet workflow → [v0-template `docs/SHARED_PACKAGES.md`](https://github.com/eden-ecommerce/v0-template/blob/main/docs/SHARED_PACKAGES.md).

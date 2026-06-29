@@ -25,6 +25,6 @@ Read `PROJECT_RULES.md` before integrations or deploy. **Flat single-app** — n
 
 * **Deploy** — set `constants/app.ts` origins; `pnpm env:pull` → `.env.local`; `pnpm predeploy` before ship. Vercel: Root Directory empty, `GITHUB_TOKEN` (`read:packages`) + root `.npmrc`.
 
-* **Shared deps** — registry semver pins from GitHub Packages. Dev shared packages on v0-template. See `docs/ARCHITECTURE.md`.
+* **Shared deps** — registry semver pins from GitHub Packages. Dev shared packages in `common`/`lib` repos. See `docs/ARCHITECTURE.md`.
 
 Doubt → `PROJECT_RULES.md` wins.

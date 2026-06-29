@@ -37,7 +37,7 @@ christian-jobs/
 | Namespace | `christian-jobs` on CF Worker → `www.eden.co.uk/christian-jobs` |
 | Registry | Semver pins in root `package.json` |
 
-Develop shared packages on v0-template. Bump pins here after release.
+Develop shared packages in `common`/`lib` repos. Bump pins here after release.
 
 ## Domain traps
 

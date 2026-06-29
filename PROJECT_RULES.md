@@ -11,7 +11,7 @@ v0: read first. Hidden Eden stuff AI can't guess from repo alone.
 | Origins + namespace | `constants/app.ts` |
 | URL helpers | `lib/config.ts` |
 
-Registry pins in root `package.json` on `main`. Develop shared packages on v0-template.
+Registry pins in root `package.json` on `main`. Develop shared packages in `common`/`lib` repos.
 
 Fleet workflow → [v0-template `docs/SHARED_PACKAGES.md`](https://github.com/eden-ecommerce/v0-template/blob/main/docs/SHARED_PACKAGES.md).
 

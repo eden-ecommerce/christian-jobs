@@ -13,7 +13,7 @@ Flat Next app @ repo root. Forked from v0-template. No submodules.
 | `.env.local` | via `pnpm env:pull` |
 | `vercel.json` | Root install + build |
 
-Shared package dev on **v0-template** only. Bump semver pins here after release.
+Shared package dev in `eden-ecommerce/common` and `eden-ecommerce/lib` repos. Bump semver pins here after release.
 
 Fleet shared packages → [v0-template `docs/SHARED_PACKAGES.md`](https://github.com/eden-ecommerce/v0-template/blob/main/docs/SHARED_PACKAGES.md).
 
@@ -55,7 +55,7 @@ Sandbox (dev reference): `/sandbox`, `/sandbox/search`, `/sandbox/form`.
 
 ## Shared packages
 
-Develop `common`/`lib` on v0-template. After release, bump pins in `package.json` → `pnpm install`.
+Develop `common`/`lib` in their standalone repos. After release, bump pins in `package.json` → `pnpm install`.
 
 ## Pre-deploy
 
