@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSettingsQueryOptions } from "@hooks/settings/get-options";
 import { settingsKeys } from "@hooks/settings/get-key";
 import { updateSettings } from "@hooks/settings/fetch-settings";
-import type { SettingsApiResponse } from "@components/forms/SettingsForm/settings.schema";
+import type { SettingsApiResponse } from "@lib/settings.schema";
 
 export function useSettings() {
   return useQuery(getSettingsQueryOptions());

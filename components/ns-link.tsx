@@ -1,3 +1,9 @@
-// Re-export NsLink from the shared site-chrome package.
-// All consumers import from "@components/ns-link" and keep working unchanged.
-export { NsLink } from "@eden-ecommerce/site-chrome";
+import Link from "next/link";
+import type { ComponentProps } from "react";
+
+type NsLinkProps = ComponentProps<typeof Link>;
+
+/** Internal navigation — pass the full path you need, e.g. `/christian-jobs`. */
+export function NsLink(props: NsLinkProps) {
+  return <Link {...props} />;
+}

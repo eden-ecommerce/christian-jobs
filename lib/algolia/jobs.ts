@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getAlgoliaSearchClient } from "@lib/algolia/client";
+import { getAlgoliaSearchClient } from "@eden-ecommerce/lib/algolia/client";
 import {
   DEFAULT_LOCATION_RADIUS_METERS,
   JOBS_BASE_FILTER,
@@ -673,5 +673,5 @@ export async function getJobFilterOptions(): Promise<JobFacets> {
 // Organisation (re-exported from events for convenience)
 // ---------------------------------------------------------------------------
 
-export type { OrgCategory, OrganisationHit } from "@lib/algolia/events";
-export { getOrganisationById } from "@lib/algolia/events";
+export type { OrgCategory, OrganisationHit } from "@lib/algolia/organisations";
+export { getOrganisationById } from "@lib/algolia/organisations";

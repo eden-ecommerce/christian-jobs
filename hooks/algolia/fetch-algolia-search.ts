@@ -1,4 +1,4 @@
-import { getAlgoliaSearchClient } from "@lib/algolia/client";
+import { getAlgoliaSearchClient } from "@eden-ecommerce/lib/algolia/client";
 import { isAlgoliaEnvConfigured } from "@lib/env-configured";
 import {
   defaultSearchIndices,

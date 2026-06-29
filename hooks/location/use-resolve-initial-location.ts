@@ -1,7 +1,7 @@
 "use client";
 
-import { LONDON_COORDINATES, LONDON_LABEL } from "@lib/location/constants";
-import type { CloudflareLocation } from "@lib/location/types";
+import { LONDON_COORDINATES, LONDON_LABEL } from "@eden-ecommerce/lib/location/constants";
+import type { CloudflareLocation } from "@eden-ecommerce/lib/location/types";
 import {
   formatCoordinatesLabel,
   formatLocationLabelFromPlace,

@@ -1,7 +1,7 @@
 "use client";
 
 import { LocationInitialiser } from "@components/location/LocationInitialiser";
-import type { CloudflareLocation } from "@lib/location/types";
+import type { CloudflareLocation } from "@eden-ecommerce/lib/location/types";
 
 type EventsLocationProviderProps = {
   serverLocation: CloudflareLocation;

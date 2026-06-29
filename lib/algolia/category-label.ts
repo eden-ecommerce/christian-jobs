@@ -1,7 +1,7 @@
 import {
   DEFAULT_HIERARCHY_SEPARATOR,
   DEFAULT_LABEL_ID_DELIMITER,
-} from "@lib/algolia/hierarchical-filter";
+} from "@eden-ecommerce/lib/algolia/hierarchical-filter";
 
 /** Strip hierarchical facet encoding (e.g. "Label:::id") from EVERY segment for display. */
 export function cleanCategoryLabel(value: string | null): string | null {

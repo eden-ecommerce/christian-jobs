@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { CORS_HEADERS, corsPreflight } from "@lib/cors";
+import { CORS_HEADERS, corsPreflight } from "@eden-ecommerce/lib/cors";
 
 /**
  * Example API route at `/api/health`.

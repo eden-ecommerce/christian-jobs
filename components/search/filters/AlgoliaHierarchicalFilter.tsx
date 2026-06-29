@@ -1,7 +1,7 @@
 "use client";
 
-import { HierarchicalFilterPrimitive } from "@components/search/filters/HierarchicalFilterPrimitive";
 import { DropdownPrimitive } from "@components/search/filters/DropdownPrimitive";
+import { HierarchicalFilterPrimitive } from "@components/search/filters/HierarchicalFilterPrimitive";
 import {
   buildHierarchyAttributes,
   buildRefinedPath,

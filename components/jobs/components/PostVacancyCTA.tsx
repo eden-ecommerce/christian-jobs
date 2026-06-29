@@ -19,7 +19,7 @@ export function PostVacancyCTA() {
 
   useEffect(() => {
     let value = 99;
-    let interval: ReturnType<typeof setInterval> | undefined;
+    let interval: number | undefined;
 
     const startTimeout = window.setTimeout(() => {
       interval = window.setInterval(() => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { FilterBadgePrimitive } from "@components/search/active-filters/FilterBadgePrimitive";
-import { useHierarchicalRefinements } from "@hooks/algolia/use-hierarchical-refinements";
+import { useHierarchicalRefinements } from "@lib/algolia/use-hierarchical-refinements";
 import type { HierarchicalFacetConfig } from "@lib/algolia/hierarchical-filter";
 
 type HierarchicalRefinementBadgesProps = {

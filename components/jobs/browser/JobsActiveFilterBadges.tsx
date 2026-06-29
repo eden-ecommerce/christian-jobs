@@ -1,6 +1,6 @@
 "use client";
 
-import { FilterBadgePrimitive } from "@components/search/active-filters/FilterBadgePrimitive";
+import { FilterBadgePrimitive } from "@components/ui/FilterBadgePrimitive";
 import { cleanCategoryLabel } from "@lib/algolia/category-label";
 import type { JobFacet } from "@lib/algolia/jobs";
 import {

@@ -4,12 +4,14 @@ v0: read this first. Hidden Eden stuff AI can't guess from repo alone.
 
 ## Deploy
 
-- Cloudflare Worker on eden.co.uk — first URL segment = this app's namespace
-- Set NAMESPACE in lib/config.ts — rename app/REPLACE to match
-- assetPrefix from ASSET_BASE_URL in lib/constants.ts — configure before first deploy
-- REPLACE in lib/constants.ts → ask user prod domain before asset or link work
+- Cloudflare Worker on eden.co.uk — first URL segment = this app's namespace (`christian-jobs`)
+- Set `NEXT_PUBLIC_NAMESPACE=christian-jobs` and `NEXT_PUBLIC_PRODUCTION_ORIGIN` in env (`constants/app.ts`)
+- User pages under `app/christian-jobs/`; `app/api/*` stays at root (Vercel-only)
+- `assetPrefix` from `ASSET_BASE_URL` in production (`next.config.ts`)
+- Header/footer via `components/sanity/*` + `@eden-ecommerce/common` blocks
+- Shared integrations → `@eden-ecommerce/lib`; feature code → `lib/jobs/`, `lib/blog/`, `components/`
 - No DB — HTTP APIs only, no Prisma or DATABASE_URL
-- /api/* CORS locked to https://www.eden.co.uk in lib/cors.ts
+- /api/* CORS locked to https://www.eden.co.uk (`@eden-ecommerce/lib/cors`)
 - v0 build tolerates TS errors — run pnpm predeploy before deploy
 
 ## Absolute paths
@@ -40,11 +42,11 @@ v0: read this first. Hidden Eden stuff AI can't guess from repo alone.
 
 ## Config map
 
-- Deploy origins → lib/constants.ts (ASSET_* and API_*)
-- Namespace → lib/config.ts (NAMESPACE, NAMESPACE_PATH, assetUrl, apiUrl)
-- Private secrets → lib/env-server.ts getServerEnv — server only
-- Eden platform API → lib/eden/fetch — app API → apiFetch + API_BASE_URL
-- Algolia fields + facets → lib/algolia/constants.ts from live discovery
+- Deploy origins + namespace → `constants/app.ts` (`NEXT_PUBLIC_*`)
+- URL helpers → `lib/config.ts` (`NAMESPACE_PATH`, `SANDBOX_PATH`, `assetUrl`, `apiUrl`, `SITE_URL`)
+- Private secrets → `getServerEnv()` from `@eden-ecommerce/lib/env-server` — server only
+- Eden platform API → `@eden-ecommerce/lib/eden/fetch` — app API → `apiFetch` + `API_BASE_URL`
+- Algolia fields + facets → `lib/algolia/constants.ts` from live discovery
 - Secrets in .env or host env — never commit .env
 
 ## Spec URLs
@@ -124,6 +126,33 @@ curl -sG "https://dc9143c3dc8ee44506ba.api.sanity.io/v2021-10-21/data/query/next
 - Eden admin provisions OAuth client + missing secrets
 - Run pnpm predeploy before deploy
 - Don't invent creds or API response fields
+
+## Sandbox
+
+- Showcase common/lib integrations — not prod features
+- Hub `app/sandbox` (integration health check); demos `app/sandbox/form`, `app/sandbox/search`
+- Shared sandbox UI `app/sandbox/_components/`; integration sections `app/sandbox/_sections/`
+- Generic search/forms primitives in `components/search/`, `components/forms/`
+- **Vercel origin only** — not CF Worker namespace; gate via `lib/sandbox/is-sandbox-enabled.server.ts`
+- Dev: always on. Prod: `SANDBOX_ACCESS=public|eden-user` in env
+- Sandbox links → `SANDBOX_PATH` (`/sandbox`) from `lib/config.ts`
+
+## Version routes
+
+Iterate before sign-off; Vercel-only; never under namespace.
+
+| Rule | Value |
+|------|-------|
+| URL | `/v{n}/{feature}/subroute` e.g. `/v3/blog/my-post` |
+| FS | `app/v{n}/{feature}/` — version first |
+| Gate | `app/v/layout.tsx` → `getSandboxAccess()` same as sandbox |
+| Forbidden | `/{NAMESPACE}/{feature}/v{n}` — ships on deploy |
+| Links | leading `/v{n}/…` — not `NAMESPACE_PATH`, not `SANDBOX_PATH` |
+
+## Namespace routing
+
+- User pages `app/christian-jobs/`; Vercel-only exceptions: `app/api/*`, `app/sandbox/*`, `app/v{n}/*`
+- `app/page.tsx` redirects to `NAMESPACE_PATH`
 
 ## Live patterns
 

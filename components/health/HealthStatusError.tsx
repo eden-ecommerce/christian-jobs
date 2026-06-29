@@ -1,4 +1,4 @@
-import { ErrorCard } from "@components/ui/ErrorCard";
+import { ErrorCard } from "@components/ui/cards/ErrorCard";
 
 type HealthStatusErrorProps = {
   onRetry: () => void;
@@ -9,7 +9,11 @@ export function HealthStatusError({ onRetry }: HealthStatusErrorProps) {
     <ErrorCard
       title="Health check failed"
       message="The API did not respond. Ensure the dev server is running."
-      onRetry={onRetry}
+      actionSlot={
+        <button type="button" className="underline" onClick={onRetry}>
+          Retry
+        </button>
+      }
     />
   );
 }

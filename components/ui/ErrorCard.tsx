@@ -1,4 +1,4 @@
-import { cn } from "@lib/utils";
+import { cn } from "@eden-ecommerce/lib/utils";
 
 export type ErrorCardProps = {
   title?: string;

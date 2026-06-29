@@ -1,4 +1,5 @@
-import { getArticlesByTag, articleHref, type Article } from "@eden-ecommerce/blog-kit";
+import { getArticlesByTag, articleHref, type Article } from "@lib/blog";
+import { NAMESPACE_PATH } from "@lib/config";
 import { isSanityEnvConfigured } from "@lib/env-configured.server";
 import { NsLink } from "@components/ns-link";
 import { CHRISTIAN_JOBS_TAG } from "@lib/blog";
@@ -85,7 +86,7 @@ export async function BlogArticleCarousel() {
           </p>
         </div>
         <NsLink
-          href="/blog"
+          href={`${NAMESPACE_PATH ?? "/christian-jobs"}/blog`}
           className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-primary hover:underline"
         >
           All articles <ArrowRight className="h-4 w-4" aria-hidden />

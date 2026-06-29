@@ -4,8 +4,8 @@ import { useState } from "react";
 import { JobCard } from "@components/jobs/JobCard";
 import { NsLink } from "@components/ns-link";
 import { useSavedJobs } from "@lib/jobs/use-saved-jobs";
-import { apiUrl } from "@lib/config";
-import { cn } from "@lib/utils";
+import { apiUrl, NAMESPACE_PATH } from "@lib/config";
+import { cn } from "@eden-ecommerce/lib/utils";
 import type { JobHit } from "@lib/algolia/jobs";
 import { Bookmark, Loader2 } from "lucide-react";
 import useSWR from "swr";
@@ -103,7 +103,7 @@ export function SavedJobsPageClient() {
           </p>
         </div>
         <NsLink
-              href="/"
+          href={NAMESPACE_PATH ?? "/christian-jobs"}
           className="mt-2 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           Browse jobs

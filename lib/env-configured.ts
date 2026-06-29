@@ -1,53 +1,65 @@
-/** Shown when an integration's required env vars are missing. */
-export const ENV_NOT_CONFIGURED_MESSAGE =
-  "Contact the IT team to set your environment variables.";
+export {
+  ENV_NOT_CONFIGURED_MESSAGE,
+  isAlgoliaEnvConfigured,
+  isEdenApiEnvConfigured,
+  isEdenOAuthEnvConfigured,
+  isGoogleMapsEnvConfigured,
+  isGtmEnvConfigured,
+  isUserBeaconEnvConfigured,
+} from "@eden-ecommerce/lib/env-configured";
+
+import {
+  INTEGRATION_ENV_VARS as LIB_INTEGRATION_ENV_VARS,
+  INTEGRATION_LABELS as LIB_INTEGRATION_LABELS,
+} from "@eden-ecommerce/lib/env-configured";
 
 export const INTEGRATION_ENV_VARS = {
-  sanity: [
-    "EDEN_SANITY_PROJECT_ID",
-    "EDEN_SANITY_DATASET",
-    "EDEN_SANITY_API_DEVELOPER_TOKEN",
+  ...LIB_INTEGRATION_ENV_VARS,
+  deploy: [
+    "NEXT_PUBLIC_NAMESPACE",
+    "NEXT_PUBLIC_PRODUCTION_ORIGIN",
+    "NEXT_PUBLIC_DEV_ORIGIN",
   ],
-  algolia: ["NEXT_PUBLIC_ALGOLIA_APP_ID", "NEXT_PUBLIC_ALGOLIA_SEARCH_KEY"],
-  edenApi: ["NEXT_PUBLIC_EDEN_API_URL"],
-  edenOAuth: [
-    "NEXT_PUBLIC_EDEN_OAUTH_URL",
-    "EDEN_PAYMENT_CLIENT_ID",
-    "EDEN_PAYMENT_CLIENT_SECRET",
-  ],
-  googleMaps: ["NEXT_PUBLIC_GOOGLE_MAPS_API_KEY"],
-} as const satisfies Record<string, readonly string[]>;
+} as const;
 
 export type IntegrationKey = keyof typeof INTEGRATION_ENV_VARS;
-/** @deprecated Use IntegrationKey */
-export type PublicIntegration = IntegrationKey;
 
 export const INTEGRATION_LABELS: Record<IntegrationKey, string> = {
-  sanity: "Sanity CMS",
-  algolia: "Algolia Search",
-  edenApi: "Eden API",
-  edenOAuth: "Eden OAuth",
-  googleMaps: "Google Maps",
+  ...LIB_INTEGRATION_LABELS,
+  deploy: "Deploy configuration",
 };
 
-export function isAlgoliaEnvConfigured(): boolean {
-  return Boolean(
-    process.env.NEXT_PUBLIC_ALGOLIA_APP_ID && process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY,
-  );
-}
+const hasVercelPreviewOrigin = (): boolean =>
+  process.env.VERCEL_ENV === "preview" && Boolean(process.env.VERCEL_URL);
 
-export function isEdenApiEnvConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_EDEN_API_URL);
-}
+/** Client-safe deploy env gate — namespace always; production origin only for production builds. */
+export const isDeployEnvConfigured = (): boolean => {
+  if (!process.env.NEXT_PUBLIC_NAMESPACE?.trim()) return false;
 
-export function isEdenOAuthEnvConfigured(): boolean {
-  return Boolean(
-    process.env.NEXT_PUBLIC_EDEN_OAUTH_URL &&
-      process.env.EDEN_PAYMENT_CLIENT_ID &&
-      process.env.EDEN_PAYMENT_CLIENT_SECRET,
-  );
-}
+  if (process.env.NODE_ENV === "production") {
+    return Boolean(
+      process.env.NEXT_PUBLIC_PRODUCTION_ORIGIN || hasVercelPreviewOrigin(),
+    );
+  }
 
-export function isGoogleMapsEnvConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY);
-}
+  return true;
+};
+
+/** Env vars to show in IntegrationEnvError for missing deploy configuration. */
+export const getDeployIntegrationEnvVars = (): readonly string[] => {
+  const vars: string[] = [];
+
+  if (!process.env.NEXT_PUBLIC_NAMESPACE?.trim()) {
+    vars.push("NEXT_PUBLIC_NAMESPACE");
+  }
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    !process.env.NEXT_PUBLIC_PRODUCTION_ORIGIN &&
+    !hasVercelPreviewOrigin()
+  ) {
+    vars.push("NEXT_PUBLIC_PRODUCTION_ORIGIN");
+  }
+
+  return vars.length > 0 ? vars : ["NEXT_PUBLIC_NAMESPACE"];
+};

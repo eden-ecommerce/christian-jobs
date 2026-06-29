@@ -1,7 +1,7 @@
 import settingsFixture from "@/data/settings.mock.json";
 import { NextResponse } from "next/server";
-import { CORS_HEADERS, corsPreflight } from "@lib/cors";
-import type { SettingsApiResponse } from "@components/forms/SettingsForm/settings.schema";
+import { CORS_HEADERS, corsPreflight } from "@eden-ecommerce/lib/cors";
+import type { SettingsApiResponse } from "@lib/settings.schema";
 import { z } from "zod";
 
 const settingsBodySchema = z.object({

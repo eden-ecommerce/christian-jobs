@@ -1,4 +1,4 @@
-import { getServerEnv } from "@lib/env-server";
+import { getServerEnv } from "@eden-ecommerce/lib/env-server";
 import type { NextRequest } from "next/server";
 import { revalidateTag } from "next/cache";
 

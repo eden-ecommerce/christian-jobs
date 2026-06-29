@@ -2,7 +2,7 @@
 
 import { UserLocationSearch } from "@components/google-maps/UserLocationSearch";
 import { DropdownPrimitive } from "@components/search/filters/DropdownPrimitive";
-import { useUserLocation } from "@hooks/google-maps/use-user-location";
+import { useUserLocation } from "@lib/google-maps/use-user-location";
 import { isGoogleMapsEnvConfigured } from "@lib/env-configured";
 
 export function UserLocationFilter() {

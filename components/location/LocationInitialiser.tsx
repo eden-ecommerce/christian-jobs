@@ -1,6 +1,6 @@
 "use client";
 
-import type { CloudflareLocation } from "@lib/location/types";
+import type { CloudflareLocation } from "@eden-ecommerce/lib/location/types";
 import { useResolveInitialLocation } from "@hooks/location/use-resolve-initial-location";
 
 type LocationInitialiserProps = {

@@ -3,7 +3,7 @@
 import {
   USER_LOCATION_CHANGE_EVENT,
   USER_LOCATION_STORAGE_KEY,
-} from "@lib/location/constants";
+} from "@eden-ecommerce/lib/location/constants";
 import type { UserLocation } from "@lib/google-maps/types";
 import { useCallback, useSyncExternalStore } from "react";
 

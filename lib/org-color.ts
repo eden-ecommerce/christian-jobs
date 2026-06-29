@@ -11,7 +11,7 @@
  * should use the default theme primary).
  */
 
-import type { RgbColor } from "@lib/algolia/events";
+import type { RgbColor } from "@lib/algolia/organisations";
 
 /** Relative luminance per WCAG 2.x */
 function relativeLuminance({ r, g, b }: RgbColor): number {
