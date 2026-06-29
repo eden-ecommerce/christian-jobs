@@ -2,67 +2,96 @@
 
 import { Input } from "@components/ui/input";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
-import { useEffect, useRef } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  type KeyboardEventHandler,
+} from "react";
 
 const AUTOCOMPLETE_OPTIONS: google.maps.places.AutocompleteOptions = {
   fields: ["geometry.location", "formatted_address", "address_components", "name"],
   types: ["geocode"],
 };
 
+export type LocationSearchHandle = {
+  getValue: () => string;
+};
+
 type LocationSearchProps = {
-  defaultValue?: string;
+  /** Seeded from URL/parent; synced to the DOM when this changes externally. */
+  initialLabel?: string;
   onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
-  onInputChange?: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
 };
 
-export function LocationSearch({
-  defaultValue = "",
-  onPlaceSelect,
-  onInputChange,
-  placeholder = "Search for a location…",
-  disabled = false,
-  className,
-}: LocationSearchProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const placesLibrary = useMapsLibrary("places");
-  const onPlaceSelectRef = useRef(onPlaceSelect);
+/** Uncontrolled input with Google Autocomplete. Parents read value via ref on submit. */
+export const LocationSearch = forwardRef<LocationSearchHandle, LocationSearchProps>(
+  function LocationSearch(
+    {
+      initialLabel = "",
+      onPlaceSelect,
+      placeholder = "Search for a location…",
+      disabled = false,
+      className,
+      onKeyDown,
+    },
+    ref,
+  ) {
+    const inputRef = useRef<HTMLInputElement>(null);
+    const placesLibrary = useMapsLibrary("places");
+    const onPlaceSelectRef = useRef(onPlaceSelect);
 
-  useEffect(() => {
-    onPlaceSelectRef.current = onPlaceSelect;
-  }, [onPlaceSelect]);
+    useEffect(() => {
+      onPlaceSelectRef.current = onPlaceSelect;
+    }, [onPlaceSelect]);
 
-  useEffect(() => {
-    if (!placesLibrary || !inputRef.current) {
-      return;
-    }
-
-    const autocomplete = new placesLibrary.Autocomplete(inputRef.current, AUTOCOMPLETE_OPTIONS);
-    const listener = autocomplete.addListener("place_changed", () => {
-      const place = autocomplete.getPlace();
-      if (place) {
-        onPlaceSelectRef.current(place);
+    useEffect(() => {
+      const input = inputRef.current;
+      if (!input || input.value === initialLabel) {
+        return;
       }
-    });
+      input.value = initialLabel;
+    }, [initialLabel]);
 
-    return () => {
-      listener.remove();
-      google.maps.event.clearInstanceListeners(autocomplete);
-    };
-  }, [placesLibrary]);
+    useImperativeHandle(ref, () => ({
+      getValue: () => inputRef.current?.value ?? "",
+    }));
 
-  return (
-    <Input
-      ref={inputRef}
-      type="search"
-      defaultValue={defaultValue}
-      onChange={(e) => onInputChange?.(e.target.value)}
-      placeholder={placeholder}
-      disabled={disabled}
-      aria-label="Location search"
-      className={className}
-    />
-  );
-}
+    useEffect(() => {
+      if (!placesLibrary || !inputRef.current) {
+        return;
+      }
+
+      const autocomplete = new placesLibrary.Autocomplete(inputRef.current, AUTOCOMPLETE_OPTIONS);
+      const listener = autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (place) {
+          onPlaceSelectRef.current(place);
+        }
+      });
+
+      return () => {
+        listener.remove();
+        google.maps.event.clearInstanceListeners(autocomplete);
+      };
+    }, [placesLibrary]);
+
+    return (
+      <Input
+        ref={inputRef}
+        type="search"
+        defaultValue={initialLabel}
+        onKeyDown={onKeyDown}
+        placeholder={placeholder}
+        disabled={disabled}
+        aria-label="Location search"
+        className={className}
+      />
+    );
+  },
+);
