@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@components/ui/button";
 import { useFormikContext } from "formik";
 import type { ReactNode } from "react";

@@ -38,17 +38,20 @@
       "@components/search/*": [
         "./components/search/*"
       ],
-      "@components/google-maps/*": [
-        "./components/google-maps/*"
+      "@sandbox/*": [
+        "./app/sandbox/_components/*"
       ],
       "@components/health/*": [
         "./components/health/*"
       ],
-      "@components/location/*": [
-        "./components/location/*"
-      ],
       "@components/panels/*": [
         "./components/panels/*"
+      ],
+      "@components/google-maps/*": [
+        "./components/google-maps/*"
+      ],
+      "@components/location/*": [
+        "./components/location/*"
       ],
       "@components/ns-link": [
         "./components/ns-link.tsx"

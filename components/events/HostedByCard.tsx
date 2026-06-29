@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Globe, Building2 } from "lucide-react";
-import type { OrganisationHit } from "@lib/algolia/events";
+import type { OrganisationHit } from "@lib/algolia/organisations";
 import { pickOrgAccentColor, contrastForeground } from "@lib/org-color";
 
 type Props = {

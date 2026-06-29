@@ -1,5 +1,4 @@
-import { Label } from "@components/ui/label";
-import { cn } from "@eden-ecommerce/lib/utils";
+import { Label } from "@components/fields/label";
 import type { ReactNode } from "react";
 
 type FormFieldProps = {

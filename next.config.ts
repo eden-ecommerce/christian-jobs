@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import path from "path";
 import { fileURLToPath } from "url";
 import { withSentryConfig } from "@sentry/nextjs";
-import { ASSET_BASE_URL, assertDeployEnvForProduction } from "./constants/app";
+import { ASSET_BASE_URL, assertDeployEnvForProduction, NAMESPACE_PATH } from "./constants/app";
 import { ALLOWED_ORIGIN, CORS_HEADERS } from "@eden-ecommerce/lib/cors";
 
 assertDeployEnvForProduction();
@@ -86,6 +86,16 @@ const nextConfig: NextConfig = {
             value: CORS_HEADERS["Access-Control-Allow-Headers"],
           },
         ],
+      },
+    ];
+  },
+  async redirects() {
+    if (!NAMESPACE_PATH) return [];
+    return [
+      {
+        source: `${NAMESPACE_PATH}/search`,
+        destination: NAMESPACE_PATH,
+        permanent: true,
       },
     ];
   },

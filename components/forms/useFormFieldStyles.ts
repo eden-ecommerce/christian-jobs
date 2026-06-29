@@ -1,6 +1,8 @@
-import { cn } from "@eden-ecommerce/lib/utils";
-import { isEqual } from "lodash";
+"use client";
+
+import { cn } from "@lib/utils";
 import { useFormikContext } from "formik";
+import { isEqual } from "lodash";
 
 export function useFormFieldStyles<T extends Record<string, unknown>>() {
   const formik = useFormikContext<T>();

@@ -1,5 +1,5 @@
 import { apiFetch } from "@lib/apiFetch";
-import type { SettingsApiResponse } from "@components/forms/SettingsForm/settings.schema";
+import type { SettingsApiResponse } from "@lib/settings.schema";
 
 export function fetchSettings(): Promise<SettingsApiResponse> {
   return apiFetch<SettingsApiResponse>("/api/settings");

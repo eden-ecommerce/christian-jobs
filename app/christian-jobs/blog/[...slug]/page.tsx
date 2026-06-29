@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import {
   getArticleBySlug,
-  getArticlesByTag,
+  getRelatedArticles,
   articleHref,
 } from "@lib/blog";
 import { ArticleDetailPage } from "@components/blog/ArticleDetailPage";
@@ -10,7 +10,7 @@ import { NAMESPACE_PATH, SITE_URL } from "@lib/config";
 import { isSanityEnvConfigured } from "@lib/env-configured.server";
 import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
 import { Breadcrumbs } from "@components/common/Breadcrumbs";
-import { CHRISTIAN_JOBS_TAG, isChristianJobsArticle } from "@lib/blog";
+import { isChristianJobsArticle } from "@lib/blog";
 
 export const dynamic = "force-dynamic";
 
@@ -67,9 +67,6 @@ export default async function ArticlePage({
 
   if (!article) notFound();
 
-  // TODO (blog-kit@0.1.1): replace with getArticleBySlug(id, { requiredTag: CHRISTIAN_JOBS_TAG })
-  // which returns null automatically when the tag doesn't match — removes the need
-  // for isChristianJobsArticle and the separate getArticlesByTag call below.
   if (!isChristianJobsArticle(article)) notFound();
 
   // Redirect legacy / non-canonical paths to the canonical articleHref URL.
@@ -79,14 +76,10 @@ export default async function ArticlePage({
     permanentRedirect(canonical);
   }
 
-  // TODO (blog-kit@0.1.1): replace with getRelatedArticles(article, { scopeToTag: CHRISTIAN_JOBS_TAG })
-  // For now, build related from the tag-scoped list to keep every link on-topic
-  // (getRelatedArticles "latest" bucket spans all tags in the dataset).
-  const tagArticles = await getArticlesByTag(CHRISTIAN_JOBS_TAG);
-  const others = tagArticles.filter((a) => a.slug !== article.slug);
+  const relatedRaw = await getRelatedArticles(article.slug, article.tags ?? []);
   const relatedArticles = {
-    related: others.slice(0, 4),
-    latest: others.slice(4, 9),
+    related: relatedRaw.related.filter(isChristianJobsArticle).slice(0, 4),
+    latest: relatedRaw.latest.filter(isChristianJobsArticle).slice(0, 5),
   };
 
   return (

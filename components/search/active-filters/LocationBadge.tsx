@@ -1,7 +1,7 @@
 "use client";
 
 import { FilterBadgePrimitive } from "@components/search/active-filters/FilterBadgePrimitive";
-import { useUserLocation } from "@hooks/google-maps/use-user-location";
+import { useUserLocation } from "@lib/google-maps/use-user-location";
 
 function formatLocationLabel(
   location: NonNullable<ReturnType<typeof useUserLocation>["location"]>,

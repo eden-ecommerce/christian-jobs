@@ -1,14 +1,14 @@
 "use client";
 
-import { HierarchicalFilterPrimitive } from "@components/search/filters/HierarchicalFilterPrimitive";
 import { DropdownPrimitive } from "@components/search/filters/DropdownPrimitive";
+import { HierarchicalFilterPrimitive } from "@components/search/filters/HierarchicalFilterPrimitive";
 import {
   buildHierarchyAttributes,
   buildRefinedPath,
   DEFAULT_HIERARCHY_SEPARATOR,
   mapHierarchicalMenuItems,
   type HierarchicalFacetConfig,
-} from "@eden-ecommerce/lib/algolia/hierarchical-filter";
+} from "@lib/algolia/hierarchical-filter";
 import { useHierarchicalMenu } from "react-instantsearch";
 
 type AlgoliaHierarchicalFilterProps = {

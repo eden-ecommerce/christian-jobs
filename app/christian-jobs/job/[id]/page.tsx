@@ -105,7 +105,6 @@ export default async function JobPage({ params }: Props) {
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Eden", url: "https://www.eden.co.uk" },
     { name: "Christian Jobs", url: "https://www.eden.co.uk/christian-jobs" },
-    { name: "Search", url: "https://www.eden.co.uk/christian-jobs/search" },
     { name: job.title, url: `https://www.eden.co.uk/christian-jobs/job/${job.id}` },
   ]);
 
@@ -115,7 +114,6 @@ export default async function JobPage({ params }: Props) {
       <Breadcrumbs
         items={[
           { label: "Christian Jobs", href: NAMESPACE_PATH },
-          { label: "Search", href: `${NAMESPACE_PATH}/search` },
           { label: job.title },
         ]}
       />

@@ -1,10 +1,10 @@
 "use client";
 
-import { cn } from "@eden-ecommerce/lib/utils";
 import {
   MultiStepFormProvider,
   type StepDefinition,
 } from "@components/forms/MultiStepForm/multi-step-form-context";
+import { cn } from "@lib/utils";
 
 type MultiStepFormProps<TStep extends string> = {
   steps: StepDefinition<TStep>[];

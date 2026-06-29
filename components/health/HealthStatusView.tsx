@@ -1,6 +1,6 @@
 "use client";
 
-import type { HealthResponse } from "@/types";
+import type { HealthResponse } from "@hooks/health/types";
 
 type HealthStatusViewProps = {
   data: HealthResponse;

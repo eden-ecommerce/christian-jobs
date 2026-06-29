@@ -1,4 +1,4 @@
-import { assertNever } from "@eden-ecommerce/lib/assert-never";
+import { assertNever } from "@lib/assert-never";
 
 // TEMPORARILY DISABLED: real component comes from the private
 // `@christian-360/next-design` package. To re-enable, restore the import below,

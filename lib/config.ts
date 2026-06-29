@@ -12,6 +12,9 @@ import {
 
 export { API_BASE_URL, ASSET_BASE_URL, NAMESPACE, NAMESPACE_PATH };
 
+/** Vercel-only sandbox hub (not proxied through the Cloudflare worker). */
+export const SANDBOX_PATH = "/sandbox";
+
 /** Canonical public origin including namespace — for SEO, JSON-LD, share URLs. */
 export const SITE_URL =
   PRODUCTION_ORIGIN && NAMESPACE_PATH

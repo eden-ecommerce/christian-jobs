@@ -1,5 +1,6 @@
 "use client";
 
+import { LocationInitialiser } from "@components/location/LocationInitialiser";
 import { ActiveFilterBadges } from "@components/search/active-filters/ActiveFilterBadges";
 import { AlgoliaConfig } from "@components/search/AlgoliaConfig";
 import { AlgoliaHits } from "@components/search/AlgoliaHits";
@@ -9,9 +10,8 @@ import { UserLocationFilter } from "@components/search/filters/UserLocationFilte
 import { InsightsMiddleware } from "@components/search/InsightsMiddleware";
 import { LocationConfigure } from "@components/search/LocationConfigure";
 import { SearchBox } from "@components/search/SearchBox";
-import { LocationInitialiser } from "@components/location/LocationInitialiser";
 import type { HierarchicalAlgoliaIndexPreset } from "@lib/algolia/constants";
-import type { CloudflareLocation } from "@eden-ecommerce/lib/location/types";
+import type { CloudflareLocation } from "@lib/location/types";
 
 type SearchPageProps = {
   preset: HierarchicalAlgoliaIndexPreset;

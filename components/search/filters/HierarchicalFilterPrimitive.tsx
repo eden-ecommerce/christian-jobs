@@ -3,8 +3,8 @@
 import type {
   HierarchicalBreadcrumb,
   HierarchicalFilterItem,
-} from "@eden-ecommerce/lib/algolia/hierarchical-filter";
-import { cn } from "@eden-ecommerce/lib/utils";
+} from "@lib/algolia/hierarchical-filter";
+import { cn } from "@lib/utils";
 
 type HierarchicalFilterPrimitiveProps = {
   items: HierarchicalFilterItem[];

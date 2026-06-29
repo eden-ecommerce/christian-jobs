@@ -5,7 +5,7 @@ import { JobListItem } from "@components/jobs/browser/JobListItem";
 import { SaveJobButton } from "@components/jobs/SaveJobButton";
 import { usePostedLabel } from "@hooks/jobs/use-posted-label";
 import type { JobHit } from "@lib/algolia/jobs";
-import type { OrganisationHit } from "@lib/algolia/events";
+import type { OrganisationHit } from "@lib/algolia/organisations";
 import {
   formatSalary,
   humaniseJobType,
