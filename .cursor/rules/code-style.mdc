@@ -1,0 +1,32 @@
+---
+description: UK English spelling and self-describing names for code, files, and docs
+alwaysApply: true
+---
+
+# Code style
+
+Canonical detail: `PROJECT_RULES.md` § Code style.
+
+## UK English
+
+British English in user-facing copy, comments, docs, changelogs, and **new** identifiers you name.
+
+Prefer: organise, colour, behaviour, licence (noun), initialise, optimise, synchronise, favourite, centre, honour, analyse, catalogue, labelled, modelling.
+
+Keep US spellings only when an external API, library symbol, or env var requires it.
+
+## Names
+
+Concise and self-describing — purpose clear without opening the body.
+
+| Kind | Pattern | Good | Avoid |
+|------|---------|------|-------|
+| Variables | `camelCase` nouns/phrases | `namespacePrefixedPath`, `parsedAssetBaseUrl` | `nsPath`, `data`, `temp` |
+| Functions | verb + object | `publicAssetPath`, `getFooter` | `handle`, `process`, `doThing` |
+| Files | `kebab-case.ts(x)` | `sanity-defaults.ts`, `get-footer.ts` | `utils2.ts`, `misc.ts` |
+| Components | `PascalCase` role | `SanityFooter`, `ArticleCard` | `Footer2`, `Wrapper` |
+| Booleans | `is`/`has`/`should` | `isProductionBuild` | `production`, `flag` |
+
+Fleet-standard abbreviations are fine: `API`, `CORS`, `CDN`, `GROQ`, `URL`, `ID`.
+
+Misleading shorthand is worse than a longer name — e.g. `parsedAssetBaseUrl` not `assetOrigin` when the value is a `URL`.

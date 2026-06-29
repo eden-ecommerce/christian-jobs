@@ -7,7 +7,7 @@ description: Pre-deploy gate — one pnpm predeploy, namespace route ready, docs
 
 Pre-deploy gate. **One shell command** by default: `pnpm predeploy`. Use Grep/Read tools for rule checks — no shell greps, no `pnpm audit`, no subagents unless user asks.
 
-**Rules:** `PROJECT_RULES.md` · **Templates:** [templates/CONTEXT.md](templates/CONTEXT.md), [templates/DEPLOY_CHANGELOG.md](templates/DEPLOY_CHANGELOG.md)
+**Rules:** `PROJECT_RULES.md` · `.cursor/rules/code-style.mdc` · **Templates:** [templates/CONTEXT.md](templates/CONTEXT.md), [templates/DEPLOY_CHANGELOG.md](templates/DEPLOY_CHANGELOG.md)
 
 ## Trigger
 
@@ -48,7 +48,7 @@ Grep/read (no terminal):
 | Secrets / private creds in tree | yes |
 | `app/{NAMESPACE}/.../v{n}/` version under namespace | yes |
 | `next/image` without `unoptimized` | fix |
-| `PROJECT_RULES.md` violations in changed files | fix |
+| `PROJECT_RULES.md` / `code-style.mdc` violations (UK English, vague names) | fix |
 
 ## Step 3 — Namespace route
 

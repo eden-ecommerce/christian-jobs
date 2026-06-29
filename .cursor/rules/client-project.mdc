@@ -27,4 +27,6 @@ Read `PROJECT_RULES.md` before integrations or deploy. **Flat single-app** — n
 
 * **Shared deps** — registry semver pins from GitHub Packages. Dev shared packages in `common`/`lib` repos. See `docs/ARCHITECTURE.md`.
 
+* **Code style** — UK English + self-describing names → `.cursor/rules/code-style.mdc` + `PROJECT_RULES.md` § Code style.
+
 Doubt → `PROJECT_RULES.md` wins.

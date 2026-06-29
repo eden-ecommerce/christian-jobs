@@ -12,12 +12,12 @@ PR review terse actionable. One line per finding. Location, problem, fix.
 **Severity (optional):**
 * `🔴 bug:` — broken, incident
 * `🟡 risk:` — fragile (race, null, swallowed error)
-* `🔵 nit:` — style, naming — ignore OK
+* `🔵 nit:` — style, naming, UK spelling — ignore OK
 * `❓ q:` — question not suggestion
 
 **Drop:** I noticed…, seems like…, might consider…, great work…, restating line, hedging.
 
-**Keep:** exact line nums; symbols in backticks; concrete fix; why if fix non-obvious.
+**Keep:** exact line nums; symbols in backticks; concrete fix; why if fix non-obvious. Flag US spelling in new identifiers/docs and vague names per `code-style.mdc`.
 
 ## Examples
 

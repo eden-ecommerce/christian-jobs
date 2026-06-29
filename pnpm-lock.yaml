@@ -15,8 +15,8 @@ importers:
         specifier: 0.3.3
         version: 0.3.3(@types/react@19.2.14)(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tailwindcss@4.3.1)
       '@eden-ecommerce/lib':
-        specifier: 0.2.4
-        version: 0.2.4(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(@tanstack/react-query@5.101.0(react@19.2.4))(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-instantsearch@7.35.1(algoliasearch@5.55.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(webpack@5.107.2(postcss@8.5.15))
+        specifier: 0.2.5
+        version: 0.2.5(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(@tanstack/react-query@5.101.0(react@19.2.4))(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-instantsearch@7.35.1(algoliasearch@5.55.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(webpack@5.107.2(postcss@8.5.15))
       '@portabletext/react':
         specifier: ^6.2.0
         version: 6.2.0(react@19.2.4)
@@ -534,6 +534,14 @@ packages:
 
   '@eden-ecommerce/lib@0.2.4':
     resolution: {integrity: sha512-aFd65O9P0ekeyRMlkYio152JXkVfw9uPFfF+4xlFTV7Ews9GOi8tUSBa0KlT/Gfv4652ek2/0pAeYK/6+6p5pQ==, tarball: https://npm.pkg.github.com/download/@eden-ecommerce/lib/0.2.4/fdc6b8c113065d3c5d4975982ad29f4ac897ae9c}
+    peerDependencies:
+      '@tanstack/react-query': '>=5.0.0'
+      next: '>=16.0.0'
+      react: '>=19.0.0'
+      react-instantsearch: '>=7.0.0'
+
+  '@eden-ecommerce/lib@0.2.5':
+    resolution: {integrity: sha512-WSFeS0ZJBWeqjX3D4+JZRuY7cRE46x9lvGWh+hJ10mab7JOuuqh13LAYz5Ha0rKvY+81H8v6tjYzYuCou51vhA==, tarball: https://npm.pkg.github.com/download/@eden-ecommerce/lib/0.2.5/4802c163658ddba0e6f3745e06fa6b6038c9a2c1}
     peerDependencies:
       '@tanstack/react-query': '>=5.0.0'
       next: '>=16.0.0'
@@ -4410,6 +4418,29 @@ snapshots:
       - tailwindcss
 
   '@eden-ecommerce/lib@0.2.4(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(@tanstack/react-query@5.101.0(react@19.2.4))(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-instantsearch@7.35.1(algoliasearch@5.55.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(webpack@5.107.2(postcss@8.5.15))':
+    dependencies:
+      '@sentry/nextjs': 10.58.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(webpack@5.107.2(postcss@8.5.15))
+      '@tanstack/react-query': 5.101.0(react@19.2.4)
+      algoliasearch: 5.55.0
+      clsx: 2.1.1
+      instantsearch.js: 4.101.1(algoliasearch@5.55.0)
+      lodash: 4.18.1
+      neverthrow: 8.2.0
+      next: 16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react: 19.2.4
+      react-instantsearch: 7.35.1(algoliasearch@5.55.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      server-only: 0.0.1
+      tailwind-merge: 3.6.0
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - '@opentelemetry/core'
+      - '@opentelemetry/exporter-trace-otlp-http'
+      - '@opentelemetry/sdk-trace-base'
+      - encoding
+      - supports-color
+      - webpack
+
+  '@eden-ecommerce/lib@0.2.5(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(@tanstack/react-query@5.101.0(react@19.2.4))(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-instantsearch@7.35.1(algoliasearch@5.55.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(webpack@5.107.2(postcss@8.5.15))':
     dependencies:
       '@sentry/nextjs': 10.58.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.61.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(webpack@5.107.2(postcss@8.5.15))
       '@tanstack/react-query': 5.101.0(react@19.2.4)

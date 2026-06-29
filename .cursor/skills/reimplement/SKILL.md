@@ -32,7 +32,7 @@ No vendored submodules, workspace kits, or `site-chrome`. Registry pins only.
 1. **Inventory** (read-only) — routes, components, env, integrations; list cruft to delete (workspace packages, duplicate libs)
 2. **Fresh base** — latest `v0-template` `main`; set namespace in `constants/app.ts`; `pnpm env:pull` after `vercel link`; `pnpm clean:install` if deps broken
 3. **Classify** — generic → common/lib PR; feature-only → `$APP_ROOT`
-4. **Port** — `$APP_ROOT/app/{NAMESPACE}/{NAMESPACE_ROUTE}/` + `components/{domain}/` + `lib/{domain}/`
+4. **Port** — `$APP_ROOT/app/{NAMESPACE}/{NAMESPACE_ROUTE}/` + `components/{domain}/` + `lib/{domain}/`; rename vague ported symbols per `.cursor/rules/code-style.mdc` (UK English, self-describing names)
 5. **Chrome** — copy template Sanity header/footer stack **and** the checklist below (do not skip)
 6. **Verify** — one command:
 

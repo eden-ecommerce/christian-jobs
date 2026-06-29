@@ -22,16 +22,16 @@ export const SITE_URL =
     : undefined;
 
 /**
- * Root-relative `/public` path. Namespace prefix applies in production only
- * (Cloudflare Worker mount). In dev, Next serves `public/` from the site root.
+ * `/public` asset URL for header/footer icons and other runtime paths.
+ * Dev: root-relative (Next serves `public/` from the site root).
+ * Production: absolute URL on `ASSET_BASE_URL` — `public/` files are served from
+ * the deployment root, not under `NAMESPACE_PATH` (unlike page routes).
  */
 export function publicAssetPath(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
-  const normalized = path.startsWith("/") ? path : `/${path}`;
-  if (process.env.NODE_ENV !== "production" || !NAMESPACE_PATH) {
-    return normalized;
-  }
-  return `${NAMESPACE_PATH}${normalized}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const isProductionBuild = process.env.NODE_ENV === "production";
+  return isProductionBuild ? assetUrl(normalizedPath) : normalizedPath;
 }
 
 /**

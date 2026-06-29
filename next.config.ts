@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { withSentryConfig } from "@sentry/nextjs";
 import { ASSET_BASE_URL, assertDeployEnvForProduction, NAMESPACE_PATH } from "./constants/app";
-import { ALLOWED_ORIGIN, CORS_HEADERS } from "@eden-ecommerce/lib/cors";
+import { NEXT_CONFIG_CORS_HEADERS } from "@eden-ecommerce/lib/cors";
 
 assertDeployEnvForProduction();
 
@@ -12,6 +12,8 @@ const SANITY_CDN_PROJECT_ID =
 const SANITY_CDN_DATASET = process.env.EDEN_SANITY_DATASET ?? "next-eden";
 
 const clientDir = path.dirname(fileURLToPath(import.meta.url));
+
+const parsedAssetBaseUrl = ASSET_BASE_URL ? new URL(ASSET_BASE_URL) : null;
 
 const nextConfig: NextConfig = {
   env: {
@@ -62,6 +64,15 @@ const nextConfig: NextConfig = {
         hostname: "www.eden.co.uk",
         pathname: "/assets/**",
       },
+      ...(parsedAssetBaseUrl
+        ? [
+            {
+              protocol: parsedAssetBaseUrl.protocol.replace(":", "") as "https" | "http",
+              hostname: parsedAssetBaseUrl.hostname,
+              pathname: "/**",
+            },
+          ]
+        : []),
       {
         protocol: "https",
         hostname: "*.amazonaws.com",
@@ -75,17 +86,19 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        headers: [
-          { key: "Access-Control-Allow-Origin", value: ALLOWED_ORIGIN },
-          {
-            key: "Access-Control-Allow-Methods",
-            value: CORS_HEADERS["Access-Control-Allow-Methods"],
-          },
-          {
-            key: "Access-Control-Allow-Headers",
-            value: CORS_HEADERS["Access-Control-Allow-Headers"],
-          },
-        ],
+        headers: [...NEXT_CONFIG_CORS_HEADERS],
+      },
+      ...(NAMESPACE_PATH
+        ? [
+            {
+              source: `${NAMESPACE_PATH}/:path*`,
+              headers: [...NEXT_CONFIG_CORS_HEADERS],
+            },
+          ]
+        : []),
+      {
+        source: "/_next/static/:path*",
+        headers: [...NEXT_CONFIG_CORS_HEADERS],
       },
     ];
   },

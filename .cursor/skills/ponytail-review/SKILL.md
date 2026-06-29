@@ -17,6 +17,8 @@ Tags:
 * `yagni:` one-impl abstraction, unused config, single-caller layer
 * `shrink:` same logic fewer lines — show shorter form
 
+Also flag vague new names (`data`, `handle`, `temp`, misleading shorthand) — rename per `code-style.mdc`.
+
 ## Examples
 
 ✅ `L12-38: stdlib: 27-line validator. "@" in email 1 line; real validation = confirmation mail.`

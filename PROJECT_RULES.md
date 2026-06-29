@@ -15,6 +15,13 @@ Registry pins in root `package.json` on `main`. Develop shared packages in `comm
 
 Fleet workflow → [v0-template `docs/SHARED_PACKAGES.md`](https://github.com/eden-ecommerce/v0-template/blob/main/docs/SHARED_PACKAGES.md).
 
+## Code style
+
+British English and self-describing names — `.cursor/rules/code-style.mdc` and [v0-template `PROJECT_RULES.md` § Code style](https://github.com/eden-ecommerce/v0-template/blob/main/PROJECT_RULES.md).
+
+* **UK English** — organise, colour, behaviour, licence, initialise, optimise, synchronise, favourite, centre, labelled, modelling.
+* **Names** — concise `camelCase`/`kebab-case`/`PascalCase`; verb+object functions; `is`/`has` booleans; no vague `data`/`temp`/`handle`.
+
 ## Deploy
 
 - CF Worker on eden.co.uk — first URL segment = namespace (`christian-jobs`)
