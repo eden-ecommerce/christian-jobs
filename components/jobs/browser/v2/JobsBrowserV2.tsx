@@ -1,10 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { JobsSearchBar } from "@components/jobs/browser/JobsSearchBar";
-import { JobsPageHero } from "@components/jobs/browser/JobsPageHero";
+import { JobsHeroSearchV2 } from "@components/jobs/browser/v2/JobsHeroSearchV2";
+import { PostVacancyCTA } from "@components/jobs/components/PostVacancyCTA";
 import { GoogleMapsProvider } from "@components/google-maps/GoogleMapsProvider";
 import { JobsFilterPills } from "@components/jobs/browser/JobsFilterPills";
 import { JobsFilterSidebar } from "@components/jobs/browser/JobsFilterSidebar";
@@ -32,9 +40,10 @@ type Props = {
 };
 
 /**
- * Three-column jobs browser — filters sidebar, results list, detail pane.
+ * V2 jobs browser — prominent hero search, "Post a vacancy" pill in header,
+ * same three-column layout beneath.
  */
-export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Props) {
+export function JobsBrowserV2({ initialResult, initialFacets, blogCarousel }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -84,7 +93,12 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
     [pathname, router],
   );
 
-  // Auto-select the first job on desktop/tablet when the page loads with no selection
+  const scrollToResults = useCallback(() => {
+    const el = document.getElementById("v2-results");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  // Auto-select first job on desktop/tablet when page loads with no selection
   useEffect(() => {
     if (autoSelectedRef.current || urlState.vjk) return;
     const isDesktopOrTablet = window.matchMedia("(min-width: 768px)").matches;
@@ -104,7 +118,6 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
   const selectJob = useCallback(
     (jobId: string) => {
       updateUrl({ ...urlState, vjk: jobId });
-      // Full-screen overlay only on phone; tablet uses inline 2-column detail pane
       if (window.matchMedia("(max-width: 767px)").matches) {
         listScrollRef.current = window.scrollY;
         setMobileDetailOpen(true);
@@ -125,8 +138,9 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
     (changes: Partial<JobsUrlState>) => {
       updateUrl({ ...urlState, ...changes, vjk: undefined, page: 0 });
       setMobileDetailOpen(false);
+      scrollToResults();
     },
-    [urlState, updateUrl],
+    [urlState, updateUrl, scrollToResults],
   );
 
   const handleSearch = useCallback(
@@ -134,8 +148,7 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
       query: string,
       location: { label: string; lat?: number; lng?: number },
     ) => {
-      const hasGeo =
-        location.lat !== undefined && location.lng !== undefined;
+      const hasGeo = location.lat !== undefined && location.lng !== undefined;
       updateUrl({
         ...urlState,
         q: query,
@@ -148,8 +161,9 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
         vjk: undefined,
       });
       setMobileDetailOpen(false);
+      scrollToResults();
     },
-    [urlState, updateUrl],
+    [urlState, updateUrl, scrollToResults],
   );
 
   const handleRadiusChange = useCallback(
@@ -202,6 +216,13 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
   const detailLoading = detailQuery.isLoading && Boolean(urlState.vjk);
   const detailError = detailQuery.isError ? "Unable to load job details." : null;
 
+  const sharedFilterFacets = {
+    categories: facets.categories,
+    contractTypes: facets.contractTypes,
+    organisationTypes: facets.organisationTypes,
+    denominations: facets.denominations,
+  };
+
   const listPaneProps = {
     jobs,
     total,
@@ -210,12 +231,7 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
     loadingMore,
     hasMore,
     filterState: urlState,
-    filterFacets: {
-      categories: facets.categories,
-      contractTypes: facets.contractTypes,
-      organisationTypes: facets.organisationTypes,
-      denominations: facets.denominations,
-    },
+    filterFacets: sharedFilterFacets,
     onFilterChange: handleFilterChange,
     onClearFilters: handleClearFilters,
     onSelect: selectJob,
@@ -225,60 +241,74 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
 
   const showLandingSearch = isLatestJobsBrowse(urlState);
 
+  const sharedSearchProps = {
+    query: urlState.q,
+    location: urlState.location,
+    lat: urlState.lat,
+    lng: urlState.lng,
+    radius: urlState.radius,
+    onSearch: handleSearch,
+    onRadiusChange: handleRadiusChange,
+  };
+
   const page = (
     <div className="font-[family-name:var(--font-outfit)] bg-[#F9FAFB]">
-      <JobsPageHero />
 
-      {/* Search — sticky so jobs stay reachable while scrolling */}
+      {/* ── V2 Hero ── white, centred, Figma-matched layout ── */}
+      <section className="border-b border-[#E5E7EB] bg-white">
+        <div className="mx-auto max-w-3xl px-4 pb-10 pt-10 text-center sm:px-6 sm:pt-14 sm:pb-12">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
+            Find your <span className="text-[#235A0E]">Christian</span> job
+          </h1>
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Search roles at churches, charities and Christian organisations across the UK.
+          </p>
+
+          {/* Unified search bar — always visible on desktop */}
+          <div className="mt-7">
+            <JobsHeroSearchV2 {...sharedSearchProps} />
+          </div>
+
+          {/* Secondary post-vacancy CTA */}
+          <div className="mt-5 flex items-center justify-center">
+            <PostVacancyCTA compact />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Sticky bar — compact search after landing; mobile search always ── */}
       <div className="sticky top-0 z-40 border-b border-[#E5E7EB]/80 bg-[#F9FAFB]/95 backdrop-blur-sm">
         <JobsSearchBar
-          query={urlState.q}
-          location={urlState.location}
-          lat={urlState.lat}
-          lng={urlState.lng}
-          radius={urlState.radius}
-          onSearch={handleSearch}
-          onRadiusChange={handleRadiusChange}
-          showEmployerHint={showLandingSearch}
+          {...sharedSearchProps}
+          showDesktopForm={false}
+          showMobileForm={false}
         />
         {/* Mobile filter pills */}
         <div className="lg:hidden">
           <JobsFilterPills
             state={urlState}
-            facets={{
-              contractTypes: facets.contractTypes,
-              organisationTypes: facets.organisationTypes,
-              denominations: facets.denominations,
-              categories: facets.categories,
-            }}
+            facets={sharedFilterFacets}
             onChange={handleFilterChange}
             onClearAll={handleClearFilters}
           />
         </div>
       </div>
 
-      {/* Three-column layout — starts immediately below search */}
-      <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 sm:py-5">
-        {/* Desktop: 3 columns (filters + list + detail) */}
+      {/* ── Three-column layout ── */}
+      <div id="v2-results" className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 sm:py-5">
+        {/* Desktop: 3 columns */}
         <div className="hidden min-h-[calc(100vh-160px)] gap-5 lg:grid lg:grid-cols-[260px_minmax(300px,380px)_1fr]">
           <div className="sticky top-[120px] h-[calc(100vh-140px)] self-start overflow-hidden">
             <JobsFilterSidebar
               state={urlState}
-              facets={{
-                categories: facets.categories,
-                contractTypes: facets.contractTypes,
-                organisationTypes: facets.organisationTypes,
-                denominations: facets.denominations,
-              }}
+              facets={sharedFilterFacets}
               onChange={handleFilterChange}
               onClearAll={handleClearFilters}
             />
           </div>
-
           <div className="sticky top-[120px] h-[calc(100vh-140px)] self-start overflow-hidden">
             <JobsListPane {...listPaneProps} />
           </div>
-
           <div className="sticky top-[120px] h-[calc(100vh-140px)] self-start overflow-hidden">
             <JobDetailPanel
               data={detailData}
@@ -291,12 +321,11 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
           </div>
         </div>
 
-        {/* Tablet: 2 columns (list + detail), filters via pills in header */}
+        {/* Tablet: 2 columns */}
         <div className="hidden min-h-[calc(100vh-160px)] gap-5 md:grid md:grid-cols-[minmax(280px,360px)_1fr] lg:hidden">
           <div className="sticky top-[120px] h-[calc(100vh-140px)] self-start overflow-hidden">
             <JobsListPane {...listPaneProps} />
           </div>
-
           <div className="sticky top-[120px] h-[calc(100vh-140px)] self-start overflow-hidden">
             <JobDetailPanel
               data={detailData}
@@ -309,7 +338,7 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
           </div>
         </div>
 
-        {/* Phone: list only, detail opens as full-screen overlay */}
+        {/* Phone: list only */}
         <div className="md:hidden">
           <JobsListPane {...listPaneProps} />
         </div>

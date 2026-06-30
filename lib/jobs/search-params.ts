@@ -1,5 +1,8 @@
+import { DEFAULT_LOCATION_RADIUS_METERS } from "@lib/algolia/constants";
 import type { JobSort } from "@lib/algolia/jobs";
 import type { SearchJobsParams } from "@lib/algolia/jobs";
+
+const MILE_IN_METERS = 1609.344;
 
 export type WorkType = "any" | "onsite" | "hybrid" | "remote";
 export type DatePosted = "any" | "24h" | "week" | "month";
@@ -69,6 +72,34 @@ export const SORT_OPTIONS = [
   { label: "Most recent", value: "date_desc" },
   { label: "Most relevant", value: "relevance" },
 ] as const;
+
+export const LOCATION_RADIUS_OPTIONS = [
+  { miles: 10, label: "Within 10 miles", value: Math.round(10 * MILE_IN_METERS) },
+  { miles: 20, label: "Within 20 miles", value: Math.round(20 * MILE_IN_METERS) },
+  {
+    miles: 30,
+    label: "Within 30 miles",
+    value: DEFAULT_LOCATION_RADIUS_METERS,
+  },
+  { miles: 50, label: "Within 50 miles", value: Math.round(50 * MILE_IN_METERS) },
+] as const;
+
+/** Effective geo search radius in metres (URL override or site default). */
+export function resolveLocationRadiusMeters(radius?: number): number {
+  return radius ?? DEFAULT_LOCATION_RADIUS_METERS;
+}
+
+export function formatLocationRadiusLabel(radiusMeters: number): string {
+  const match = LOCATION_RADIUS_OPTIONS.find((option) => option.value === radiusMeters);
+  if (match) return match.label.toLowerCase();
+
+  const miles = Math.round(radiusMeters / MILE_IN_METERS);
+  return `within ${miles} miles`;
+}
+
+export function locationRadiusToUrlValue(radiusMeters: number): number | undefined {
+  return radiusMeters === DEFAULT_LOCATION_RADIUS_METERS ? undefined : radiusMeters;
+}
 
 function one(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -167,7 +198,7 @@ export function toSearchJobsParams(state: JobsUrlState): SearchJobsParams {
   if (state.lat !== undefined && state.lng !== undefined) {
     params.lat = state.lat;
     params.lng = state.lng;
-    if (state.radius) params.radiusMeters = state.radius;
+    params.radiusMeters = resolveLocationRadiusMeters(state.radius);
   }
 
   if (state.workType !== "any") params.workType = state.workType;

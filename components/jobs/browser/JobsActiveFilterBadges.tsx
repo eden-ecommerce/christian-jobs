@@ -1,11 +1,13 @@
 "use client";
 
 import { FilterBadgePrimitive } from "@components/ui/FilterBadgePrimitive";
+import { DEFAULT_LOCATION_RADIUS_METERS } from "@lib/algolia/constants";
 import { cleanCategoryLabel } from "@lib/algolia/category-label";
 import type { JobFacet } from "@lib/algolia/jobs";
 import {
   CONTRACT_TYPE_OPTIONS,
   DATE_POSTED_OPTIONS,
+  formatLocationRadiusLabel,
   ORGANISATION_TYPE_OPTIONS,
   SALARY_OPTIONS,
   WORK_TYPE_OPTIONS,
@@ -54,10 +56,16 @@ export function JobsActiveFilterBadges({
     const items: Badge[] = [];
 
     if (state.location.trim()) {
+      const hasGeo = state.lat !== undefined && state.lng !== undefined;
+      const radiusLabel = hasGeo
+        ? formatLocationRadiusLabel(state.radius ?? DEFAULT_LOCATION_RADIUS_METERS)
+        : undefined;
       items.push({
         key: "location",
         prefix: "Near",
-        label: state.location,
+        label: radiusLabel
+          ? `${state.location} (${radiusLabel})`
+          : state.location,
         onRemove: () =>
           onChange({
             location: "",

@@ -1,5 +1,6 @@
 "use client";
 
+import { JobsLocationRadiusSelect } from "@components/jobs/browser/JobsLocationRadiusSelect";
 import { useRecentJobSearches } from "@hooks/jobs/use-recent-job-searches";
 import {
   filterKeywordSuggestions,
@@ -16,11 +17,15 @@ type Props = {
   initialMode: Mode;
   query: string;
   location: string;
+  lat?: number;
+  lng?: number;
+  radius?: number;
   onClose: () => void;
   onSearch: (
     query: string,
     location: { label: string; lat?: number; lng?: number },
   ) => void;
+  onRadiusChange: (radius: number | undefined) => void;
 };
 
 /** Full-screen mobile search sheet (Indeed-style, one page per field). */
@@ -29,8 +34,12 @@ export function JobsMobileSearchSheet({
   initialMode,
   query,
   location,
+  lat,
+  lng,
+  radius,
   onClose,
   onSearch,
+  onRadiusChange,
 }: Props) {
   const { recents, removeRecent } = useRecentJobSearches();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -87,11 +96,28 @@ export function JobsMobileSearchSheet({
     });
   }
 
+  function useCurrentLocation() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        submitSearch(query.trim(), {
+          label: "Current location",
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+      },
+      () => undefined,
+    );
+  }
+
   if (!open || !mounted) return null;
 
   const keywordSuggestions = filterKeywordSuggestions(keyword);
   const locationSuggestions = filterLocationSuggestions(locationLabel);
   const showRecents = mode === "what" && !keyword.trim() && recents.length > 0;
+  const hasGeoFromUrl = lat !== undefined && lng !== undefined;
+  const hasGeoFromCoords = coords !== null;
+  const showRadius = mode === "where" && (hasGeoFromUrl || hasGeoFromCoords);
 
   const panel = (
     <div
@@ -110,82 +136,90 @@ export function JobsMobileSearchSheet({
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
 
-        <div className="relative min-w-0 flex-1">
-          {mode === "what" ? (
-            <>
-              <Search
-                className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
-                aria-hidden="true"
-              />
-              <input
-                ref={inputRef}
-                type="search"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    submitKeyword();
-                  }
-                }}
-                placeholder="Job title, keywords, or company"
-                aria-label="Job title, keywords, or company"
-                autoComplete="off"
-                enterKeyHint="search"
-                className="h-12 w-full rounded-xl border-2 border-[#2d6a4f] bg-white pl-11 pr-10 text-base text-foreground outline-none placeholder:text-muted-foreground"
-              />
-              {keyword ? (
-                <button
-                  type="button"
-                  onClick={() => setKeyword("")}
-                  className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-[#F3F4F6]"
-                  aria-label="Clear search"
-                >
-                  <X className="h-4 w-4" aria-hidden="true" />
-                </button>
-              ) : null}
-            </>
-          ) : (
-            <>
-              <MapPin
-                className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
-                aria-hidden="true"
-              />
-              <input
-                ref={inputRef}
-                type="search"
-                value={locationLabel}
-                onChange={(e) => {
-                  setLocationLabel(e.target.value);
-                  setCoords(null);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    submitLocation();
-                  }
-                }}
-                placeholder={'City, postcode or "remote"'}
-                aria-label="City, postcode or remote"
-                autoComplete="off"
-                enterKeyHint="search"
-                className="h-12 w-full rounded-xl border-2 border-[#2d6a4f] bg-white pl-11 pr-10 text-base text-foreground outline-none placeholder:text-muted-foreground"
-              />
-              {locationLabel ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLocationLabel("");
+        <div className="min-w-0 flex-1">
+          <label
+            htmlFor={mode === "what" ? "jobs-mobile-keywords" : "jobs-mobile-location"}
+            className="mb-1 block px-1 text-xs font-medium text-muted-foreground"
+          >
+            {mode === "what" ? "Job Title" : "Location"}
+          </label>
+          <div className="relative">
+            {mode === "what" ? (
+              <>
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <input
+                  ref={inputRef}
+                  id="jobs-mobile-keywords"
+                  type="search"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      submitKeyword();
+                    }
+                  }}
+                  placeholder="Job title, keywords, or company"
+                  autoComplete="off"
+                  enterKeyHint="search"
+                  className="h-12 w-full rounded-xl border-2 border-[#2d6a4f] bg-white pl-11 pr-10 text-base text-foreground outline-none placeholder:text-muted-foreground"
+                />
+                {keyword ? (
+                  <button
+                    type="button"
+                    onClick={() => setKeyword("")}
+                    className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-[#F3F4F6]"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <MapPin
+                  className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <input
+                  ref={inputRef}
+                  id="jobs-mobile-location"
+                  type="search"
+                  value={locationLabel}
+                  onChange={(e) => {
+                    setLocationLabel(e.target.value);
                     setCoords(null);
                   }}
-                  className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-[#F3F4F6]"
-                  aria-label="Clear location"
-                >
-                  <X className="h-4 w-4" aria-hidden="true" />
-                </button>
-              ) : null}
-            </>
-          )}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      submitLocation();
+                    }
+                  }}
+                  placeholder={'City, postcode or "remote"'}
+                  autoComplete="off"
+                  enterKeyHint="search"
+                  className="h-12 w-full rounded-xl border-2 border-[#2d6a4f] bg-white pl-11 pr-10 text-base text-foreground outline-none placeholder:text-muted-foreground"
+                />
+                {locationLabel ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLocationLabel("");
+                      setCoords(null);
+                    }}
+                    className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-[#F3F4F6]"
+                    aria-label="Clear location"
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                ) : null}
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -298,7 +332,21 @@ export function JobsMobileSearchSheet({
       </div>
 
       {mode === "where" ? (
-        <div className="shrink-0 border-t border-[#E5E7EB] bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="shrink-0 space-y-3 border-t border-[#E5E7EB] bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <button
+            type="button"
+            onClick={useCurrentLocation}
+            className="inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-[#2d6a4f] hover:underline"
+          >
+            <MapPin className="h-4 w-4" aria-hidden="true" />
+            Use my current location
+          </button>
+          {showRadius ? (
+            <JobsLocationRadiusSelect
+              radius={radius}
+              onChange={onRadiusChange}
+            />
+          ) : null}
           <button
             type="button"
             onClick={submitLocation}

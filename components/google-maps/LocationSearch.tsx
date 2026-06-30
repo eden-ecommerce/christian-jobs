@@ -22,11 +22,14 @@ export type LocationSearchHandle = {
 type LocationSearchProps = {
   /** Seeded from URL/parent; synced to the DOM when this changes externally. */
   initialLabel?: string;
+  id?: string;
   onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
   onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
+  onFocus?: React.FocusEventHandler<HTMLInputElement>;
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
 };
 
 /** Uncontrolled input with Google Autocomplete. Parents read value via ref on submit. */
@@ -34,11 +37,14 @@ export const LocationSearch = forwardRef<LocationSearchHandle, LocationSearchPro
   function LocationSearch(
     {
       initialLabel = "",
+      id,
       onPlaceSelect,
       placeholder = "Search for a location…",
       disabled = false,
       className,
       onKeyDown,
+      onFocus,
+      onBlur,
     },
     ref,
   ) {
@@ -84,12 +90,14 @@ export const LocationSearch = forwardRef<LocationSearchHandle, LocationSearchPro
     return (
       <Input
         ref={inputRef}
+        id={id}
         type="search"
         defaultValue={initialLabel}
         onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
         placeholder={placeholder}
         disabled={disabled}
-        aria-label="Location search"
         className={className}
       />
     );

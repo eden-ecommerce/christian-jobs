@@ -1,6 +1,7 @@
 "use client";
 
 import { JobsMobileSearch } from "@components/jobs/browser/JobsMobileSearch";
+import { JobsLocationRadiusSelect } from "@components/jobs/browser/JobsLocationRadiusSelect";
 import {
   LocationSearch,
   type LocationSearchHandle,
@@ -9,14 +10,38 @@ import { useRecentJobSearches } from "@hooks/jobs/use-recent-job-searches";
 import { useUserLocation } from "@hooks/google-maps/use-user-location";
 import { isGoogleMapsEnvConfigured } from "@lib/env-configured";
 import { userLocationFromPlace } from "@lib/google-maps/location-labels";
-import { Search } from "lucide-react";
+import { MapPin, Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 function desktopSearchFormClass(elevated: boolean) {
   return elevated
-    ? "mx-auto hidden max-w-[1600px] flex-col gap-3 rounded-2xl border border-[#E5E7EB] bg-white p-3 shadow-soft-sm lg:flex-row lg:items-center lg:gap-3 lg:p-3 lg:flex"
-    : "mx-auto hidden max-w-[1600px] flex-col gap-3 px-4 py-4 lg:flex-row lg:items-center lg:gap-3 lg:px-6 lg:flex";
+    ? "mx-auto hidden max-w-[1600px] flex-col gap-3 rounded-2xl border border-[#E5E7EB] bg-white p-3 shadow-soft-sm lg:flex-row lg:items-start lg:gap-3 lg:p-3 lg:flex"
+    : "mx-auto hidden max-w-[1600px] flex-col gap-3 px-4 py-4 lg:flex-row lg:items-start lg:gap-3 lg:px-6 lg:flex";
 }
+
+function SearchField({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <label htmlFor={htmlFor} className="text-xs font-medium text-muted-foreground">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+const KEYWORD_FIELD_ID = "jobs-search-keywords";
+const LOCATION_FIELD_ID = "jobs-search-location";
+const KEYWORD_FIELD_LABEL = "Job Title";
+const LOCATION_FIELD_LABEL = "Location";
 
 function SearchBarShell({
   elevated,
@@ -33,26 +58,46 @@ function SearchBarShell({
   );
 }
 
-const locationInputClass =
-  "h-12 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm shadow-soft-sm focus:border-[#2d6a4f] focus:ring-2 focus:ring-[#2d6a4f]/15";
+const locationInputInnerClass =
+  "h-12 min-w-0 flex-1 rounded-none border-0 bg-transparent px-3 text-sm shadow-none outline-none focus-visible:border-transparent focus-visible:ring-0";
+
+const locationFieldShellClass =
+  "flex min-w-0 flex-1 items-center rounded-xl border border-[#E5E7EB] bg-white shadow-soft-sm focus-within:border-[#2d6a4f] focus-within:ring-2 focus-within:ring-[#2d6a4f]/15";
 
 type Props = {
   query: string;
   location: string;
+  lat?: number;
+  lng?: number;
+  radius?: number;
   onSearch: (
     query: string,
     location: { label: string; lat?: number; lng?: number },
   ) => void;
+  onRadiusChange: (radius: number | undefined) => void;
   /** Elevated search card styling on the default landing view. */
   showEmployerHint?: boolean;
+  /** Optional element rendered after the Search button (desktop only). */
+  endSlot?: ReactNode;
+  /** When false, the desktop (lg+) search form is not rendered. Mobile form is unaffected. */
+  showDesktopForm?: boolean;
+  /** When false, the mobile search bar/sheet is not rendered. */
+  showMobileForm?: boolean;
 };
 
 /** Sticky keyword + location search bar for the jobs browser. */
 export function JobsSearchBar({
   query,
   location,
+  lat,
+  lng,
+  radius,
   onSearch,
+  onRadiusChange,
   showEmployerHint = false,
+  endSlot,
+  showDesktopForm = true,
+  showMobileForm = true,
 }: Props) {
   const mapsEnabled = isGoogleMapsEnvConfigured();
   const { setLocation } = useUserLocation();
@@ -65,6 +110,8 @@ export function JobsSearchBar({
     lat: number;
     lng: number;
   } | null>(null);
+
+  const hasGeoFromUrl = lat !== undefined && lng !== undefined;
 
   useEffect(() => {
     setKeyword(query);
@@ -122,7 +169,9 @@ export function JobsSearchBar({
     const coords =
       selectedPlace?.label === locationLabel
         ? { lat: selectedPlace.lat, lng: selectedPlace.lng }
-        : undefined;
+        : hasGeoFromUrl
+          ? { lat, lng }
+          : undefined;
 
     runSearch(keyword.trim(), {
       label: locationLabel,
@@ -131,67 +180,115 @@ export function JobsSearchBar({
     });
   }
 
+  const useCurrentLocation = useCallback(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        runSearch(keyword.trim(), {
+          label: "Current location",
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+      },
+      () => undefined,
+    );
+  }, [keyword, runSearch]);
+
   const keywordPlaceholder = "Job title, keywords, or company";
 
   return (
     <>
+      {showDesktopForm ? (
       <SearchBarShell elevated={showEmployerHint}>
         <form
           onSubmit={submitDesktop}
           className={desktopSearchFormClass(showEmployerHint)}
         >
-          <div className="relative flex-1">
-            <Search
-              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <input
-              type="search"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              placeholder={keywordPlaceholder}
-              aria-label={keywordPlaceholder}
-              className="h-12 w-full rounded-xl border border-[#E5E7EB] bg-white pl-11 pr-3 text-sm text-foreground shadow-soft-sm outline-none placeholder:text-muted-foreground focus:border-[#2d6a4f] focus:ring-2 focus:ring-[#2d6a4f]/15"
-            />
-          </div>
-
-          <div className="relative flex-1">
-            {mapsEnabled ? (
-              <LocationSearch
-                ref={locationSearchRef}
-                initialLabel={location}
-                onPlaceSelect={handlePlaceSelect}
-                placeholder={'City, postcode or "remote"'}
-                className={locationInputClass}
+          <SearchField label={KEYWORD_FIELD_LABEL} htmlFor={KEYWORD_FIELD_ID}>
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
               />
-            ) : (
               <input
-                ref={plainLocationRef}
-                type="text"
-                defaultValue={location}
-                placeholder={'City, postcode or "remote"'}
-                aria-label="City, postcode or remote"
-                className={`${locationInputClass} outline-none`}
+                id={KEYWORD_FIELD_ID}
+                type="search"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder={keywordPlaceholder}
+                className="h-12 w-full rounded-xl border border-[#E5E7EB] bg-white pl-11 pr-3 text-sm text-foreground shadow-soft-sm outline-none placeholder:text-muted-foreground focus:border-[#2d6a4f] focus:ring-2 focus:ring-[#2d6a4f]/15"
               />
-            )}
-          </div>
+            </div>
+          </SearchField>
+
+          <SearchField label={LOCATION_FIELD_LABEL} htmlFor={LOCATION_FIELD_ID}>
+            <div className={locationFieldShellClass}>
+              {mapsEnabled ? (
+                <LocationSearch
+                  ref={locationSearchRef}
+                  id={LOCATION_FIELD_ID}
+                  initialLabel={location}
+                  onPlaceSelect={handlePlaceSelect}
+                  placeholder={'City, postcode or "remote"'}
+                  className={locationInputInnerClass}
+                />
+              ) : (
+                <input
+                  ref={plainLocationRef}
+                  id={LOCATION_FIELD_ID}
+                  type="text"
+                  defaultValue={location}
+                  placeholder={'City, postcode or "remote"'}
+                  className={`${locationInputInnerClass} outline-none`}
+                />
+              )}
+              <div
+                className="h-5 w-px shrink-0 bg-[#E5E7EB]"
+                aria-hidden="true"
+              />
+              <JobsLocationRadiusSelect
+                inline
+                radius={radius}
+                onChange={onRadiusChange}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={useCurrentLocation}
+              className="mt-1.5 inline-flex cursor-pointer items-center gap-1.5 text-xs font-medium text-[#2d6a4f] hover:underline"
+            >
+              <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+              Use my current location
+            </button>
+          </SearchField>
 
           <button
             type="submit"
-            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2d6a4f] px-7 text-sm font-semibold text-white shadow-soft transition-opacity hover:opacity-90"
+            className="mt-5 inline-flex h-12 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-[#2d6a4f] px-7 text-sm font-semibold text-white shadow-soft transition-opacity hover:opacity-90"
           >
             <Search className="h-4 w-4" aria-hidden="true" />
             Search
           </button>
+
+          {endSlot ? (
+            <div className="mt-5 self-start">{endSlot}</div>
+          ) : null}
         </form>
       </SearchBarShell>
+      ) : null}
 
-      <JobsMobileSearch
-        query={query}
-        location={location}
-        onSearch={runSearch}
-        elevated={showEmployerHint}
-      />
+      {showMobileForm ? (
+        <JobsMobileSearch
+          query={query}
+          location={location}
+          lat={lat}
+          lng={lng}
+          radius={radius}
+          onSearch={runSearch}
+          onRadiusChange={onRadiusChange}
+          elevated={showEmployerHint}
+        />
+      ) : null}
     </>
   );
 }

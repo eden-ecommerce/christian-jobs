@@ -1,6 +1,7 @@
-@import 'tailwindcss';
+@import 'tailwindcss' source('..');
+/* Scan shared header/footer primitives — node_modules is gitignored by default. */
+@source '../node_modules/@eden-ecommerce/common/src';
 @import '@eden-ecommerce/common/tailwind.css';
-@source "../node_modules/@eden-ecommerce/common/src";
 /* TEMPORARILY DISABLED: scans the private @christian-360/next-design package
    for Tailwind classes. Re-enable when the package is wired back in. */
 /* @source "../node_modules/@christian-360/next-design"; */

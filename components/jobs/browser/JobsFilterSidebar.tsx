@@ -1,9 +1,5 @@
 "use client";
 
-import { LocationSearch, type LocationSearchHandle } from "@components/google-maps/LocationSearch";
-import { useUserLocation } from "@hooks/google-maps/use-user-location";
-import { isGoogleMapsEnvConfigured } from "@lib/env-configured";
-import { userLocationFromPlace } from "@lib/google-maps/location-labels";
 import type { JobFacet } from "@lib/algolia/jobs";
 import type { JobSort } from "@lib/algolia/jobs";
 import type { DatePosted, JobsUrlState, WorkType } from "@lib/jobs/search-params";
@@ -31,11 +27,11 @@ import {
   Cross,
   Globe,
   Heart,
-  MapPin,
   Sparkles,
   Users,
+  X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 const POST_JOB_HREF = "https://hub.eden.co.uk/dashboard/job-journey";
 
@@ -58,11 +54,6 @@ type Props = {
   };
   onChange: (changes: Partial<JobsUrlState>) => void;
   onClearAll: () => void;
-  onLocationSearch: (location: {
-    label: string;
-    lat?: number;
-    lng?: number;
-  }) => void;
 };
 
 function QuickPill({
@@ -89,78 +80,6 @@ function QuickPill({
       {icon}
       {label}
     </button>
-  );
-}
-
-function LocationSection({
-  location,
-  onLocationSearch,
-}: {
-  location: string;
-  onLocationSearch: Props["onLocationSearch"];
-}) {
-  const { setLocation } = useUserLocation();
-  const locationSearchRef = useRef<LocationSearchHandle>(null);
-  const plainLocationRef = useRef<HTMLInputElement>(null);
-  const mapsEnabled = isGoogleMapsEnvConfigured();
-
-  useEffect(() => {
-    if (!mapsEnabled && plainLocationRef.current) {
-      plainLocationRef.current.value = location;
-    }
-  }, [location, mapsEnabled]);
-
-  const handlePlaceSelect = useCallback(
-    (place: google.maps.places.PlaceResult) => {
-      const resolved = userLocationFromPlace(place);
-      if (!resolved) return;
-      setLocation(resolved);
-      onLocationSearch({
-        label: resolved.label,
-        lat: resolved.latitude,
-        lng: resolved.longitude,
-      });
-    },
-    [setLocation, onLocationSearch],
-  );
-
-  const submitFreeText = useCallback(() => {
-    const label = (
-      mapsEnabled
-        ? locationSearchRef.current?.getValue()
-        : plainLocationRef.current?.value
-    )?.trim();
-    if (label) {
-      onLocationSearch({ label });
-    }
-  }, [mapsEnabled, onLocationSearch]);
-
-  if (!mapsEnabled) {
-    return (
-      <input
-        ref={plainLocationRef}
-        type="text"
-        defaultValue={location}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") submitFreeText();
-        }}
-        placeholder="Enter postcode or location"
-        className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm outline-none placeholder:text-muted-foreground focus:border-[#2d6a4f] focus:ring-2 focus:ring-[#2d6a4f]/15"
-      />
-    );
-  }
-
-  return (
-    <LocationSearch
-      ref={locationSearchRef}
-      initialLabel={location}
-      onPlaceSelect={handlePlaceSelect}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") submitFreeText();
-      }}
-      placeholder="Enter postcode or location"
-      className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm focus:border-[#2d6a4f] focus:ring-2 focus:ring-[#2d6a4f]/15"
-    />
   );
 }
 
@@ -413,7 +332,6 @@ export function JobsFilterSidebar({
   facets,
   onChange,
   onClearAll,
-  onLocationSearch,
 }: Props) {
   const isLatest = isNewestFirst(state);
   const isRemote = state.workType === "remote";
@@ -448,15 +366,10 @@ export function JobsFilterSidebar({
           <button
             type="button"
             onClick={onClearAll}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#2d6a4f] px-3 py-1.5 text-xs font-semibold text-white shadow-soft-sm transition-opacity hover:opacity-90"
+            className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-[#2d6a4f]/30 hover:bg-white hover:text-[#2d6a4f]"
           >
             Clear filters
-            <span
-              className="inline-flex min-w-5 items-center justify-center rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-bold tabular-nums leading-none"
-              aria-hidden="true"
-            >
-              {activeFilterCount}
-            </span>
+            <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span className="sr-only">
               ({activeFilterCount} active{" "}
               {activeFilterCount === 1 ? "filter" : "filters"})
@@ -508,39 +421,6 @@ export function JobsFilterSidebar({
             }
           />
         </div>
-      </div>
-
-      <div className="mt-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Location
-        </p>
-        <div className="mt-2">
-          <LocationSection
-            location={state.location}
-            onLocationSearch={onLocationSearch}
-          />
-        </div>
-        <button
-          type="button"
-          className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#2d6a4f] hover:underline"
-          onClick={() => {
-            if (navigator.geolocation) {
-              navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                  onLocationSearch({
-                    label: "Current location",
-                    lat: pos.coords.latitude,
-                    lng: pos.coords.longitude,
-                  });
-                },
-                () => undefined,
-              );
-            }
-          }}
-        >
-          <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-          Use my current location
-        </button>
       </div>
 
       <div className="mt-6 min-h-0 flex-1 overflow-y-auto pr-1">

@@ -79,7 +79,15 @@ And the component fallback (info bar uses `bg-primary-900`):
 }
 ```
 
-Also: `@import '@eden-ecommerce/common/tailwind.css'` + `@source` scan for common (see template `globals.css`). Keep namespace-specific theme tokens separate — do not remove jobs/brand colours for page content.
+Tailwind v4 source scan for common (at top of `globals.css`, before other `@import`s):
+
+```css
+@import 'tailwindcss' source('..');
+@source '../node_modules/@eden-ecommerce/common/src';
+@import '@eden-ecommerce/common/tailwind.css';
+```
+
+Keep namespace-specific theme tokens separate — do not remove jobs/brand colours for page content.
 
 ### Static assets — copy `public/` chrome files
 

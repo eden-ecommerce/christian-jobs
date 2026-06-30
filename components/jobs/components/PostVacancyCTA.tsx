@@ -1,12 +1,17 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Briefcase } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const POST_JOB_HREF = "https://hub.eden.co.uk/dashboard/job-journey";
 
+type Props = {
+  /** Renders a compact inline text link instead of the full animated card. */
+  compact?: boolean;
+};
+
 /** Animated post-a-vacancy CTA with price countdown. */
-export function PostVacancyCTA() {
+export function PostVacancyCTA({ compact = false }: Props) {
   const [entered, setEntered] = useState(false);
   const [price, setPrice] = useState("£99");
   const [showSubLabel, setShowSubLabel] = useState(false);
@@ -39,6 +44,21 @@ export function PostVacancyCTA() {
       if (interval) window.clearInterval(interval);
     };
   }, []);
+
+  if (compact) {
+    return (
+      <a
+        href={POST_JOB_HREF}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-[#2d6a4f] hover:underline"
+      >
+        <Briefcase className="h-4 w-4" aria-hidden="true" />
+        Post a vacancy — it&apos;s FREE
+        <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+      </a>
+    );
+  }
 
   return (
     <div

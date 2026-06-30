@@ -12,7 +12,7 @@ export type LocationSuggestion = {
   lng?: number;
 };
 
-/** Shown before the user types in the "What" field. */
+/** Shown before the user types in the job title field. */
 export const KEYWORD_DEFAULT_SUGGESTIONS: KeywordSuggestion[] = [
   { id: "part-time", label: "Part-time" },
   { id: "full-time", label: "Full-time" },
@@ -42,7 +42,7 @@ const KEYWORD_SEARCH_POOL: KeywordSuggestion[] = [
   { id: "software developer", label: "Software developer" },
 ];
 
-/** Quick-select locations shown before the user types in the "Where" field. */
+/** Quick-select locations shown before the user types in the location field. */
 export const LOCATION_DEFAULT_SUGGESTIONS: LocationSuggestion[] = [
   { id: "remote", label: "Remote" },
   { id: "london", label: "London", lat: 51.5074, lng: -0.1278 },

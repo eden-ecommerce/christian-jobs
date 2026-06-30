@@ -276,11 +276,7 @@ export function JobDetailPanel({
           rel="noopener noreferrer"
           aria-label={`Apply for ${job.title} at ${orgName}`}
           className="mt-5 inline-flex w-full items-center justify-center rounded-xl px-5 py-3 text-sm font-bold transition-opacity hover:opacity-90"
-          style={
-            accentHex && accentFg
-              ? { backgroundColor: accentHex, color: accentFg }
-              : { backgroundColor: "#2d6a4f", color: "#ffffff" }
-          }
+          style={{ backgroundColor: "#235A0E", color: "#ffffff" }}
         >
           Apply Now
         </a>

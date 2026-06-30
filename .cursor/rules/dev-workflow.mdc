@@ -9,6 +9,7 @@ During implementation and UI iteration:
 
 - **Do not** run `pnpm ts-check`, `pnpm lint`, or `pnpm predeploy` unless the user asks, `/push`, or `/review`.
 - `pnpm dev` is sufficient for header/search/mega-nav/sandbox work.
+- Broken header/chrome styles after `@eden-ecommerce/common` bump or `globals.css` change → `rm -rf .next && pnpm dev` (stale Turbopack CSS cache).
 - Local env from Vercel: `pnpm env:pull` (after `vercel link` @ repo root) → `.env.local`.
 - Run `pnpm check` (or `pnpm ts-check` then `pnpm lint`) once before push/PR.
 
