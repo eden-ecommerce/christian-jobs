@@ -98,15 +98,17 @@ export function JobsBrowserV2({ initialResult, initialFacets, blogCarousel }: Pr
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  // Auto-select first job on desktop/tablet when page loads with no selection
+  // Auto-select the first job on desktop/tablet when there's no selection.
+  // autoSelectedRef resets whenever a search/filter clears vjk, so new results
+  // always populate the detail panel automatically.
   useEffect(() => {
     if (autoSelectedRef.current || urlState.vjk) return;
     const isDesktopOrTablet = window.matchMedia("(min-width: 768px)").matches;
-    if (isDesktopOrTablet && initialResult.hits.length > 0) {
+    if (isDesktopOrTablet && jobs.length > 0) {
       autoSelectedRef.current = true;
-      updateUrl({ ...urlState, vjk: initialResult.hits[0].id });
+      updateUrl({ ...urlState, vjk: jobs[0].id });
     }
-  }, [urlState, updateUrl, initialResult.hits]);
+  }, [jobs, urlState, updateUrl]);
 
   const prefetchDetail = useCallback(
     (jobId: string) => {
@@ -136,6 +138,7 @@ export function JobsBrowserV2({ initialResult, initialFacets, blogCarousel }: Pr
 
   const handleFilterChange = useCallback(
     (changes: Partial<JobsUrlState>) => {
+      autoSelectedRef.current = false;
       updateUrl({ ...urlState, ...changes, vjk: undefined, page: 0 });
       setMobileDetailOpen(false);
       scrollToResults();
@@ -148,6 +151,7 @@ export function JobsBrowserV2({ initialResult, initialFacets, blogCarousel }: Pr
       query: string,
       location: { label: string; lat?: number; lng?: number },
     ) => {
+      autoSelectedRef.current = false;
       const hasGeo = location.lat !== undefined && location.lng !== undefined;
       updateUrl({
         ...urlState,
