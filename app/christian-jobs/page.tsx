@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { JobsBrowser } from "@components/jobs/browser/JobsBrowser";
+import { JobsBrowserV2 } from "@components/jobs/browser/v2/JobsBrowserV2";
 import { BlogArticleCarousel } from "@components/blog/BlogArticleCarousel";
 import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
 import {
@@ -66,7 +66,7 @@ export default async function ChristianJobsPage({
           </div>
         }
       >
-        <JobsBrowser
+        <JobsBrowserV2
           initialResult={result}
           initialFacets={facets}
           blogCarousel={<BlogArticleCarousel />}
