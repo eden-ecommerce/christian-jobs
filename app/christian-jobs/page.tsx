@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { JobsBrowserV2 } from "@components/jobs/browser/v2/JobsBrowserV2";
+import { JobsHomepageV3 } from "@components/jobs/browser/v3/JobsHomepageV3";
 import { BlogArticleCarousel } from "@components/blog/BlogArticleCarousel";
-import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
 import {
-  searchJobs,
-  getJobFilterOptions,
-} from "@lib/algolia/jobs";
-import {
+  isLatestJobsBrowse,
+  jobsUrlStateToSearchParams,
   parseJobsUrlState,
-  toSearchJobsParams,
 } from "@lib/jobs/search-params";
+import { jobsSearchPath } from "@lib/jobs/routes";
 import { buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
 
 export const revalidate = 300;
@@ -36,25 +34,16 @@ export default async function ChristianJobsPage({
 }) {
   const sp = await searchParams;
   const urlState = parseJobsUrlState(sp);
-  const searchParams_ = toSearchJobsParams(urlState);
 
-  const [result, facets] = await Promise.all([
-    searchJobs(searchParams_),
-    getJobFilterOptions(),
-  ]);
+  if (!isLatestJobsBrowse(urlState) || urlState.vjk) {
+    const qs = jobsUrlStateToSearchParams(urlState).toString();
+    redirect(qs ? `${jobsSearchPath()}?${qs}` : jobsSearchPath());
+  }
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Eden", url: "https://www.eden.co.uk" },
     { name: "Christian Jobs", url: "https://www.eden.co.uk/christian-jobs" },
   ]);
-
-  if (!result.configured) {
-    return (
-      <main className="mx-auto max-w-screen-xl px-4 py-8">
-        <IntegrationEnvError integration="algolia" />
-      </main>
-    );
-  }
 
   return (
     <main>
@@ -62,15 +51,11 @@ export default async function ChristianJobsPage({
       <Suspense
         fallback={
           <div className="flex min-h-[50vh] items-center justify-center">
-            <p className="text-sm text-muted-foreground">Loading jobs…</p>
+            <p className="text-sm text-muted-foreground">Loading…</p>
           </div>
         }
       >
-        <JobsBrowserV2
-          initialResult={result}
-          initialFacets={facets}
-          blogCarousel={<BlogArticleCarousel />}
-        />
+        <JobsHomepageV3 blogCarousel={<BlogArticleCarousel />} />
       </Suspense>
     </main>
   );

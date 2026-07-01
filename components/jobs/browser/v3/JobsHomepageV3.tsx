@@ -6,13 +6,14 @@ import { JobsHeroSectionV3 } from "@components/jobs/browser/v3/JobsHeroSectionV3
 import { JobsFeaturedCarousels } from "@components/jobs/browser/JobsFeaturedCarousels";
 import { GoogleMapsProvider } from "@components/google-maps/GoogleMapsProvider";
 import { isGoogleMapsEnvConfigured } from "@lib/env-configured";
+import { jobsSearchPath } from "@lib/jobs/routes";
 import { jobsUrlStateToSearchParams } from "@lib/jobs/search-params";
 import type { JobsUrlState } from "@lib/jobs/search-params";
 
-export const V3_RESULTS_PATH = "/v3/search";
-
 type Props = {
   blogCarousel?: ReactNode;
+  /** Where hero search and featured job picks navigate — defaults to namespace search. */
+  resultsPath?: string;
 };
 
 const defaultBrowseState = (): JobsUrlState => ({
@@ -28,7 +29,10 @@ const defaultBrowseState = (): JobsUrlState => ({
 });
 
 /** V3 landing page — hero search, post-vacancy link, featured jobs and blog. */
-export function JobsHomepageV3({ blogCarousel }: Props) {
+export function JobsHomepageV3({
+  blogCarousel,
+  resultsPath = jobsSearchPath(),
+}: Props) {
   const router = useRouter();
 
   const handleSearch = useCallback(
@@ -46,9 +50,9 @@ export function JobsHomepageV3({ blogCarousel }: Props) {
         lng: location.lng,
         sort: hasGeo ? "distance" : "date_desc",
       });
-      router.push(`${V3_RESULTS_PATH}?${params.toString()}`);
+      router.push(`${resultsPath}?${params.toString()}`);
     },
-    [router],
+    [router, resultsPath],
   );
 
   const handleSelectJob = useCallback(
@@ -57,9 +61,9 @@ export function JobsHomepageV3({ blogCarousel }: Props) {
         ...defaultBrowseState(),
         vjk: jobId,
       });
-      router.push(`${V3_RESULTS_PATH}?${params.toString()}`);
+      router.push(`${resultsPath}?${params.toString()}`);
     },
-    [router],
+    [router, resultsPath],
   );
 
   const page = (

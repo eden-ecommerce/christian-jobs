@@ -103,14 +103,7 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
-    if (!NAMESPACE_PATH) return [];
-    return [
-      {
-        source: `${NAMESPACE_PATH}/search`,
-        destination: NAMESPACE_PATH,
-        permanent: true,
-      },
-    ];
+    return [];
   },
 };
 

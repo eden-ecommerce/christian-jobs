@@ -20,7 +20,10 @@ export default function ChristianJobsV3HomePage() {
           </div>
         }
       >
-        <JobsHomepageV3 blogCarousel={<BlogArticleCarousel />} />
+        <JobsHomepageV3
+          blogCarousel={<BlogArticleCarousel />}
+          resultsPath="/v3/search"
+        />
       </Suspense>
     </main>
   );
