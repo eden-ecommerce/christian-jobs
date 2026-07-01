@@ -33,7 +33,7 @@ function JobCarousel({
   const isHomepage = variant === "homepage";
 
   return (
-    <section className={isHomepage ? "py-8" : "py-4"}>
+    <section className={isHomepage ? "py-3 sm:py-8" : "py-4"}>
       <div className="mx-auto flex max-w-[1200px] items-end justify-between gap-4 px-5 sm:px-8">
         <h2
           className={
@@ -46,7 +46,7 @@ function JobCarousel({
         </h2>
       </div>
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
-        <div className="mt-4 overflow-x-auto pb-4 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mt-3 overflow-x-auto pb-2 pt-0.5 sm:mt-4 sm:pb-4 sm:pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex items-stretch gap-4 px-0.5">
             {jobs.map((job) => (
               <div key={job.objectID} className="flex w-[19rem] shrink-0 sm:w-80">
@@ -80,10 +80,10 @@ export function JobsFeaturedCarousels({
 
   return (
     <div
-      className={`border-t px-4 py-8 font-[family-name:var(--font-outfit)] sm:px-6 ${
+      className={`border-t px-4 font-[family-name:var(--font-outfit)] sm:px-6 ${
         isHomepage
-          ? "border-[#e8e8ed] bg-[#fbfbfd]"
-          : "border-[#E5E7EB] bg-[#F9FAFB] py-6"
+          ? "border-[#e8e8ed] bg-[#fbfbfd] py-4 sm:py-8"
+          : "border-[#E5E7EB] bg-[#F9FAFB] py-4 sm:py-6"
       }`}
     >
       <JobCarousel
