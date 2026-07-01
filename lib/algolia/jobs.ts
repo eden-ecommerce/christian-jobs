@@ -372,6 +372,7 @@ export async function searchJobs(
       "categoryHierarchy.lvl4",
       "organisationType",
       "jobType",
+      "contractType",
       "denomination",
     ],
   };
@@ -387,7 +388,7 @@ export async function searchJobs(
     return { ...EMPTY_RESULT, configured: true };
   }
 
-  const facets = readFacets(facetResult);
+  let facets = readFacets(facetResult);
 
   let hits = (main.hits as RawHit[]).map(mapHit);
   let nbHits = main.nbHits ?? hits.length;
@@ -439,10 +440,13 @@ export async function searchJobs(
   }
 
   if (needsClientProcessing) {
+    facets = enrichContractTypeFacets(facets, hits);
     nbPages = Math.max(1, Math.ceil(nbHits / hitsPerPage));
     resolvedPage = Math.min(page, nbPages - 1);
     const start = resolvedPage * hitsPerPage;
     hits = hits.slice(start, start + hitsPerPage);
+  } else {
+    facets = enrichContractTypeFacets(facets, hits);
   }
 
   return {
@@ -453,6 +457,34 @@ export async function searchJobs(
     configured: true,
     facets,
   };
+}
+
+function formatContractTypeLabel(value: string): string {
+  return value
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/^./, (c) => c.toUpperCase());
+}
+
+/** Derive contract-type facet counts from job hits when Algolia facets are unavailable. */
+function contractTypesFromHits(hits: JobHit[]): JobFacet[] {
+  const counts = new Map<string, number>();
+  for (const hit of hits) {
+    if (!hit.jobType) continue;
+    counts.set(hit.jobType, (counts.get(hit.jobType) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([value, count]) => ({
+      value,
+      label: formatContractTypeLabel(value),
+      count,
+    }))
+    .sort((a, b) => b.count - a.count);
+}
+
+function enrichContractTypeFacets(facets: JobFacets, hits: JobHit[]): JobFacets {
+  if (facets.contractTypes.length > 0 || hits.length === 0) return facets;
+  const contractTypes = contractTypesFromHits(hits);
+  return contractTypes.length > 0 ? { ...facets, contractTypes } : facets;
 }
 
 function readFacets(result: unknown): JobFacets {
@@ -511,12 +543,12 @@ function readFacets(result: unknown): JobFacets {
     }))
     .sort((a, b) => b.count - a.count);
 
-  const contractTypes = Object.entries(facets["jobType"] ?? {})
+  const contractTypes = Object.entries(
+    facets["jobType"] ?? facets["contractType"] ?? {},
+  )
     .map(([value, count]) => ({
       value,
-      label: value
-        .replace(/([a-z])([A-Z])/g, "$1 $2")
-        .replace(/^./, (c) => c.toUpperCase()),
+      label: formatContractTypeLabel(value),
       count,
     }))
     .sort((a, b) => b.count - a.count);
@@ -647,26 +679,7 @@ export async function getCharityJobs(limit = 8): Promise<JobHit[]> {
 /** Fetch filter facet options for the jobs browser. */
 export async function getJobFilterOptions(): Promise<JobFacets> {
   const result = await searchJobs({ hitsPerPage: 1000, sort: "date_desc" });
-  const facets = { ...result.facets };
-
-  if (facets.contractTypes.length === 0 && result.hits.length > 0) {
-    const counts = new Map<string, number>();
-    for (const hit of result.hits) {
-      if (!hit.jobType) continue;
-      counts.set(hit.jobType, (counts.get(hit.jobType) ?? 0) + 1);
-    }
-    facets.contractTypes = [...counts.entries()]
-      .map(([value, count]) => ({
-        value,
-        label: value
-          .replace(/([a-z])([A-Z])/g, "$1 $2")
-          .replace(/^./, (c) => c.toUpperCase()),
-        count,
-      }))
-      .sort((a, b) => b.count - a.count);
-  }
-
-  return facets;
+  return result.facets;
 }
 
 // ---------------------------------------------------------------------------

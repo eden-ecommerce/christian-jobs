@@ -25,6 +25,7 @@ type Props = {
   };
   onChange: (changes: Partial<JobsUrlState>) => void;
   onClearAll: () => void;
+  compact?: boolean;
 };
 
 export function JobsFilterPills({
@@ -32,6 +33,7 @@ export function JobsFilterPills({
   facets,
   onChange,
   onClearAll,
+  compact = false,
 }: Props) {
   const hasActive =
     state.contractTypes.length > 0 ||
@@ -62,8 +64,8 @@ export function JobsFilterPills({
   }
 
   return (
-    <div className="border-b border-border bg-background">
-      <div className="mx-auto max-w-[1600px] px-4 py-2 sm:px-6">
+    <div className={compact ? undefined : "border-b border-border bg-background"}>
+      <div className={compact ? "py-1" : "mx-auto max-w-[1600px] px-4 py-2 sm:px-6"}>
         <div className="relative min-w-0">
           <div
             className={`flex items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden${

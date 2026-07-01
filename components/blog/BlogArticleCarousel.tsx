@@ -72,7 +72,7 @@ export async function BlogArticleCarousel() {
   if (articles.length === 0) return null;
 
   return (
-    <section className="py-8" aria-labelledby="blog-carousel-heading">
+    <section className="py-4" aria-labelledby="blog-carousel-heading">
       <div className="flex items-end justify-between gap-4">
         <div>
           <h2

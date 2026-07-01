@@ -31,7 +31,84 @@ type Props = {
   onSelect: (jobId: string) => void;
   onLoadMore: () => void;
   onPrefetch?: (jobId: string) => void;
+  /** Page scroll (Indeed-style) vs fixed-height column scroll. */
+  listScroll?: "container" | "page";
+  /** Hide the results toolbar — use when rendering it above a split layout. */
+  hideToolbar?: boolean;
 };
+
+function resultsLabel(
+  filterState: JobsUrlState | undefined,
+  total: number,
+  hasActiveFilters: boolean,
+) {
+  const latestBrowse = filterState ? isLatestJobsBrowse(filterState) : false;
+  const newestFirst = filterState ? isNewestFirst(filterState) : false;
+
+  if (latestBrowse) {
+    return (
+      <>
+        <span className="font-semibold text-foreground">Latest jobs</span>
+        <span className="font-normal text-muted-foreground">
+          {" "}
+          · {total.toLocaleString()} most recently added
+        </span>
+      </>
+    );
+  }
+
+  if (newestFirst) {
+    return (
+      <>
+        {total.toLocaleString()}{" "}
+        {hasActiveFilters ? "filtered " : ""}
+        {total === 1 ? "result" : "results"}
+        <span className="font-normal text-muted-foreground"> · Newest first</span>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {total.toLocaleString()}{" "}
+      {hasActiveFilters ? "filtered " : ""}
+      {total === 1 ? "result" : "results"}
+    </>
+  );
+}
+
+/** Results count and quick actions above the job list. */
+export function JobsListToolbar({ total, filterState }: { total: number; filterState?: JobsUrlState }) {
+  const hasActiveFilters = filterState
+    ? countActiveFilters(filterState) > 0
+    : false;
+
+  return (
+    <div className="flex items-center justify-between px-1 pb-2">
+      <p className="text-sm text-foreground">
+        {resultsLabel(filterState, total, hasActiveFilters)}
+      </p>
+      <div className="flex items-center gap-2">
+        <Link
+          href={`${NAMESPACE_PATH}/saved`}
+          className="inline-flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-foreground shadow-soft-sm transition-colors hover:border-[#2d6a4f]/30"
+        >
+          <Bookmark className="h-3.5 w-3.5" aria-hidden="true" />
+          Saved
+        </Link>
+        <a
+          href={POST_JOB_HREF}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-full bg-[#2d6a4f] px-3 py-1.5 text-xs font-semibold text-white shadow-soft-sm transition-opacity hover:opacity-90"
+        >
+          <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+          Post
+        </a>
+      </div>
+    </div>
+  );
+}
 
 /** Scrollable middle column with job cards and infinite scroll. */
 export function JobsListPane({
@@ -48,45 +125,10 @@ export function JobsListPane({
   onSelect,
   onLoadMore,
   onPrefetch,
+  listScroll = "container",
+  hideToolbar = false,
 }: Props) {
-  const hasActiveFilters = filterState
-    ? countActiveFilters(filterState) > 0
-    : false;
-  const latestBrowse = filterState ? isLatestJobsBrowse(filterState) : false;
-  const newestFirst = filterState ? isNewestFirst(filterState) : false;
-
-  function resultsLabel() {
-    if (latestBrowse) {
-      return (
-        <>
-          <span className="font-semibold text-foreground">Latest jobs</span>
-          <span className="font-normal text-muted-foreground">
-            {" "}
-            · {total.toLocaleString()} most recently added
-          </span>
-        </>
-      );
-    }
-
-    if (newestFirst) {
-      return (
-        <>
-          {total.toLocaleString()}{" "}
-          {hasActiveFilters ? "filtered " : ""}
-          {total === 1 ? "result" : "results"}
-          <span className="font-normal text-muted-foreground"> · Newest first</span>
-        </>
-      );
-    }
-
-    return (
-      <>
-        {total.toLocaleString()}{" "}
-        {hasActiveFilters ? "filtered " : ""}
-        {total === 1 ? "result" : "results"}
-      </>
-    );
-  }
+  const pageScroll = listScroll === "page";
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -104,38 +146,24 @@ export function JobsListPane({
     const el = sentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(handleIntersect, {
-      root: listRef.current,
+      root: pageScroll ? null : listRef.current,
       rootMargin: "200px",
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [handleIntersect]);
+  }, [handleIntersect, pageScroll]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 items-center justify-between px-1 pb-2">
-        <p className="text-sm text-foreground">{resultsLabel()}</p>
-        <div className="flex items-center gap-2">
-          <Link
-            href={`${NAMESPACE_PATH}/saved`}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-foreground shadow-soft-sm transition-colors hover:border-[#2d6a4f]/30"
-          >
-            <Bookmark className="h-3.5 w-3.5" aria-hidden="true" />
-            Saved
-          </Link>
-          <a
-            href={POST_JOB_HREF}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#2d6a4f] px-3 py-1.5 text-xs font-semibold text-white shadow-soft-sm transition-opacity hover:opacity-90"
-          >
-            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-            Post
-          </a>
-        </div>
-      </div>
+    <div className={pageScroll ? "flex flex-col" : "flex h-full min-h-0 flex-col"}>
+      {hideToolbar ? null : (
+        <JobsListToolbar total={total} filterState={filterState} />
+      )}
 
-      {filterState && filterFacets && onFilterChange && onClearFilters ? (
+      {!hideToolbar &&
+      filterState &&
+      filterFacets &&
+      onFilterChange &&
+      onClearFilters ? (
         <JobsActiveFilterBadges
           state={filterState}
           facets={filterFacets}
@@ -146,7 +174,11 @@ export function JobsListPane({
 
       <div
         ref={listRef}
-        className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1"
+        className={
+          pageScroll
+            ? "space-y-3"
+            : "min-h-0 flex-1 space-y-3 overflow-y-auto pr-1"
+        }
         aria-label="Job results"
       >
         {loading && jobs.length === 0 ? (

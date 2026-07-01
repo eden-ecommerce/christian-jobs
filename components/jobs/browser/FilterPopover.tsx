@@ -44,7 +44,7 @@ export function FilterPopover({
   const close = useCallback(() => {
     setOpen(false);
     onClose?.();
-    triggerRef.current?.focus();
+    triggerRef.current?.focus({ preventScroll: true });
   }, [onClose]);
 
   useLayoutEffect(() => {

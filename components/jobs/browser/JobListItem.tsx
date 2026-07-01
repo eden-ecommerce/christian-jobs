@@ -17,8 +17,8 @@ type Props = {
   selected: boolean;
   onSelect: (jobId: string) => void;
   onPrefetch?: (jobId: string) => void;
-  /** Card variant for list; compact for carousels */
-  variant?: "card" | "compact";
+  /** Card variant for list; compact for carousels; v3 for homepage editorial cards */
+  variant?: "card" | "compact" | "v3";
   /** Equal-height layout for horizontal carousels only */
   matchHeight?: boolean;
 };
@@ -42,7 +42,8 @@ export function JobListItem({
   const contractLabel = job.jobType ? humaniseJobType(job.jobType) : null;
   const workLabel = job.online ? "Remote" : "Onsite";
 
-  const isCard = variant === "card";
+  const isCard = variant === "card" || variant === "v3";
+  const isV3 = variant === "v3";
 
   return (
     <article
@@ -59,7 +60,11 @@ export function JobListItem({
       onMouseEnter={() => onPrefetch?.(job.id)}
       onFocus={() => onPrefetch?.(job.id)}
       className={`relative cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2d6a4f]/30 ${
-        isCard
+        isV3
+          ? `${matchHeight ? "flex h-full w-full flex-col " : ""}rounded-[20px] bg-white p-4 shadow-[0_4px_24px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] ${
+              selected ? "ring-2 ring-[#235A0E]" : ""
+            }`
+          : isCard
           ? `${matchHeight ? "flex h-full w-full flex-col " : ""}rounded-2xl bg-white p-4 shadow-soft hover:shadow-[0_6px_24px_rgba(0,0,0,0.07)] ${
               selected
                 ? "border-2 border-[#2d6a4f]"

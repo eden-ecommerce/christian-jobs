@@ -78,6 +78,7 @@ export function JobDetailPanel({
   onPrefetch,
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const postedLabel = usePostedLabel(data?.job.postedTimestamp ?? null);
   const [now] = useState(() => Date.now());
   const isNew = Boolean(
@@ -87,7 +88,10 @@ export function JobDetailPanel({
 
   useEffect(() => {
     if (data?.job.id && panelRef.current) {
-      panelRef.current.focus();
+      panelRef.current.focus({ preventScroll: true });
+    }
+    if (data?.job.id && scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
     }
   }, [data?.job.id]);
 
@@ -160,7 +164,10 @@ export function JobDetailPanel({
       className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white shadow-soft outline-none"
       aria-label={`Job details: ${job.title}`}
     >
-      <div className="min-h-0 flex-1 overflow-y-auto p-6">
+      <div
+        ref={scrollRef}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6"
+      >
         {/* Header: logo, title, and actions on one row */}
         <header className="flex items-start gap-3">
           {logoUrl ? (

@@ -23,14 +23,23 @@ function SearchField({
   label,
   htmlFor,
   children,
+  compact = false,
 }: {
   label: string;
   htmlFor: string;
   children: ReactNode;
+  compact?: boolean;
 }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1">
-      <label htmlFor={htmlFor} className="text-xs font-medium text-muted-foreground">
+      <label
+        htmlFor={htmlFor}
+        className={
+          compact
+            ? "sr-only"
+            : "text-xs font-medium text-muted-foreground"
+        }
+      >
         {label}
       </label>
       {children}
@@ -83,6 +92,8 @@ type Props = {
   showDesktopForm?: boolean;
   /** When false, the mobile search bar/sheet is not rendered. */
   showMobileForm?: boolean;
+  /** Tighter single-row layout for v3 and similar experiments. */
+  compact?: boolean;
 };
 
 /** Sticky keyword + location search bar for the jobs browser. */
@@ -98,6 +109,7 @@ export function JobsSearchBar({
   endSlot,
   showDesktopForm = true,
   showMobileForm = true,
+  compact = false,
 }: Props) {
   const mapsEnabled = isGoogleMapsEnvConfigured();
   const { setLocation } = useUserLocation();
@@ -195,19 +207,23 @@ export function JobsSearchBar({
   }, [keyword, runSearch]);
 
   const keywordPlaceholder = "Job title, keywords, or company";
+  const inputHeightClass = compact ? "h-10" : "h-12";
+  const desktopFormClass = compact
+    ? "mx-auto hidden max-w-none flex-col gap-2 px-0 py-2 lg:flex-row lg:items-center lg:gap-2 lg:flex"
+    : desktopSearchFormClass(showEmployerHint);
 
   return (
     <>
       {showDesktopForm ? (
-      <SearchBarShell elevated={showEmployerHint}>
+      <SearchBarShell elevated={showEmployerHint && !compact}>
         <form
           onSubmit={submitDesktop}
-          className={desktopSearchFormClass(showEmployerHint)}
+          className={desktopFormClass}
         >
-          <SearchField label={KEYWORD_FIELD_LABEL} htmlFor={KEYWORD_FIELD_ID}>
+          <SearchField label={KEYWORD_FIELD_LABEL} htmlFor={KEYWORD_FIELD_ID} compact={compact}>
             <div className="relative">
               <Search
-                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                className={`pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground ${compact ? "h-3.5 w-3.5" : "left-4 h-4 w-4"}`}
                 aria-hidden="true"
               />
               <input
@@ -216,12 +232,12 @@ export function JobsSearchBar({
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 placeholder={keywordPlaceholder}
-                className="h-12 w-full rounded-xl border border-[#E5E7EB] bg-white pl-11 pr-3 text-sm text-foreground shadow-soft-sm outline-none placeholder:text-muted-foreground focus:border-[#2d6a4f] focus:ring-2 focus:ring-[#2d6a4f]/15"
+                className={`${inputHeightClass} w-full rounded-xl border border-[#E5E7EB] bg-white pr-3 text-sm text-foreground shadow-soft-sm outline-none placeholder:text-muted-foreground focus:border-[#2d6a4f] focus:ring-2 focus:ring-[#2d6a4f]/15 ${compact ? "pl-9" : "pl-11"}`}
               />
             </div>
           </SearchField>
 
-          <SearchField label={LOCATION_FIELD_LABEL} htmlFor={LOCATION_FIELD_ID}>
+          <SearchField label={LOCATION_FIELD_LABEL} htmlFor={LOCATION_FIELD_ID} compact={compact}>
             <div className={locationFieldShellClass}>
               {mapsEnabled ? (
                 <LocationSearch
@@ -230,7 +246,7 @@ export function JobsSearchBar({
                   initialLabel={location}
                   onPlaceSelect={handlePlaceSelect}
                   placeholder={'City, postcode or "remote"'}
-                  className={locationInputInnerClass}
+                  className={`${compact ? "h-10" : "h-12"} min-w-0 flex-1 rounded-none border-0 bg-transparent px-3 text-sm shadow-none outline-none focus-visible:border-transparent focus-visible:ring-0`}
                 />
               ) : (
                 <input
@@ -239,7 +255,7 @@ export function JobsSearchBar({
                   type="text"
                   defaultValue={location}
                   placeholder={'City, postcode or "remote"'}
-                  className={`${locationInputInnerClass} outline-none`}
+                  className={`${compact ? "h-10" : "h-12"} min-w-0 flex-1 rounded-none border-0 bg-transparent px-3 text-sm shadow-none outline-none focus-visible:border-transparent focus-visible:ring-0`}
                 />
               )}
               <div
@@ -252,6 +268,7 @@ export function JobsSearchBar({
                 onChange={onRadiusChange}
               />
             </div>
+            {!compact ? (
             <button
               type="button"
               onClick={useCurrentLocation}
@@ -260,18 +277,19 @@ export function JobsSearchBar({
               <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
               Use my current location
             </button>
+            ) : null}
           </SearchField>
 
           <button
             type="submit"
-            className="mt-5 inline-flex h-12 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-[#2d6a4f] px-7 text-sm font-semibold text-white shadow-soft transition-opacity hover:opacity-90"
+            className={`inline-flex ${inputHeightClass} shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2d6a4f] text-sm font-semibold text-white shadow-soft transition-opacity hover:opacity-90 ${compact ? "self-auto px-5 lg:self-auto" : "mt-5 self-start px-7"}`}
           >
             <Search className="h-4 w-4" aria-hidden="true" />
             Search
           </button>
 
           {endSlot ? (
-            <div className="mt-5 self-start">{endSlot}</div>
+            <div className={compact ? "self-auto" : "mt-5 self-start"}>{endSlot}</div>
           ) : null}
         </form>
       </SearchBarShell>
