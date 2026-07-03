@@ -4,6 +4,7 @@ import {
   type JobSort,
   type DatePostedFilter,
 } from "@lib/algolia/jobs";
+import type { JobWorkType } from "@lib/jobs/search-params";
 
 function one(value: string | null): string | undefined {
   return value ?? undefined;
@@ -31,19 +32,26 @@ export async function GET(req: NextRequest) {
   const datePostedRaw = one(sp.get("datePosted")) as DatePostedFilter | undefined;
   const minSalaryRaw = one(sp.get("minSalary"));
   const onlineRaw = one(sp.get("online"));
-  const workTypeRaw = one(sp.get("workType")) as
-    | "onsite"
-    | "hybrid"
-    | "remote"
-    | undefined;
+  const workTypes = multi(sp, "workType").filter(
+    (value): value is JobWorkType =>
+      value === "onsite" || value === "hybrid" || value === "remote",
+  );
+  const workTypeRaw = one(sp.get("workType")) as JobWorkType | undefined;
 
   let online: boolean | undefined;
   if (onlineRaw === "true") online = true;
   else if (onlineRaw === "false") online = false;
 
-  const workType =
-    workTypeRaw ??
-    (online === true ? "remote" : online === false ? "onsite" : undefined);
+  const resolvedWorkTypes: JobWorkType[] =
+    workTypes.length > 0
+      ? workTypes
+      : workTypeRaw
+        ? [workTypeRaw]
+        : online === true
+          ? ["remote"]
+          : online === false
+            ? ["onsite"]
+            : [];
 
   const query = [one(sp.get("q")), one(sp.get("location"))]
     .filter(Boolean)
@@ -74,7 +82,7 @@ export async function GET(req: NextRequest) {
         : undefined,
       minSalary: minSalaryRaw ? Number(minSalaryRaw) : undefined,
       datePosted: datePostedRaw,
-      workType,
+      workTypes: resolvedWorkTypes.length ? resolvedWorkTypes : undefined,
       sort: sortRaw ?? (hasGeo ? "distance" : "date_desc"),
       page: pageRaw ? Math.max(0, Number(pageRaw) - 1) : 0,
       hitsPerPage: one(sp.get("pageSize"))

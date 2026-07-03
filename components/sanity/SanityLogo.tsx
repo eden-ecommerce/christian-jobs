@@ -8,6 +8,7 @@ type LogoVariant = "standard" | "summerStandard";
 
 type SanityLogoProps = {
   variant?: LogoVariant;
+  href?: string;
   lazyLoad?: boolean;
   className?: string;
   imgClassName?: string;
@@ -20,12 +21,13 @@ const logoSources: Record<LogoVariant, string> = {
 
 export const SanityLogo = ({
   variant = "standard",
+  href = SANITY_LINKS.home,
   lazyLoad = false,
   className,
   imgClassName,
 }: SanityLogoProps) => {
   return (
-    <a href={SANITY_LINKS.home} className={className}>
+    <a href={href} className={className}>
       <Image
         priority={!lazyLoad}
         src={logoSources[variant]}

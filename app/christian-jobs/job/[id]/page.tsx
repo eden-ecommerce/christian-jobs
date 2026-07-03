@@ -19,6 +19,10 @@ import { SaveJobButton } from "@components/jobs/SaveJobButton";
 import { PostJobSidebarCta } from "@components/jobs/PromoteJobBanner";
 import { HostedByCard } from "@components/events/HostedByCard";
 import { getJobById, getOrganisationById, searchJobs } from "@lib/algolia/jobs";
+import {
+  formatJobDescriptionHtml,
+  hasDisplayableSalary,
+} from "@lib/jobs/format-job";
 import { validateBrandingColor, pickOrgAccentColor, contrastForeground } from "@lib/org-color";
 import { NAMESPACE_PATH } from "@lib/config";
 import { buildBreadcrumbJsonLd, jsonLdScriptProps } from "@lib/seo/jsonld";
@@ -176,9 +180,12 @@ export default async function JobPage({ params }: Props) {
               <h2 className="mb-3 text-lg font-semibold text-foreground">
                 About this role
               </h2>
-              <p className="whitespace-pre-line text-pretty leading-relaxed text-muted-foreground">
-                {job.description}
-              </p>
+              <div
+                className="prose prose-sm max-w-none text-muted-foreground"
+                dangerouslySetInnerHTML={{
+                  __html: formatJobDescriptionHtml(job.description),
+                }}
+              />
             </div>
           )}
 
@@ -198,21 +205,22 @@ export default async function JobPage({ params }: Props) {
         <aside className="lg:sticky lg:top-6 lg:self-start">
           <div className="rounded-xl border border-border bg-card p-5">
             <dl className="flex flex-col gap-4">
-              {/* Salary */}
-              <div className="flex items-start gap-3">
-                <BanknoteIcon
-                  className="mt-0.5 h-5 w-5 shrink-0 text-primary"
-                  aria-hidden="true"
-                />
-                <div>
-                  <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Salary
-                  </dt>
-                  <dd className="text-sm font-medium text-foreground">
-                    {job.salary ?? "Not specified"}
-                  </dd>
+              {hasDisplayableSalary(job.salary) ? (
+                <div className="flex items-start gap-3">
+                  <BanknoteIcon
+                    className="mt-0.5 h-5 w-5 shrink-0 text-primary"
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Salary
+                    </dt>
+                    <dd className="text-sm font-medium text-foreground">
+                      {job.salary}
+                    </dd>
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
               {/* Location */}
               <div className="flex items-start gap-3">

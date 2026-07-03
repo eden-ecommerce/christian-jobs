@@ -31,7 +31,7 @@ export const productAttributesToRetrieve = [
 ] as const;
 
 /** Default radius in metres for aroundRadius — verify against live index requirements. */
-export const DEFAULT_LOCATION_RADIUS_METERS = 50_000;
+export const DEFAULT_LOCATION_RADIUS_METERS = 40_234;
 
 /** Base filter for event searches on organisationHub. */
 export const EVENTS_BASE_FILTER = "entityType:event AND published:true";

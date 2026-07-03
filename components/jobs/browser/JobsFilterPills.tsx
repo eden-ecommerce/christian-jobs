@@ -5,13 +5,14 @@ import type { JobFacet } from "@lib/algolia/jobs";
 import {
   CONTRACT_TYPE_OPTIONS,
   DATE_POSTED_OPTIONS,
+  hasActiveJobSearch,
   ORGANISATION_TYPE_OPTIONS,
   SALARY_OPTIONS,
   SORT_OPTIONS,
   WORK_TYPE_OPTIONS,
   type DatePosted,
+  type JobWorkType,
   type JobsUrlState,
-  type WorkType,
 } from "@lib/jobs/search-params";
 import type { JobSort } from "@lib/algolia/jobs";
 
@@ -35,15 +36,7 @@ export function JobsFilterPills({
   onClearAll,
   compact = false,
 }: Props) {
-  const hasActive =
-    state.contractTypes.length > 0 ||
-    state.organisationTypes.length > 0 ||
-    state.workType !== "any" ||
-    state.denominations.length > 0 ||
-    !!state.minSalary ||
-    state.datePosted !== "any" ||
-    state.sort === "relevance" ||
-    !!state.category;
+  const hasActive = hasActiveJobSearch(state);
 
   const contractOptions =
     facets.contractTypes.length > 0
@@ -153,23 +146,32 @@ export function JobsFilterPills({
             </div>
           </FilterPopover>
 
-          <FilterPopover label="Work Type" active={state.workType !== "any"}>
+          <FilterPopover
+            label="Work Type"
+            active={state.workTypes.length > 0}
+            activeCount={state.workTypes.length}
+          >
             <div className="flex flex-col">
-              {WORK_TYPE_OPTIONS.map((opt) => (
-                <FilterOption
-                  key={opt.value}
-                  type="radio"
-                  name="workType"
-                  label={opt.label}
-                  checked={state.workType === opt.value}
-                  onChange={() =>
-                    onChange({
-                      workType: opt.value as WorkType,
-                      page: 0,
-                    })
-                  }
-                />
-              ))}
+              {WORK_TYPE_OPTIONS.filter((opt) => opt.value !== "any").map(
+                (opt) => (
+                  <FilterOption
+                    key={opt.value}
+                    type="checkbox"
+                    name="workType"
+                    label={opt.label}
+                    checked={state.workTypes.includes(opt.value as JobWorkType)}
+                    onChange={() =>
+                      onChange({
+                        workTypes: toggleArrayValue(
+                          state.workTypes,
+                          opt.value,
+                        ) as JobWorkType[],
+                        page: 0,
+                      })
+                    }
+                  />
+                ),
+              )}
             </div>
           </FilterPopover>
 
@@ -247,32 +249,6 @@ export function JobsFilterPills({
               ))}
             </div>
           </FilterPopover>
-
-          {facets.categories.length > 0 ? (
-            <FilterPopover label="Categories" active={!!state.category}>
-              <div className="flex max-h-64 flex-col overflow-y-auto">
-                <FilterOption
-                  type="radio"
-                  name="category"
-                  label="All categories"
-                  checked={!state.category}
-                  onChange={() => onChange({ category: undefined, page: 0 })}
-                />
-                {facets.categories.map((cat) => (
-                  <FilterOption
-                    key={cat.value}
-                    type="radio"
-                    name="category"
-                    label={`${cat.label} (${cat.count})`}
-                    checked={state.category === cat.value}
-                    onChange={() =>
-                      onChange({ category: cat.value, page: 0 })
-                    }
-                  />
-                ))}
-              </div>
-            </FilterPopover>
-          ) : null}
           </div>
 
           {hasActive ? (
@@ -286,7 +262,7 @@ export function JobsFilterPills({
                 onClick={onClearAll}
                 className="absolute inset-y-0 right-0 z-[2] flex items-center bg-background pl-4 text-sm font-medium text-[#2d6a4f] hover:underline"
               >
-                Clear all filters
+                Clear search
               </button>
             </>
           ) : null}

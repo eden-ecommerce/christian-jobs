@@ -5,7 +5,16 @@ import type { SearchJobsParams } from "@lib/algolia/jobs";
 const MILE_IN_METERS = 1609.344;
 
 export type WorkType = "any" | "onsite" | "hybrid" | "remote";
+export type JobWorkType = Exclude<WorkType, "any">;
 export type DatePosted = "any" | "24h" | "week" | "month";
+
+export type JobsHeroSearchSubmit = {
+  category?: string;
+  workTypes: JobWorkType[];
+  contractTypes?: string[];
+  location: { label: string; lat?: number; lng?: number };
+  radius?: number;
+};
 
 export type JobsUrlState = {
   q: string;
@@ -18,7 +27,7 @@ export type JobsUrlState = {
   uncategorised?: boolean;
   contractTypes: string[];
   organisationTypes: string[];
-  workType: WorkType;
+  workTypes: JobWorkType[];
   denominations: string[];
   minSalary?: number;
   datePosted: DatePosted;
@@ -61,6 +70,29 @@ export const WORK_TYPE_OPTIONS = [
   { label: "Remote", value: "remote" },
 ] as const;
 
+/** Primary search work-type pills — no "Any" option. */
+export const HERO_WORK_TYPE_OPTIONS = [
+  { label: "Remote", value: "remote" },
+  { label: "Hybrid", value: "hybrid" },
+  { label: "Onsite", value: "onsite" },
+] as const satisfies readonly { label: string; value: JobWorkType }[];
+
+/** Primary search contract-type pills for the v5 hero. */
+export const HERO_CONTRACT_TYPE_OPTIONS = [
+  { label: "Full time", value: "fullTime" },
+  { label: "Part time", value: "partTime" },
+] as const;
+
+const VALID_JOB_WORK_TYPES = new Set<string>(["onsite", "hybrid", "remote"]);
+
+export function parseJobWorkTypes(
+  values: string[],
+): JobWorkType[] {
+  return values.filter(
+    (value): value is JobWorkType => VALID_JOB_WORK_TYPES.has(value),
+  );
+}
+
 export const DATE_POSTED_OPTIONS = [
   { label: "Any time", value: "any" },
   { label: "Past 24 hours", value: "24h" },
@@ -74,14 +106,19 @@ export const SORT_OPTIONS = [
 ] as const;
 
 export const LOCATION_RADIUS_OPTIONS = [
+  { miles: 5, label: "Within 5 miles", value: Math.round(5 * MILE_IN_METERS) },
   { miles: 10, label: "Within 10 miles", value: Math.round(10 * MILE_IN_METERS) },
-  { miles: 20, label: "Within 20 miles", value: Math.round(20 * MILE_IN_METERS) },
   {
-    miles: 30,
-    label: "Within 30 miles",
+    miles: 25,
+    label: "Within 25 miles",
     value: DEFAULT_LOCATION_RADIUS_METERS,
   },
   { miles: 50, label: "Within 50 miles", value: Math.round(50 * MILE_IN_METERS) },
+  {
+    miles: 100,
+    label: "Within 100 miles",
+    value: Math.round(100 * MILE_IN_METERS),
+  },
 ] as const;
 
 /** Effective geo search radius in metres (URL override or site default). */
@@ -126,7 +163,7 @@ export function parseJobsUrlState(
   const minSalaryRaw = one(sp.minSalary);
   const pageRaw = one(sp.page);
   const sortRaw = one(sp.sort) as JobSort | undefined;
-  const workTypeRaw = one(sp.workType) as WorkType | undefined;
+  const workTypes = parseJobWorkTypes(multi(sp.workType));
   const datePostedRaw = one(sp.datePosted) as DatePosted | undefined;
 
   return {
@@ -140,7 +177,7 @@ export function parseJobsUrlState(
     uncategorised: one(sp.uncategorised) === "true" ? true : undefined,
     contractTypes: multi(sp.contractType),
     organisationTypes: multi(sp.organisationType ?? sp.org),
-    workType: workTypeRaw ?? "any",
+    workTypes,
     denominations: multi(sp.denomination),
     minSalary: minSalaryRaw ? Number(minSalaryRaw) : undefined,
     datePosted: datePostedRaw ?? "any",
@@ -163,7 +200,7 @@ export function jobsUrlStateToSearchParams(state: JobsUrlState): URLSearchParams
   if (state.uncategorised) params.set("uncategorised", "true");
   for (const ct of state.contractTypes) params.append("contractType", ct);
   for (const ot of state.organisationTypes) params.append("organisationType", ot);
-  if (state.workType !== "any") params.set("workType", state.workType);
+  for (const workType of state.workTypes) params.append("workType", workType);
   for (const d of state.denominations) params.append("denomination", d);
   if (state.minSalary) params.set("minSalary", String(state.minSalary));
   if (state.datePosted !== "any") params.set("datePosted", state.datePosted);
@@ -201,7 +238,7 @@ export function toSearchJobsParams(state: JobsUrlState): SearchJobsParams {
     params.radiusMeters = resolveLocationRadiusMeters(state.radius);
   }
 
-  if (state.workType !== "any") params.workType = state.workType;
+  if (state.workTypes.length) params.workTypes = state.workTypes;
 
   return params;
 }
@@ -216,7 +253,7 @@ export function countActiveFilters(state: JobsUrlState): number {
   }
   if (state.contractTypes.length) count++;
   if (state.organisationTypes.length) count++;
-  if (state.workType !== "any") count++;
+  if (state.workTypes.length) count++;
   if (state.denominations.length) count++;
   if (state.minSalary) count++;
   if (state.datePosted !== "any") count++;
@@ -234,4 +271,24 @@ export function isNewestFirst(state: JobsUrlState): boolean {
 /** Default landing view — all jobs, newest first, no search or filters. */
 export function isLatestJobsBrowse(state: JobsUrlState): boolean {
   return isNewestFirst(state) && !state.q.trim() && countActiveFilters(state) === 0;
+}
+
+/** URL state for the default latest-jobs browse — clears hero search and all filters. */
+export function latestJobsBrowseState(): JobsUrlState {
+  return {
+    q: "",
+    location: "",
+    contractTypes: [],
+    organisationTypes: [],
+    workTypes: [],
+    denominations: [],
+    datePosted: "any",
+    sort: "date_desc",
+    page: 0,
+  };
+}
+
+/** True when the user has moved away from the default latest-jobs browse. */
+export function hasActiveJobSearch(state: JobsUrlState): boolean {
+  return !isLatestJobsBrowse(state);
 }

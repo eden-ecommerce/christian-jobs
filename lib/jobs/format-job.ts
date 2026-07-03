@@ -1,5 +1,34 @@
 import type { JobHit } from "@lib/algolia/jobs";
 
+const HTML_TAG_PATTERN = /<\/?[a-z][\s\S]*>/i;
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/** Convert plain-text line breaks to paragraph markup; pass through existing HTML. */
+export function formatJobDescriptionHtml(description: string): string {
+  const trimmed = description.trim();
+  if (!trimmed) return "";
+  if (HTML_TAG_PATTERN.test(trimmed)) return trimmed;
+
+  return trimmed
+    .split(/\n{2,}/)
+    .map((paragraph) => {
+      const lines = paragraph
+        .split(/\n/)
+        .map((line) => escapeHtml(line))
+        .join("<br />");
+      return `<p>${lines}</p>`;
+    })
+    .join("");
+}
+
 /** Compose a short location line for job cards and detail views. */
 export function jobLocationLine(job: Pick<
   JobHit,
@@ -13,18 +42,62 @@ export function jobLocationLine(job: Pick<
   return job.locationName ?? "Location to be confirmed";
 }
 
-export function formatPostedLabel(postedTimestamp: number | null): string | null {
+const RECENT_POSTED_WINDOW_DAYS = 7;
+const IMMINENT_CLOSING_WINDOW_DAYS = 3;
+
+export function formatPostedLabel(
+  postedTimestamp: number | null,
+  now = Date.now(),
+): string | null {
   if (!postedTimestamp) return null;
-  const diffDays = Math.floor((Date.now() - postedTimestamp) / 86_400_000);
+  const diffDays = Math.floor((now - postedTimestamp) / 86_400_000);
+  if (diffDays >= RECENT_POSTED_WINDOW_DAYS) return null;
   if (diffDays === 0) return "Posted today";
   if (diffDays === 1) return "Posted yesterday";
-  if (diffDays < 7) return `Posted ${diffDays} days ago`;
-  if (diffDays < 30) {
-    const weeks = Math.floor(diffDays / 7);
-    return `Posted ${weeks} week${weeks === 1 ? "" : "s"} ago`;
-  }
-  const months = Math.floor(diffDays / 30);
-  return `Posted ${months} month${months === 1 ? "" : "s"} ago`;
+  if (diffDays < RECENT_POSTED_WINDOW_DAYS) return "Posted this week";
+  return null;
+}
+
+export type ClosingUrgency = {
+  label: string;
+  daysRemaining: number;
+  isImminent: boolean;
+};
+
+export function getClosingUrgency(
+  job: Pick<JobHit, "closingDate" | "closingDateTimestamp">,
+  now = Date.now(),
+): ClosingUrgency | null {
+  const timestamp =
+    job.closingDateTimestamp ??
+    (job.closingDate ? new Date(job.closingDate).getTime() : null);
+  if (timestamp === null || Number.isNaN(timestamp)) return null;
+
+  const daysRemaining = Math.ceil((timestamp - now) / 86_400_000);
+  if (daysRemaining < 0) return null;
+
+  const label =
+    daysRemaining === 0
+      ? "Closes today"
+      : daysRemaining === 1
+        ? "Closes tomorrow"
+        : `Closes in ${daysRemaining} days`;
+
+  return {
+    label,
+    daysRemaining,
+    isImminent: daysRemaining <= IMMINENT_CLOSING_WINDOW_DAYS,
+  };
+}
+
+/** Closing label for cards — only when the deadline is within a few days. */
+export function formatImminentClosingLabel(
+  job: Pick<JobHit, "closingDate" | "closingDateTimestamp">,
+  now = Date.now(),
+): string | null {
+  const urgency = getClosingUrgency(job, now);
+  if (!urgency?.isImminent) return null;
+  return urgency.label;
 }
 
 export function formatClosingLabel(closingDate: string | null): string | null {
@@ -39,8 +112,30 @@ export function formatClosingLabel(closingDate: string | null): string | null {
   })}`;
 }
 
+/** Whether salary should be shown in the UI (excludes empty, zero, and placeholder values). */
+export function hasDisplayableSalary(salary: string | null): boolean {
+  if (!salary?.trim()) return false;
+
+  const normalised = salary.trim().toLowerCase();
+  if (
+    normalised === "0" ||
+    normalised === "£0" ||
+    normalised === "£0.00" ||
+    normalised === "0.00" ||
+    /^£?\s*0(\.0+)?$/.test(normalised)
+  ) {
+    return false;
+  }
+
+  const minimum = parseSalaryMinimum(salary);
+  if (minimum === 0) return false;
+
+  return true;
+}
+
 export function formatSalary(salary: string | null): string {
-  return salary?.trim() ? salary : "Competitive";
+  if (!hasDisplayableSalary(salary)) return "";
+  return salary!.trim();
 }
 
 /** Split camelCase/PascalCase into spaced words: "partTime" -> "Part Time" */

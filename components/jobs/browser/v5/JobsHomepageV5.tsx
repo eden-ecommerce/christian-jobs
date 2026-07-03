@@ -2,13 +2,14 @@
 
 import { useCallback, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { JobsHeroSectionV3 } from "@components/jobs/browser/v3/JobsHeroSectionV3";
+import { JobsHeroSectionV5 } from "@components/jobs/browser/v5/JobsHeroSectionV5";
 import { JobsFeaturedCarousels } from "@components/jobs/browser/JobsFeaturedCarousels";
 import { GoogleMapsProvider } from "@components/google-maps/GoogleMapsProvider";
 import { isGoogleMapsEnvConfigured } from "@lib/env-configured";
 import { jobsSearchPath } from "@lib/jobs/routes";
 import {
   jobsUrlStateToSearchParams,
+  latestJobsBrowseState,
   type JobsHeroSearchSubmit,
   type JobsUrlState,
 } from "@lib/jobs/search-params";
@@ -19,20 +20,10 @@ type Props = {
   resultsPath?: string;
 };
 
-const defaultBrowseState = (): JobsUrlState => ({
-  q: "",
-  location: "",
-  contractTypes: [],
-  organisationTypes: [],
-  workTypes: [],
-  denominations: [],
-  datePosted: "any",
-  sort: "date_desc",
-  page: 0,
-});
+const defaultBrowseState = (): JobsUrlState => latestJobsBrowseState();
 
-/** V3 landing page — hero search, post-vacancy link, featured jobs and blog. */
-export function JobsHomepageV3({
+/** V5 landing page — Rightmove-inspired hero card, featured jobs and blog. */
+export function JobsHomepageV5({
   blogCarousel,
   resultsPath = jobsSearchPath(),
 }: Props) {
@@ -46,6 +37,7 @@ export function JobsHomepageV3({
         ...defaultBrowseState(),
         category: values.category,
         workTypes: values.workTypes,
+        contractTypes: values.contractTypes ?? [],
         location: values.location.label,
         place: values.location.label || undefined,
         lat: values.location.lat,
@@ -57,6 +49,10 @@ export function JobsHomepageV3({
     },
     [router, resultsPath],
   );
+
+  const handleBrowseLatest = useCallback(() => {
+    router.push(resultsPath);
+  }, [router, resultsPath]);
 
   const handleSelectJob = useCallback(
     (jobId: string) => {
@@ -71,7 +67,10 @@ export function JobsHomepageV3({
 
   const page = (
     <div className="font-[family-name:var(--font-outfit)] bg-[#fbfbfd]">
-      <JobsHeroSectionV3 onSearch={handleSearch} />
+      <JobsHeroSectionV5
+        onSearch={handleSearch}
+        onBrowseLatest={handleBrowseLatest}
+      />
 
       <JobsFeaturedCarousels
         onSelectJob={handleSelectJob}

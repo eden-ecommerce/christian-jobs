@@ -1,138 +1,41 @@
-import Image from "next/image";
-import { Phone } from "lucide-react";
-import { Header, InfoBar } from "@eden-ecommerce/common/blocks/Header";
-import { MobileMegaNav } from "@eden-ecommerce/common/blocks/Navigation";
-import { SanityDesktopMegaNav } from "@/components/sanity/SanityDesktopMegaNav";
-import { HeaderChromeProvider } from "@/components/sanity/header-chrome-context";
+import { ArrowUpRight } from "lucide-react";
 import { SanityHeaderActions } from "@/components/sanity/SanityHeaderActions";
-import {
-  SANITY_ASSETS,
-  SANITY_LINKS,
-} from "@/data/sanity-defaults";
-import {
-  buildInfoBarItems,
-  mapNavForMobileMegaNav,
-  mergeHeaderWithDefaults,
-} from "@/components/sanity/map-header-props";
-import { mapNavForDesktopMegaNav } from "@/components/sanity/map-nav-for-meganav";
-import { SanityHeaderSearch } from "@/components/sanity/SanityHeaderSearch";
 import { SanityLogo } from "@/components/sanity/SanityLogo";
-// import { isSanityEnvConfigured } from "@lib/env-configured.server";
-// import { getHeader } from "@lib/sanity/get-header";
+import { SavedJobsHeaderLink } from "@/components/jobs/SavedJobsHeaderLink";
+import { NAMESPACE_PATH } from "@/constants/app";
+import { SANITY_LINKS } from "@/data/sanity-defaults";
 
-export const SanityHeader = async () => {
-  // @todo Re-enable when CMS navigationBar is ready to ship.
-  // const liveHeader = isSanityEnvConfigured() ? await getHeader() : null;
-  const liveHeader = null;
-  const header = mergeHeaderWithDefaults(liveHeader);
-  const mobileNavItems = mapNavForMobileMegaNav(header.navigationBar);
+const jobsHomeHref = NAMESPACE_PATH ?? "/";
 
+export const SanityHeader = () => {
   return (
-    <HeaderChromeProvider>
-    <Header
-      phoneNumber={header.phoneNumber}
-      openHour={header.openHour}
-      phoneIconSlot={<Phone className="size-8 shrink-0 text-primary-900" aria-hidden />}
-      infoBarSlot={
-        <InfoBar
-          trustpilotRating={header.socialProofRating}
-          trustpilotMaxRating={header.socialProofMaxRating}
-          trustpilotMobileSlot={
-            <Image
-              src={SANITY_ASSETS.trustpilotMobile}
-              width={97}
-              height={25}
-              alt="On Trustpilot"
-              unoptimized
+    <header
+      id="eden-header"
+      className="sticky top-0 z-50 border-b border-border/70 bg-white/95 backdrop-blur-sm"
+    >
+      <div className="mx-auto flex h-14 max-w-screen-2xl items-center justify-between gap-3 px-4 sm:gap-6 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-5">
+          <SanityLogo
+            imgClassName="h-9 w-auto sm:h-10"
+            href={jobsHomeHref}
+          />
+          <a
+            href={SANITY_LINKS.home}
+            className="group inline-flex items-center gap-1 text-[13px] font-medium text-primary-900 transition-colors hover:text-primary-950 sm:text-sm"
+          >
+            <span className="truncate">Go to Eden.co.uk</span>
+            <ArrowUpRight
+              className="size-3.5 shrink-0 transition-transform group-hover:-translate-y-px group-hover:translate-x-px sm:size-4"
+              aria-hidden
             />
-          }
-          infos={buildInfoBarItems(header, {
-            freeIcon: (
-              <Image src={SANITY_ASSETS.free} width={28} height={28} alt="Free" priority unoptimized />
-            ),
-            ukIcon: (
-              <Image src={SANITY_ASSETS.uk} width={28} height={28} alt="UK" priority unoptimized />
-            ),
-            churchIcon: (
-              <Image src={SANITY_ASSETS.church} width={28} height={28} alt="Church" priority unoptimized />
-            ),
-            trustpilotStarIcon: (
-              <Image
-                src={SANITY_ASSETS.trustpilotStar}
-                width={31}
-                height={28}
-                alt="Trustpilot star"
-                priority
-                unoptimized
-              />
-            ),
-            trustpilotSmallStarIcon: (
-              <Image
-                src={SANITY_ASSETS.trustpilotSmallStar}
-                alt="star"
-                width={14}
-                height={14}
-                priority
-                unoptimized
-              />
-            ),
-            trustpilotHeading: (
-              <span>
-                Excellent {header.socialProofRating} out of {header.socialProofMaxRating}&nbsp;
-                <Image
-                  className="inline"
-                  src={SANITY_ASSETS.trustpilotSmallStar}
-                  alt="star"
-                  width={14}
-                  height={14}
-                  priority
-                  unoptimized
-                />{" "}
-                Trustpilot
-              </span>
-            ),
-            trustpilotSubheading: (
-              <ul className="flex gap-1">
-                {[0, 1, 2, 3, 4].map((index) => (
-                  <li key={index} className="bg-[#219653]">
-                    <Image
-                      src={SANITY_ASSETS.trustpilotSmallStar}
-                      alt="star"
-                      width={14}
-                      height={14}
-                      priority
-                      unoptimized
-                    />
-                  </li>
-                ))}
-              </ul>
-            ),
-          })}
-        />
-      }
-      logoSlot={<SanityLogo variant={header.logoVariant} imgClassName="w-full" />}
-      searchSlot={<SanityHeaderSearch />}
-      actionsSlot={
-        <SanityHeaderActions
-          phoneNumber={header.phoneNumber}
-          mobileNavSlot={
-            <MobileMegaNav
-              navigationBar={mobileNavItems}
-              logoSlot={<SanityLogo variant={header.logoVariant} imgClassName="w-[76px] h-auto object-cover" />}
-              phoneNumber={header.phoneNumber}
-              openHour={header.openHour}
-              helpHref={SANITY_LINKS.headerHelp}
-            />
-          }
-        />
-      }
-      navMenuSlot={
-        <SanityDesktopMegaNav
-          navigationBar={mapNavForDesktopMegaNav(header.navigationBar)}
-          className="[grid-area:navMenu]"
-        />
-      }
-    />
-    </HeaderChromeProvider>
+          </a>
+        </div>
+
+        <ul className="flex shrink-0 items-center gap-3 sm:gap-5">
+          <SavedJobsHeaderLink />
+          <SanityHeaderActions />
+        </ul>
+      </div>
+    </header>
   );
 };

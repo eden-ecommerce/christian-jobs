@@ -7,7 +7,10 @@ import { usePostedLabel } from "@hooks/jobs/use-posted-label";
 import type { JobHit } from "@lib/algolia/jobs";
 import type { OrganisationHit } from "@lib/algolia/organisations";
 import {
+  formatJobDescriptionHtml,
   formatSalary,
+  getClosingUrgency,
+  hasDisplayableSalary,
   humaniseJobType,
   jobLocationLine,
 } from "@lib/jobs/format-job";
@@ -50,10 +53,12 @@ function MetaCell({
   icon,
   label,
   value,
+  valueClassName,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  valueClassName?: string;
 }) {
   return (
     <div className="flex items-start gap-2.5">
@@ -62,7 +67,11 @@ function MetaCell({
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </p>
-        <p className="text-sm font-semibold text-foreground">{value}</p>
+        <p
+          className={`text-sm font-semibold text-foreground${valueClassName ? ` ${valueClassName}` : ""}`}
+        >
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -81,10 +90,9 @@ export function JobDetailPanel({
   const scrollRef = useRef<HTMLDivElement>(null);
   const postedLabel = usePostedLabel(data?.job.postedTimestamp ?? null);
   const [now] = useState(() => Date.now());
-  const isNew = Boolean(
-    data?.job.postedTimestamp &&
-      now - data.job.postedTimestamp < 7 * 86_400_000,
-  );
+  const closingUrgency = data?.job
+    ? getClosingUrgency(data.job, now)
+    : null;
 
   useEffect(() => {
     if (data?.job.id && panelRef.current) {
@@ -175,11 +183,11 @@ export function JobDetailPanel({
             <img
               src={logoUrl}
               alt={`${orgName} logo`}
-              className="h-14 w-14 shrink-0 rounded-full border border-[#E5E7EB] bg-white object-contain p-1"
+              className="h-14 w-14 shrink-0 rounded-[4px] border border-[#E5E7EB] bg-white object-contain p-1"
             />
           ) : (
             <div
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-base font-bold text-white"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[4px] text-base font-bold text-white"
               style={{ backgroundColor: avatarColor }}
               aria-hidden="true"
             >
@@ -188,9 +196,14 @@ export function JobDetailPanel({
           )}
 
           <div className="min-w-0 flex-1">
-            {isNew ? (
-              <span className="mb-1.5 inline-flex rounded-full bg-[#DCFCE7] px-2.5 py-0.5 text-[11px] font-semibold text-[#166534]">
-                New this week
+            {postedLabel ? (
+              <span className="mb-1.5 inline-flex rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[11px] font-semibold text-[#92400E]">
+                {postedLabel}
+              </span>
+            ) : null}
+            {closingUrgency?.isImminent ? (
+              <span className="mb-1.5 ml-1.5 inline-flex rounded-full bg-[#FEE2E2] px-2.5 py-0.5 text-[11px] font-semibold text-[#B91C1C]">
+                {closingUrgency.label}
               </span>
             ) : null}
             <h1 className="text-balance text-xl font-bold leading-snug text-foreground sm:text-2xl">
@@ -236,11 +249,13 @@ export function JobDetailPanel({
             label="Location"
             value={location}
           />
-          <MetaCell
-            icon={<Banknote className="h-4 w-4" aria-hidden="true" />}
-            label="Salary"
-            value={formatSalary(job.salary)}
-          />
+          {hasDisplayableSalary(job.salary) ? (
+            <MetaCell
+              icon={<Banknote className="h-4 w-4" aria-hidden="true" />}
+              label="Salary"
+              value={formatSalary(job.salary)}
+            />
+          ) : null}
           {job.jobType ? (
             <MetaCell
               icon={<Briefcase className="h-4 w-4" aria-hidden="true" />}
@@ -258,6 +273,14 @@ export function JobDetailPanel({
               icon={<CalendarDays className="h-4 w-4" aria-hidden="true" />}
               label="Date Posted"
               value={postedLabel.replace("Posted ", "")}
+            />
+          ) : null}
+          {closingUrgency?.isImminent ? (
+            <MetaCell
+              icon={<CalendarDays className="h-4 w-4" aria-hidden="true" />}
+              label="Closing Date"
+              value={closingUrgency.label}
+              valueClassName="text-[#B91C1C]"
             />
           ) : null}
           {job.categoryLvl0 ? (
@@ -296,7 +319,9 @@ export function JobDetailPanel({
             </h2>
             <div
               className="prose prose-sm max-w-none text-muted-foreground prose-headings:font-bold prose-li:marker:text-[#2d6a4f]"
-              dangerouslySetInnerHTML={{ __html: job.description }}
+              dangerouslySetInnerHTML={{
+                __html: formatJobDescriptionHtml(job.description),
+              }}
             />
           </section>
         ) : null}

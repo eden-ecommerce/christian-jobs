@@ -29,6 +29,7 @@ import type { JobFacets, SearchJobsResult } from "@lib/algolia/jobs";
 import {
   isLatestJobsBrowse,
   jobsUrlStateToSearchParams,
+  latestJobsBrowseState,
   parseJobsUrlState,
   type JobsUrlState,
 } from "@lib/jobs/search-params";
@@ -187,26 +188,9 @@ export function JobsBrowserV2({ initialResult, initialFacets, blogCarousel }: Pr
   );
 
   const handleClearFilters = useCallback(() => {
-    updateUrl({
-      q: urlState.q,
-      location: "",
-      lat: undefined,
-      lng: undefined,
-      place: undefined,
-      radius: undefined,
-      contractTypes: [],
-      organisationTypes: [],
-      workType: "any",
-      denominations: [],
-      minSalary: undefined,
-      datePosted: "any",
-      sort: "date_desc",
-      category: undefined,
-      page: 0,
-      vjk: undefined,
-    });
+    updateUrl(latestJobsBrowseState());
     setMobileDetailOpen(false);
-  }, [urlState, updateUrl]);
+  }, [updateUrl]);
 
   if (!configured) {
     return (

@@ -8,6 +8,7 @@ import {
   CONTRACT_TYPE_OPTIONS,
   DATE_POSTED_OPTIONS,
   formatLocationRadiusLabel,
+  hasActiveJobSearch,
   ORGANISATION_TYPE_OPTIONS,
   SALARY_OPTIONS,
   WORK_TYPE_OPTIONS,
@@ -116,11 +117,15 @@ export function JobsActiveFilterBadges({
       });
     }
 
-    if (state.workType !== "any") {
+    for (const value of state.workTypes) {
       items.push({
-        key: "workType",
-        label: labelFromOptions(WORK_TYPE_OPTIONS, state.workType),
-        onRemove: () => onChange({ workType: "any", page: 0 }),
+        key: `workType-${value}`,
+        label: labelFromOptions(WORK_TYPE_OPTIONS, value),
+        onRemove: () =>
+          onChange({
+            workTypes: state.workTypes.filter((item) => item !== value),
+            page: 0,
+          }),
       });
     }
 
@@ -158,7 +163,9 @@ export function JobsActiveFilterBadges({
     return items;
   }, [state, facets, onChange]);
 
-  if (badges.length === 0) return null;
+  if (badges.length === 0 && !hasActiveJobSearch(state)) return null;
+
+  const showClearSearch = hasActiveJobSearch(state);
 
   return (
     <div className="flex flex-wrap items-center gap-2 px-1 pb-3">
@@ -170,13 +177,13 @@ export function JobsActiveFilterBadges({
           onRemove={badge.onRemove}
         />
       ))}
-      {badges.length >= 2 ? (
+      {showClearSearch ? (
         <button
           type="button"
           onClick={onClearAll}
-          className="text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          className="text-xs font-medium text-[#2d6a4f] underline-offset-2 hover:underline"
         >
-          Clear all
+          Clear search
         </button>
       ) : null}
     </div>

@@ -2,7 +2,7 @@
 
 import type { JobFacet } from "@lib/algolia/jobs";
 import type { JobSort } from "@lib/algolia/jobs";
-import type { DatePosted, JobsUrlState, WorkType } from "@lib/jobs/search-params";
+import type { DatePosted, JobWorkType, JobsUrlState } from "@lib/jobs/search-params";
 import {
   CONTRACT_TYPE_OPTIONS,
   DATE_POSTED_OPTIONS,
@@ -223,18 +223,20 @@ function SidebarAdvancedFilters({
       </SidebarFilterSection>
 
       <SidebarFilterSection title="Work Type">
-        <SidebarRadioGroup
-          allLabel="All"
-          value={state.workType === "any" ? undefined : state.workType}
+        <SidebarCheckboxGroup
           options={WORK_TYPE_OPTIONS.filter((option) => option.value !== "any").map(
             (option) => ({
               label: option.label,
               value: option.value,
             }),
           )}
-          onChange={(value) =>
+          values={state.workTypes}
+          onToggle={(value) =>
             onChange({
-              workType: (value ?? "any") as WorkType,
+              workTypes: toggleFilterValue(
+                state.workTypes,
+                value,
+              ) as JobWorkType[],
               page: 0,
             })
           }
@@ -334,8 +336,8 @@ export function JobsFilterSidebar({
   onClearAll,
 }: Props) {
   const isLatest = isNewestFirst(state);
-  const isRemote = state.workType === "remote";
-  const isHybrid = state.workType === "hybrid";
+  const isRemote = state.workTypes.includes("remote");
+  const isHybrid = state.workTypes.includes("hybrid");
   const isFullTime = state.contractTypes.includes("fullTime");
   const activeFilterCount = countActiveFilters(state);
 
@@ -405,7 +407,9 @@ export function JobsFilterSidebar({
             active={isHybrid}
             onClick={() =>
               onChange({
-                workType: isHybrid ? "any" : ("hybrid" as WorkType),
+                workTypes: isHybrid
+                  ? state.workTypes.filter((item) => item !== "hybrid")
+                  : [...state.workTypes, "hybrid"],
                 page: 0,
               })
             }
@@ -415,7 +419,9 @@ export function JobsFilterSidebar({
             active={isRemote}
             onClick={() =>
               onChange({
-                workType: isRemote ? "any" : ("remote" as WorkType),
+                workTypes: isRemote
+                  ? state.workTypes.filter((item) => item !== "remote")
+                  : [...state.workTypes, "remote"],
                 page: 0,
               })
             }

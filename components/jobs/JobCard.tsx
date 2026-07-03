@@ -2,9 +2,11 @@
 
 import { NsLink } from "@components/ns-link";
 import { SaveJobButton } from "@components/jobs/SaveJobButton";
+import { useImminentClosingLabel } from "@hooks/jobs/use-imminent-closing-label";
 import { usePostedLabel } from "@hooks/jobs/use-posted-label";
 import { NAMESPACE_PATH } from "@lib/config";
 import type { JobHit } from "@lib/algolia/jobs";
+import { hasDisplayableSalary } from "@lib/jobs/format-job";
 import { locationLine, formatDistance } from "@lib/format";
 import { validateBrandingColor } from "@lib/org-color";
 import { MapPin, BanknoteIcon, Clock, CalendarDays } from "lucide-react";
@@ -13,19 +15,10 @@ export function JobCard({ job }: { job: JobHit }) {
   const location = locationLine(job);
   const distance = formatDistance(job.distanceMeters);
   const postedLabel = usePostedLabel(job.postedTimestamp);
+  const closingLabel = useImminentClosingLabel(job);
+  const showSalary = hasDisplayableSalary(job.salary);
 
-  // Closing date label
-  const closesLabel = (() => {
-    if (!job.closingDate) return null;
-    const d = new Date(job.closingDate);
-    if (Number.isNaN(d.getTime())) return null;
-    return d.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      timeZone: "Europe/London",
-    });
-  })();
+  // Closing date label — omitted; use closingLabel hook for imminent only.
 
   // Split camelCase/PascalCase into spaced words: "partTime" -> "Part Time"
   const humanise = (s: string) =>
@@ -106,29 +99,30 @@ export function JobCard({ job }: { job: JobHit }) {
               <span className="truncate">{distance ? `${location} · ${distance}` : location}</span>
             </span>
           )}
-          {job.salary && (
+          {showSalary ? (
             <span className="inline-flex items-center gap-2">
               <BanknoteIcon className="h-4 w-4 shrink-0 text-muted-foreground/70" aria-hidden="true" />
               <span className="truncate">{job.salary}</span>
             </span>
-          )}
+          ) : null}
           {job.schedule && (
             <span className="inline-flex items-center gap-2">
               <Clock className="h-4 w-4 shrink-0 text-muted-foreground/70" aria-hidden="true" />
               {job.schedule}
             </span>
           )}
-          {postedLabel && (
+          {postedLabel ? (
             <span className="inline-flex items-center gap-2">
               <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground/70" aria-hidden="true" />
               {postedLabel}
             </span>
-          )}
-          {closesLabel && (
-            <span className="text-sm text-muted-foreground">
-              Closes: {closesLabel}
+          ) : null}
+          {closingLabel ? (
+            <span className="inline-flex items-center gap-2 font-semibold text-[#B91C1C]">
+              <CalendarDays className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {closingLabel}
             </span>
-          )}
+          ) : null}
         </div>
 
         {/* Description snippet */}

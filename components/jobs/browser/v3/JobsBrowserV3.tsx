@@ -11,7 +11,7 @@ import {
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { JobsHeroSearchV3 } from "@components/jobs/browser/v3/JobsHeroSearchV3";
+import { JobsHeroSearchV5 } from "@components/jobs/browser/v5/JobsHeroSearchV5";
 import { GoogleMapsProvider } from "@components/google-maps/GoogleMapsProvider";
 import { JobsFilterPills } from "@components/jobs/browser/JobsFilterPills";
 import { JobsListPane, JobsListToolbar } from "@components/jobs/browser/JobsListPane";
@@ -27,7 +27,9 @@ import { getJobDetailQueryOptions } from "@hooks/jobs/get-options";
 import type { JobFacets, SearchJobsResult } from "@lib/algolia/jobs";
 import {
   jobsUrlStateToSearchParams,
+  latestJobsBrowseState,
   parseJobsUrlState,
+  type JobsHeroSearchSubmit,
   type JobsUrlState,
 } from "@lib/jobs/search-params";
 
@@ -148,27 +150,33 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
   );
 
   const handleSearch = useCallback(
-    (
-      query: string,
-      location: { label: string; lat?: number; lng?: number },
-    ) => {
+    (values: JobsHeroSearchSubmit) => {
       autoSelectedRef.current = false;
-      const hasGeo = location.lat !== undefined && location.lng !== undefined;
+      const hasGeo =
+        values.location.lat !== undefined && values.location.lng !== undefined;
       updateUrl({
-        ...urlState,
-        q: query,
-        location: location.label,
-        place: location.label || undefined,
-        lat: location.lat ?? urlState.lat,
-        lng: location.lng ?? urlState.lng,
-        sort: hasGeo ? "distance" : urlState.sort,
-        page: 0,
-        vjk: undefined,
+        ...latestJobsBrowseState(),
+        category: values.category,
+        workTypes: values.workTypes,
+        contractTypes: values.contractTypes ?? [],
+        location: values.location.label,
+        place: values.location.label || undefined,
+        lat: values.location.lat,
+        lng: values.location.lng,
+        radius: values.radius,
+        sort: hasGeo ? "distance" : "date_desc",
       });
       setMobileDetailOpen(false);
     },
-    [urlState, updateUrl],
+    [updateUrl],
   );
+
+  const handleBrowseLatest = useCallback(() => {
+    autoSelectedRef.current = false;
+    restoreScrollRef.current = window.scrollY;
+    updateUrl(latestJobsBrowseState());
+    setMobileDetailOpen(false);
+  }, [updateUrl]);
 
   const handleRadiusChange = useCallback(
     (radius: number | undefined) => {
@@ -188,26 +196,9 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
 
   const handleClearFilters = useCallback(() => {
     restoreScrollRef.current = window.scrollY;
-    updateUrl({
-      q: urlState.q,
-      location: "",
-      lat: undefined,
-      lng: undefined,
-      place: undefined,
-      radius: undefined,
-      contractTypes: [],
-      organisationTypes: [],
-      workType: "any",
-      denominations: [],
-      minSalary: undefined,
-      datePosted: "any",
-      sort: "date_desc",
-      category: undefined,
-      page: 0,
-      vjk: undefined,
-    });
+    updateUrl(latestJobsBrowseState());
     setMobileDetailOpen(false);
-  }, [urlState, updateUrl]);
+  }, [updateUrl]);
 
   if (!configured) {
     return (
@@ -246,12 +237,16 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
   };
 
   const sharedSearchProps = {
-    query: urlState.q,
+    category: urlState.category,
+    workTypes: urlState.workTypes,
+    contractTypes: urlState.contractTypes,
     location: urlState.location,
     lat: urlState.lat,
     lng: urlState.lng,
     radius: urlState.radius,
+    categories: facets.categories,
     onSearch: handleSearch,
+    onBrowseLatest: handleBrowseLatest,
     onRadiusChange: handleRadiusChange,
   };
 
@@ -271,7 +266,9 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
       {/* Search + filters — white band with breathing room */}
       <div className="border-b border-[#E5E7EB]/80 bg-[#FFFFFF]">
         <div className="mx-auto w-full max-w-[1100px] px-4 py-4 sm:px-6 sm:py-5">
-          <JobsHeroSearchV3 {...sharedSearchProps} />
+          <div className="mx-auto w-full max-w-4xl">
+            <JobsHeroSearchV5 {...sharedSearchProps} />
+          </div>
           <div className="mt-3">
             <JobsFilterPills
               state={urlState}
@@ -287,7 +284,11 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
       <div className="px-4 pb-4 pt-2 sm:px-6 sm:pb-5">
         <div className="mx-auto w-full max-w-[1100px]">
           <div className="hidden md:block">
-            <JobsListToolbar total={total} filterState={urlState} />
+            <JobsListToolbar
+              total={total}
+              filterState={urlState}
+              onClearSearch={handleClearFilters}
+            />
           </div>
 
           {/* Tablet + desktop: listings 2/5, sticky detail 3/5 */}

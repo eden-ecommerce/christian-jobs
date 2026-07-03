@@ -8,6 +8,7 @@ import {
 } from "@lib/algolia/constants";
 import { cleanCategoryLabel } from "@lib/algolia/category-label";
 import { isHybridWork } from "@lib/jobs/format-job";
+import type { JobWorkType } from "@lib/jobs/search-params";
 
 /**
  * Shape derived from live `organisationHub` browse (entityType:job).
@@ -187,9 +188,11 @@ export type SearchJobsParams = {
   denominations?: string[];
   minSalary?: number;
   datePosted?: DatePostedFilter;
-  /** @deprecated Prefer workType — kept for direct API use. */
+  /** @deprecated Prefer workTypes — kept for direct API use. */
   online?: boolean;
-  workType?: "onsite" | "hybrid" | "remote";
+  /** @deprecated Prefer workTypes — single value kept for legacy callers. */
+  workType?: JobWorkType;
+  workTypes?: JobWorkType[];
   sort?: JobSort;
   page?: number;
   hitsPerPage?: number;
@@ -307,6 +310,7 @@ export async function searchJobs(
     datePosted,
     online,
     workType,
+    workTypes,
     sort = "date_desc",
     page = 0,
     hitsPerPage = 12,
@@ -337,13 +341,20 @@ export async function searchJobs(
 
   const numericFilters: string[] = [];
 
-  const resolvedWorkType =
-    workType ??
-    (online === true ? "remote" : online === false ? "onsite" : undefined);
+  const resolvedWorkTypes: JobWorkType[] =
+    workTypes?.length
+      ? workTypes
+      : workType
+        ? [workType]
+        : online === true
+          ? ["remote"]
+          : online === false
+            ? ["onsite"]
+            : [];
 
   const sortByDate = sort === "date_asc" || sort === "date_desc";
   const needsContractFilter = Boolean(contractTypes?.length);
-  const needsWorkTypeFilter = Boolean(resolvedWorkType);
+  const needsWorkTypeFilter = resolvedWorkTypes.length > 0;
   const needsSalaryFilter = typeof minSalary === "number" && minSalary > 0;
   const needsDatePostedFilter = Boolean(datePosted);
   const needsClientProcessing =
@@ -403,11 +414,13 @@ export async function searchJobs(
   }
 
   if (needsWorkTypeFilter) {
-    hits = hits.filter((hit) => {
-      if (resolvedWorkType === "remote") return hit.online;
-      if (resolvedWorkType === "hybrid") return isHybridWork(hit);
-      return !hit.online && !isHybridWork(hit);
-    });
+    hits = hits.filter((hit) =>
+      resolvedWorkTypes.some((type) => {
+        if (type === "remote") return hit.online;
+        if (type === "hybrid") return isHybridWork(hit);
+        return !hit.online && !isHybridWork(hit);
+      }),
+    );
     nbHits = hits.length;
   }
 

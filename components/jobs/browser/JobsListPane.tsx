@@ -1,11 +1,17 @@
 "use client";
 
 import { JobsActiveFilterBadges } from "@components/jobs/browser/JobsActiveFilterBadges";
+import { JobsEmptyResultsSuggestions } from "@components/jobs/browser/JobsEmptyResultsSuggestions";
 import { JobListItem } from "@components/jobs/browser/JobListItem";
 import { NAMESPACE_PATH } from "@lib/config";
 import type { JobFacet, JobHit } from "@lib/algolia/jobs";
-import type { JobsUrlState } from "@lib/jobs/search-params";
-import { countActiveFilters, isLatestJobsBrowse, isNewestFirst } from "@lib/jobs/search-params";
+import {
+  countActiveFilters,
+  hasActiveJobSearch,
+  isLatestJobsBrowse,
+  isNewestFirst,
+  type JobsUrlState,
+} from "@lib/jobs/search-params";
 import { Bookmark, Loader2, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef } from "react";
@@ -78,16 +84,35 @@ function resultsLabel(
 }
 
 /** Results count and quick actions above the job list. */
-export function JobsListToolbar({ total, filterState }: { total: number; filterState?: JobsUrlState }) {
+export function JobsListToolbar({
+  total,
+  filterState,
+  onClearSearch,
+}: {
+  total: number;
+  filterState?: JobsUrlState;
+  onClearSearch?: () => void;
+}) {
   const hasActiveFilters = filterState
     ? countActiveFilters(filterState) > 0
     : false;
 
   return (
     <div className="flex items-center justify-between px-1 pb-2">
-      <p className="text-sm text-foreground">
-        {resultsLabel(filterState, total, hasActiveFilters)}
-      </p>
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+        <p className="text-sm text-foreground">
+          {resultsLabel(filterState, total, hasActiveFilters)}
+        </p>
+        {filterState && onClearSearch && hasActiveJobSearch(filterState) ? (
+          <button
+            type="button"
+            onClick={onClearSearch}
+            className="text-sm font-medium text-[#2d6a4f] underline-offset-2 hover:underline"
+          >
+            Clear search
+          </button>
+        ) : null}
+      </div>
       <div className="flex items-center gap-2">
         <Link
           href={`${NAMESPACE_PATH}/saved`}
@@ -156,11 +181,14 @@ export function JobsListPane({
   return (
     <div className={pageScroll ? "flex flex-col" : "flex h-full min-h-0 flex-col"}>
       {hideToolbar ? null : (
-        <JobsListToolbar total={total} filterState={filterState} />
+        <JobsListToolbar
+          total={total}
+          filterState={filterState}
+          onClearSearch={onClearFilters}
+        />
       )}
 
-      {!hideToolbar &&
-      filterState &&
+      {filterState &&
       filterFacets &&
       onFilterChange &&
       onClearFilters ? (
@@ -189,14 +217,31 @@ export function JobsListPane({
             />
           </div>
         ) : jobs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-white px-6 py-16 text-center shadow-soft">
-            <Search className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
-            <p className="text-base font-medium text-foreground">
-              No jobs match your search
-            </p>
-            <p className="max-w-sm text-sm text-muted-foreground">
-              Try widening your search area or clearing some filters.
-            </p>
+          <div className="space-y-6">
+            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-white px-6 py-12 text-center shadow-soft">
+              <Search className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+              <p className="text-base font-medium text-foreground">
+                No jobs match your search
+              </p>
+              <p className="max-w-sm text-sm text-muted-foreground">
+                Try widening your search area or clearing some filters.
+              </p>
+              {filterState && onClearFilters && hasActiveJobSearch(filterState) ? (
+                <button
+                  type="button"
+                  onClick={onClearFilters}
+                  className="mt-1 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#2d6a4f] shadow-soft-sm transition-colors hover:border-[#2d6a4f]/30"
+                >
+                  Clear search
+                </button>
+              ) : null}
+            </div>
+
+            <JobsEmptyResultsSuggestions
+              filterState={filterState}
+              onSelect={onSelect}
+              onPrefetch={onPrefetch}
+            />
           </div>
         ) : (
           <>

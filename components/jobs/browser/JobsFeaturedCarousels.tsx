@@ -2,6 +2,8 @@
 
 import type { ReactNode } from "react";
 import { JobListItem } from "@components/jobs/browser/JobListItem";
+import { JobsScrollReveal } from "@components/jobs/browser/JobsScrollReveal";
+import { jobsHomepageContainerClassName } from "@components/jobs/browser/jobs-homepage-layout";
 import type { JobHit } from "@lib/algolia/jobs";
 import { useFeaturedJobs } from "@hooks/jobs/use-featured-jobs";
 import { ArrowRight } from "lucide-react";
@@ -34,7 +36,7 @@ function JobCarousel({
 
   return (
     <section className={isHomepage ? "py-3 sm:py-8" : "py-4"}>
-      <div className="mx-auto flex max-w-[1200px] items-end justify-between gap-4 px-5 sm:px-8">
+      <div className={`${jobsHomepageContainerClassName} flex items-end justify-between gap-4`}>
         <h2
           className={
             isHomepage
@@ -45,7 +47,7 @@ function JobCarousel({
           {title}
         </h2>
       </div>
-      <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
+      <div className={jobsHomepageContainerClassName}>
         <div className="mt-3 overflow-x-auto pb-2 pt-0.5 sm:mt-4 sm:pb-4 sm:pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex items-stretch gap-4 px-0.5">
             {jobs.map((job) => (
@@ -78,30 +80,52 @@ export function JobsFeaturedCarousels({
   const { data } = useFeaturedJobs();
   const isHomepage = variant === "homepage";
 
+  const featuredCarousel = (
+    <JobCarousel
+      title="Featured Christian Jobs"
+      jobs={data?.featured ?? []}
+      onSelectJob={onSelectJob}
+      onPrefetch={onPrefetch}
+      variant={variant}
+    />
+  );
+
+  const charityCarousel = (
+    <JobCarousel
+      title="Christian Charity Jobs"
+      jobs={data?.charity ?? []}
+      onSelectJob={onSelectJob}
+      onPrefetch={onPrefetch}
+      variant={variant}
+    />
+  );
+
   return (
     <div
-      className={`border-t px-4 font-[family-name:var(--font-outfit)] sm:px-6 ${
+      className={`border-t font-[family-name:var(--font-outfit)] ${
         isHomepage
           ? "border-[#e8e8ed] bg-[#fbfbfd] py-4 sm:py-8"
-          : "border-[#E5E7EB] bg-[#F9FAFB] py-4 sm:py-6"
+          : "border-[#E5E7EB] bg-[#F9FAFB] px-4 py-4 sm:px-6 sm:py-6"
       }`}
     >
-      <JobCarousel
-        title="Featured Christian Jobs"
-        jobs={data?.featured ?? []}
-        onSelectJob={onSelectJob}
-        onPrefetch={onPrefetch}
-        variant={variant}
-      />
-      <JobCarousel
-        title="Christian Charity Jobs"
-        jobs={data?.charity ?? []}
-        onSelectJob={onSelectJob}
-        onPrefetch={onPrefetch}
-        variant={variant}
-      />
+      {isHomepage && (data?.featured?.length ?? 0) > 0 ? (
+        <JobsScrollReveal>{featuredCarousel}</JobsScrollReveal>
+      ) : (
+        featuredCarousel
+      )}
+      {isHomepage && (data?.charity?.length ?? 0) > 0 ? (
+        <JobsScrollReveal delayMs={80}>{charityCarousel}</JobsScrollReveal>
+      ) : (
+        charityCarousel
+      )}
       {blogCarousel ? (
-        <div className="mx-auto max-w-[1200px] px-5 sm:px-8">{blogCarousel}</div>
+        isHomepage ? (
+          <JobsScrollReveal delayMs={80}>
+            <div className={jobsHomepageContainerClassName}>{blogCarousel}</div>
+          </JobsScrollReveal>
+        ) : (
+          <div className={jobsHomepageContainerClassName}>{blogCarousel}</div>
+        )
       ) : null}
       {showBackToSearch ? (
       <div className="mx-auto max-w-[1600px] px-4 pb-8 sm:px-6">

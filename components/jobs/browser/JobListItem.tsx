@@ -1,10 +1,12 @@
 "use client";
 
 import { SaveJobButton } from "@components/jobs/SaveJobButton";
+import { useImminentClosingLabel } from "@hooks/jobs/use-imminent-closing-label";
 import { usePostedLabel } from "@hooks/jobs/use-posted-label";
 import type { JobHit } from "@lib/algolia/jobs";
 import {
   formatSalary,
+  hasDisplayableSalary,
   humaniseJobType,
   jobLocationLine,
 } from "@lib/jobs/format-job";
@@ -39,8 +41,10 @@ export function JobListItem({
   const initials = getOrgInitials(orgName);
   const location = jobLocationLine(job);
   const postedLabel = usePostedLabel(job.postedTimestamp);
+  const closingLabel = useImminentClosingLabel(job);
   const contractLabel = job.jobType ? humaniseJobType(job.jobType) : null;
   const workLabel = job.online ? "Remote" : "Onsite";
+  const showSalary = hasDisplayableSalary(job.salary);
 
   const isCard = variant === "card" || variant === "v3";
   const isV3 = variant === "v3";
@@ -86,12 +90,12 @@ export function JobListItem({
             <img
               src={logoUrl}
               alt={`${orgName} logo`}
-              className="h-11 w-11 rounded-full border border-[#E5E7EB] bg-white object-contain p-0.5"
+              className="h-11 w-11 rounded-[4px] border border-[#E5E7EB] bg-white object-contain p-0.5"
               loading="lazy"
             />
           ) : (
             <div
-              className="flex h-11 w-11 items-center justify-center rounded-full text-xs font-bold text-white"
+              className="flex h-11 w-11 items-center justify-center rounded-[4px] text-xs font-bold text-white"
               style={{ backgroundColor: avatarColor }}
               aria-hidden="true"
             >
@@ -113,10 +117,12 @@ export function JobListItem({
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span className="truncate">{location}</span>
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Banknote className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              <span className="truncate">{formatSalary(job.salary)}</span>
-            </span>
+            {showSalary ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Banknote className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span className="truncate">{formatSalary(job.salary)}</span>
+              </span>
+            ) : null}
           </div>
 
           <div
@@ -143,6 +149,11 @@ export function JobListItem({
             {postedLabel ? (
               <span className="inline-flex rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[11px] font-medium text-[#92400E]">
                 {postedLabel.replace("Posted ", "")}
+              </span>
+            ) : null}
+            {closingLabel ? (
+              <span className="inline-flex rounded-full bg-[#FEE2E2] px-2.5 py-0.5 text-[11px] font-semibold text-[#B91C1C]">
+                {closingLabel}
               </span>
             ) : null}
           </div>
