@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { JobsHomepageV3 } from "@components/jobs/browser/v3/JobsHomepageV3";
+import { JobsHomepageV5 } from "@components/jobs/browser/v5/JobsHomepageV5";
 import { BlogArticleCarousel } from "@components/blog/BlogArticleCarousel";
 import {
   isLatestJobsBrowse,
@@ -55,7 +55,7 @@ export default async function ChristianJobsPage({
           </div>
         }
       >
-        <JobsHomepageV3 blogCarousel={<BlogArticleCarousel />} />
+        <JobsHomepageV5 blogCarousel={<BlogArticleCarousel />} />
       </Suspense>
     </main>
   );
