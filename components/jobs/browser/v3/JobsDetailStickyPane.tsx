@@ -11,6 +11,8 @@ import {
 
 type Props = {
   children: ReactNode;
+  /** Detail grows with content so wheel events scroll the page (V3 split layout). */
+  pageScroll?: boolean;
 };
 
 const DETAIL_INSET = 16;
@@ -25,7 +27,10 @@ type Layout =
  * Detail pane that sits beside the list at page top, then pins to the viewport
  * while scrolling results — avoids sticky top-offset gaps once the header scrolls away.
  */
-export function JobsDetailStickyPane({ children }: Props) {
+export function JobsDetailStickyPane({
+  children,
+  pageScroll = false,
+}: Props) {
   const slotRef = useRef<HTMLDivElement>(null);
   const [layout, setLayout] = useState<Layout>({ mode: "flow" });
 
@@ -80,13 +85,16 @@ export function JobsDetailStickyPane({ children }: Props) {
           top: DETAIL_INSET,
           left: layout.left,
           width: layout.width,
-          height: DETAIL_HEIGHT,
+          ...(pageScroll ? {} : { height: DETAIL_HEIGHT }),
           zIndex: 20,
         }
       : undefined;
 
-  const paneClass =
-    layout.mode === "flow" ? "h-[calc(100vh-2rem)]" : "h-full";
+  const paneClass = pageScroll
+    ? ""
+    : layout.mode === "flow"
+      ? "h-[calc(100vh-2rem)]"
+      : "h-full";
 
   if (layout.mode === "hidden") {
     return (

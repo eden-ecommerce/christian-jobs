@@ -47,6 +47,8 @@ type Props = {
   selectedId?: string;
   onSelectSimilar?: (jobId: string) => void;
   onPrefetch?: (jobId: string) => void;
+  /** Page scrolls through detail content — no nested scroll trap (V3 split layout). */
+  scrollWithPage?: boolean;
 };
 
 function MetaCell({
@@ -85,6 +87,7 @@ export function JobDetailPanel({
   selectedId,
   onSelectSimilar,
   onPrefetch,
+  scrollWithPage = false,
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -101,11 +104,15 @@ export function JobDetailPanel({
     if (data?.job.id && scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
-  }, [data?.job.id]);
+  }, [data?.job.id, scrollWithPage]);
+
+  const emptyShellClass = scrollWithPage
+    ? "flex min-h-[280px] items-center justify-center rounded-2xl bg-white p-8 text-center shadow-soft"
+    : "flex h-full items-center justify-center rounded-2xl bg-white p-8 text-center shadow-soft";
 
   if (!selectedId && !loading) {
     return (
-      <div className="flex h-full items-center justify-center rounded-2xl bg-white p-8 text-center shadow-soft">
+      <div className={emptyShellClass}>
         <div>
           <Briefcase
             className="mx-auto h-12 w-12 text-muted-foreground/40"
@@ -121,7 +128,13 @@ export function JobDetailPanel({
 
   if (loading && !data) {
     return (
-      <div className="flex h-full items-center justify-center rounded-2xl bg-white shadow-soft">
+      <div
+        className={
+          scrollWithPage
+            ? "flex min-h-[280px] items-center justify-center rounded-2xl bg-white shadow-soft"
+            : "flex h-full items-center justify-center rounded-2xl bg-white shadow-soft"
+        }
+      >
         <Loader2
           className="h-8 w-8 animate-spin text-[#2d6a4f]"
           aria-label="Loading job details"
@@ -132,7 +145,7 @@ export function JobDetailPanel({
 
   if (error || !data) {
     return (
-      <div className="flex h-full items-center justify-center rounded-2xl bg-white p-8 text-center shadow-soft">
+      <div className={emptyShellClass}>
         <p className="text-sm text-destructive">
           {error ?? "Unable to load job details. Please try again."}
         </p>
@@ -165,17 +178,21 @@ export function JobDetailPanel({
   const orgDescription =
     organisation?.description ?? organisation?.mission ?? null;
 
+  const panelShellClass = scrollWithPage
+    ? "flex flex-col rounded-2xl bg-white shadow-soft outline-none"
+    : "flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white shadow-soft outline-none";
+  const panelBodyClass = scrollWithPage
+    ? "p-6"
+    : "min-h-0 flex-1 overflow-y-auto overscroll-contain p-6";
+
   return (
     <div
       ref={panelRef}
       tabIndex={-1}
-      className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white shadow-soft outline-none"
+      className={panelShellClass}
       aria-label={`Job details: ${job.title}`}
     >
-      <div
-        ref={scrollRef}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6"
-      >
+      <div ref={scrollRef} className={panelBodyClass}>
         {/* Header: logo, title, and actions on one row */}
         <header className="flex items-start gap-3">
           {logoUrl ? (

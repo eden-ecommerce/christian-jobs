@@ -331,7 +331,7 @@ export function JobsHeroSearchV5({
             </div>
 
             {/* Location — desktop: town/postcode with radius on the right; mobile: town only */}
-            <div className="min-w-0 max-lg:border-t max-lg:border-[#ececf0] max-lg:pt-2 lg:flex lg:flex-row lg:items-center lg:gap-2 lg:border-0 lg:pt-0">
+            <div className="min-w-0 max-lg:border-t max-lg:border-[#ececf0] max-lg:pt-2 lg:flex lg:flex-row lg:items-center lg:gap-2 lg:border-0 lg:border-l lg:border-[#ececf0] lg:pl-3 lg:pt-0">
               <div className="relative flex min-w-0 flex-1 lg:items-center">
                 <div className="relative min-w-0 flex-1">
                   <label

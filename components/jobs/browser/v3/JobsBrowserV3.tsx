@@ -26,6 +26,8 @@ import { useJobsInfiniteList } from "@hooks/jobs/use-jobs-infinite";
 import { getJobDetailQueryOptions } from "@hooks/jobs/get-options";
 import type { JobFacets, SearchJobsResult } from "@lib/algolia/jobs";
 import {
+  hasActiveJobSearch,
+  isLatestJobsBrowse,
   jobsUrlStateToSearchParams,
   latestJobsBrowseState,
   parseJobsUrlSearchParams,
@@ -76,10 +78,15 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     [listQuery.data, initialResult.hits],
   );
 
-  const total = listQuery.data?.pages[0]?.nbHits ?? initialResult.nbHits;
+  const fetchedNbHits = listQuery.data?.pages[0]?.nbHits;
+  const loading = listQuery.isFetching && !listQuery.isFetchingNextPage;
+  const total =
+    fetchedNbHits ??
+    (isLatestJobsBrowse(urlState) ? initialResult.nbHits : undefined);
+  const resultsLoading =
+    loading && fetchedNbHits === undefined && hasActiveJobSearch(urlState);
   const facets = listQuery.data?.pages[0]?.facets ?? initialFacets;
   const configured = initialResult.configured;
-  const loading = listQuery.isFetching && !listQuery.isFetchingNextPage;
   const loadingMore = listQuery.isFetchingNextPage;
   const hasMore = listQuery.hasNextPage ?? false;
 
@@ -218,6 +225,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     onLoadMore: () => void listQuery.fetchNextPage(),
     onPrefetch: prefetchDetail,
     listScroll: "page" as const,
+    resultsLoading,
   };
 
   const sharedSearchProps = {
@@ -243,6 +251,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
       selectedId={urlState.vjk}
       onSelectSimilar={selectJob}
       onPrefetch={prefetchDetail}
+      scrollWithPage
     />
   );
 
@@ -269,7 +278,11 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
       <div className="px-4 pb-4 pt-2 sm:px-6 sm:pb-5">
         <div className="mx-auto w-full max-w-[1100px]">
           <div className="hidden md:block">
-            <JobsListToolbar total={total} filterState={urlState} />
+            <JobsListToolbar
+              total={total}
+              filterState={urlState}
+              loading={resultsLoading}
+            />
           </div>
 
           {/* Tablet + desktop: listings 2/5, sticky detail 3/5 */}
@@ -277,7 +290,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
             <div className="min-w-0 flex-[2]">
               <JobsListPane {...listPaneProps} hideToolbar />
             </div>
-            <JobsDetailStickyPane>{detailPanel}</JobsDetailStickyPane>
+            <JobsDetailStickyPane pageScroll>{detailPanel}</JobsDetailStickyPane>
           </div>
 
           {/* Phone: list only, detail opens as full-screen overlay */}

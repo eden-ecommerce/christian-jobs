@@ -5,7 +5,6 @@ import { JobListItem } from "@components/jobs/browser/JobListItem";
 import { NAMESPACE_PATH } from "@lib/config";
 import type { JobFacet, JobHit } from "@lib/algolia/jobs";
 import {
-  countActiveFilters,
   hasActiveJobSearch,
   isLatestJobsBrowse,
   isNewestFirst,
@@ -19,7 +18,7 @@ const POST_JOB_HREF = "https://hub.eden.co.uk/dashboard/job-journey";
 
 type Props = {
   jobs: JobHit[];
-  total: number;
+  total?: number;
   selectedId?: string;
   loading: boolean;
   loadingMore: boolean;
@@ -40,44 +39,36 @@ type Props = {
   listScroll?: "container" | "page";
   /** Hide the results toolbar — use when rendering it above a split layout. */
   hideToolbar?: boolean;
+  resultsLoading?: boolean;
 };
 
 function resultsLabel(
   filterState: JobsUrlState | undefined,
   total: number,
-  hasActiveFilters: boolean,
 ) {
-  const latestBrowse = filterState ? isLatestJobsBrowse(filterState) : false;
-  const newestFirst = filterState ? isNewestFirst(filterState) : false;
+  const count = total.toLocaleString();
+  const latestBrowse = filterState ? isLatestJobsBrowse(filterState) : true;
 
   if (latestBrowse) {
     return (
       <>
         <span className="font-semibold text-foreground">Latest jobs</span>
-        <span className="font-normal text-muted-foreground">
-          {" "}
-          · {total.toLocaleString()} most recently added
-        </span>
+        <span className="font-normal text-muted-foreground"> · {count}</span>
       </>
     );
   }
 
-  if (newestFirst) {
-    return (
-      <>
-        {total.toLocaleString()}{" "}
-        {hasActiveFilters ? "filtered " : ""}
-        {total === 1 ? "result" : "results"}
-        <span className="font-normal text-muted-foreground"> · Newest first</span>
-      </>
-    );
-  }
+  const newestFirst = filterState ? isNewestFirst(filterState) : false;
 
   return (
     <>
-      {total.toLocaleString()}{" "}
-      {hasActiveFilters ? "filtered " : ""}
-      {total === 1 ? "result" : "results"}
+      <span className="font-semibold text-foreground">{count} jobs</span>
+      {newestFirst ? (
+        <span className="hidden font-normal text-muted-foreground sm:inline">
+          {" "}
+          · Newest first
+        </span>
+      ) : null}
     </>
   );
 }
@@ -86,21 +77,25 @@ function resultsLabel(
 export function JobsListToolbar({
   total,
   filterState,
+  loading = false,
 }: {
-  total: number;
+  total?: number;
   filterState?: JobsUrlState;
   onClearSearch?: () => void;
+  loading?: boolean;
 }) {
-  const hasActiveFilters = filterState
-    ? countActiveFilters(filterState) > 0
-    : false;
+  const showCount = typeof total === "number";
 
   return (
-    <div className="flex items-center justify-between px-1 pb-2">
-      <p className="text-sm text-foreground">
-        {resultsLabel(filterState, total, hasActiveFilters)}
+    <div className="flex items-center justify-between gap-2 px-1 pb-2">
+      <p className="min-w-0 flex-1 truncate whitespace-nowrap text-sm text-foreground">
+        {loading || !showCount ? (
+          <span className="text-muted-foreground">Updating…</span>
+        ) : (
+          resultsLabel(filterState, total)
+        )}
       </p>
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <Link
           href={`${NAMESPACE_PATH}/saved`}
           className="inline-flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-foreground shadow-soft-sm transition-colors hover:border-[#2d6a4f]/30"
@@ -139,6 +134,7 @@ export function JobsListPane({
   onPrefetch,
   listScroll = "container",
   hideToolbar = false,
+  resultsLoading = false,
 }: Props) {
   const pageScroll = listScroll === "page";
 
@@ -168,7 +164,11 @@ export function JobsListPane({
   return (
     <div className={pageScroll ? "flex flex-col" : "flex h-full min-h-0 flex-col"}>
       {hideToolbar ? null : (
-        <JobsListToolbar total={total} filterState={filterState} />
+        <JobsListToolbar
+          total={total}
+          filterState={filterState}
+          loading={resultsLoading}
+        />
       )}
 
       <div
@@ -237,7 +237,7 @@ export function JobsListPane({
               </div>
             ) : null}
 
-            {!hasMore && jobs.length > 0 ? (
+            {!hasMore && jobs.length > 0 && typeof total === "number" ? (
               <p className="py-4 text-center text-xs text-muted-foreground">
                 You&apos;ve seen all {total.toLocaleString()} jobs
               </p>
