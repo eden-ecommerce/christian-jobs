@@ -126,7 +126,10 @@ export function JobDetailPanel({
     );
   }
 
-  if (loading && !data) {
+  // Show spinner when loading with no data, OR when the currently displayed job
+  // doesn't match the selected id (stale data from previous selection).
+  const isStale = Boolean(data && selectedId && data.job.id !== selectedId);
+  if (loading && (!data || isStale)) {
     return (
       <div
         className={
