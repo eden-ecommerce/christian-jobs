@@ -274,7 +274,6 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
       selectedId={activeId}
       onSelectSimilar={selectJob}
       onPrefetch={prefetchDetail}
-      scrollWithPage
     />
   );
 
@@ -313,7 +312,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
             <div className="min-w-0 flex-[2]">
               <JobsListPane {...listPaneProps} hideToolbar />
             </div>
-            <JobsDetailStickyPane pageScroll>{detailPanel}</JobsDetailStickyPane>
+            <JobsDetailStickyPane>{detailPanel}</JobsDetailStickyPane>
           </div>
 
           {/* Phone: list only, detail opens as full-screen overlay */}
