@@ -51,6 +51,8 @@ export const LocationSearch = forwardRef<LocationSearchHandle, LocationSearchPro
     const inputRef = useRef<HTMLInputElement>(null);
     const placesLibrary = useMapsLibrary("places");
     const onPlaceSelectRef = useRef(onPlaceSelect);
+    // Track focus so we never overwrite the DOM value while the user is typing.
+    const isFocusedRef = useRef(false);
 
     useEffect(() => {
       onPlaceSelectRef.current = onPlaceSelect;
@@ -58,7 +60,9 @@ export const LocationSearch = forwardRef<LocationSearchHandle, LocationSearchPro
 
     useEffect(() => {
       const input = inputRef.current;
-      if (!input || input.value === initialLabel) {
+      // Only sync the external label into the DOM when the input is not focused
+      // (i.e. the change came from navigation / URL, not from the user typing).
+      if (!input || isFocusedRef.current || input.value === initialLabel) {
         return;
       }
       input.value = initialLabel;
@@ -94,8 +98,14 @@ export const LocationSearch = forwardRef<LocationSearchHandle, LocationSearchPro
         type="search"
         defaultValue={initialLabel}
         onKeyDown={onKeyDown}
-        onFocus={onFocus}
-        onBlur={onBlur}
+        onFocus={(e) => {
+          isFocusedRef.current = true;
+          onFocus?.(e);
+        }}
+        onBlur={(e) => {
+          isFocusedRef.current = false;
+          onBlur?.(e);
+        }}
         placeholder={placeholder}
         disabled={disabled}
         className={className}
