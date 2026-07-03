@@ -57,6 +57,9 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
   );
 
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  // Tracks the job the user just clicked before the URL round-trip settles.
+  // This lets us highlight the card and show the detail spinner instantly.
+  const [pendingId, setPendingId] = useState<string | null>(null);
   const listScrollRef = useRef(0);
   const autoSelectedRef = useRef(false);
   const restoreScrollRef = useRef<number | null>(null);
@@ -130,6 +133,9 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
 
   const selectJob = useCallback(
     (jobId: string) => {
+      // Set pendingId synchronously so the card highlights and the detail
+      // spinner appears before the URL round-trip completes (~1 second).
+      setPendingId(jobId);
       updateUrl({ ...urlState, vjk: jobId });
       if (window.matchMedia("(max-width: 767px)").matches) {
         listScrollRef.current = window.scrollY;
@@ -138,6 +144,13 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     },
     [urlState, updateUrl],
   );
+
+  // Clear pendingId once the URL has caught up so the real urlState.vjk takes over.
+  useEffect(() => {
+    if (pendingId && urlState.vjk === pendingId) {
+      setPendingId(null);
+    }
+  }, [urlState.vjk, pendingId]);
 
   const closeMobileDetail = useCallback(() => {
     setMobileDetailOpen(false);
@@ -199,8 +212,12 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     );
   }
 
+  // Treat the card as selected and the detail pane as loading as soon as the
+  // user clicks, before the URL round-trip resolves (pendingId covers that gap).
+  const activeId = urlState.vjk ?? pendingId ?? undefined;
   const detailData = detailQuery.data ?? null;
-  const detailLoading = detailQuery.isLoading && Boolean(urlState.vjk);
+  const detailLoading =
+    (detailQuery.isLoading && Boolean(urlState.vjk)) || Boolean(pendingId);
   const detailError = detailQuery.isError ? "Unable to load job details." : null;
 
   const sharedFilterFacets = {
@@ -213,7 +230,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
   const listPaneProps = {
     jobs,
     total,
-    selectedId: urlState.vjk,
+    selectedId: activeId,
     loading,
     loadingMore,
     hasMore,
@@ -248,7 +265,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
       data={detailData}
       loading={detailLoading}
       error={detailError}
-      selectedId={urlState.vjk}
+      selectedId={activeId}
       onSelectSimilar={selectJob}
       onPrefetch={prefetchDetail}
       scrollWithPage
@@ -301,11 +318,11 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
       </div>
 
       <JobsMobileDetail
-        open={mobileDetailOpen && Boolean(urlState.vjk)}
+        open={mobileDetailOpen && Boolean(activeId)}
         data={detailData}
         loading={detailLoading}
         error={detailError}
-        selectedId={urlState.vjk}
+        selectedId={activeId}
         onClose={closeMobileDetail}
         onSelectSimilar={selectJob}
         onPrefetch={prefetchDetail}
