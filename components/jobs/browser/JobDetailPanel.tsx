@@ -272,7 +272,7 @@ export function JobDetailPanel({
             <MetaCell
               icon={<CalendarDays className="h-4 w-4" aria-hidden="true" />}
               label="Date Posted"
-              value={postedLabel.replace("Posted ", "")}
+              value={postedLabel.replace("Added ", "")}
             />
           ) : null}
           {closingUrgency?.isImminent ? (

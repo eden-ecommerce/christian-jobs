@@ -23,8 +23,31 @@ import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type FocusEvent,
 } from "react";
+
+function subscribeNarrowHeroSearch(onStoreChange: () => void) {
+  const mediaQuery = window.matchMedia("(max-width: 1023px)");
+  mediaQuery.addEventListener("change", onStoreChange);
+  return () => mediaQuery.removeEventListener("change", onStoreChange);
+}
+
+function getNarrowHeroSearchSnapshot() {
+  return window.matchMedia("(max-width: 1023px)").matches;
+}
+
+function getNarrowHeroSearchServerSnapshot() {
+  return false;
+}
+
+function useNarrowHeroSearch() {
+  return useSyncExternalStore(
+    subscribeNarrowHeroSearch,
+    getNarrowHeroSearchSnapshot,
+    getNarrowHeroSearchServerSnapshot,
+  );
+}
 
 type Props = {
   category?: string;
@@ -39,10 +62,20 @@ type Props = {
   onSearch: (values: JobsHeroSearchSubmit) => void;
   onBrowseLatest?: () => void;
   onRadiusChange?: (radius: number | undefined) => void;
+  /** Desktop radius dropdown — hidden on homepage, shown on search results. */
+  showRadiusSelect?: boolean;
+  /** Centre refine pills row (homepage hero). */
+  centreRefinePills?: boolean;
+  /** Quick-filter pills — homepage only; results use filter dropdowns below. */
+  showRefinePills?: boolean;
+  /** Subtle lift on results page so the search card reads above the page. */
+  elevated?: boolean;
 };
 
 const INPUT_CLASS =
   "h-[52px] w-full border-0 bg-transparent pb-0.5 pl-4 pr-3 pt-[22px] text-[16px] text-[#1d1d1f] shadow-none outline-none placeholder:text-transparent focus-visible:ring-0 [&::-webkit-search-cancel-button]:hidden";
+
+const MOBILE_INPUT_CLASS = `${INPUT_CLASS} max-lg:h-[56px]`;
 
 const EMPTY_WORK_TYPES: JobWorkType[] = [];
 const EMPTY_CONTRACT_TYPES: string[] = [];
@@ -54,13 +87,15 @@ function toggleValue<T extends string>(current: T[], value: T): T[] {
 }
 
 const pillClass = (active: boolean) =>
-  `rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
+  `shrink-0 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
     active
       ? "bg-[#235A0E] text-white"
       : "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#ececf0]"
   }`;
 
-/** V5 hero search — category + location on top row; work and contract pills below. */
+const zoneDividerClass = "border-t border-[#ececf0]";
+
+/** V5 hero search — category, then location, then optional refine pills. */
 export function JobsHeroSearchV5({
   category,
   workTypes,
@@ -74,6 +109,10 @@ export function JobsHeroSearchV5({
   onSearch,
   onBrowseLatest,
   onRadiusChange,
+  showRadiusSelect = true,
+  centreRefinePills = false,
+  showRefinePills = false,
+  elevated = false,
 }: Props) {
   const mapsEnabled = isGoogleMapsEnvConfigured();
   const { setLocation } = useUserLocation();
@@ -92,6 +131,7 @@ export function JobsHeroSearchV5({
   );
   const [locationValue, setLocationValue] = useState(location);
   const [locationFocused, setLocationFocused] = useState(false);
+  const [latestSelected, setLatestSelected] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<{
     label: string;
     lat: number;
@@ -99,6 +139,7 @@ export function JobsHeroSearchV5({
   } | null>(null);
 
   const hasGeoFromUrl = lat !== undefined && lng !== undefined;
+  const isNarrow = useNarrowHeroSearch();
 
   useEffect(() => {
     setSelectedCategory(category);
@@ -147,14 +188,14 @@ export function JobsHeroSearchV5({
       setLocation(resolved);
       runSearch({
         category: selectedCategory,
-        workTypes: selectedWorkTypes,
-        contractTypes: selectedContractTypes,
+        workTypes: isNarrow ? [] : selectedWorkTypes,
+        contractTypes: isNarrow ? [] : selectedContractTypes,
         location: {
           label: resolved.label,
           lat: resolved.latitude,
           lng: resolved.longitude,
         },
-        radius,
+        radius: isNarrow || !showRadiusSelect ? undefined : radius,
       });
     },
     [
@@ -164,11 +205,12 @@ export function JobsHeroSearchV5({
       selectedWorkTypes,
       selectedContractTypes,
       radius,
+      isNarrow,
+      showRadiusSelect,
     ],
   );
 
-  function handleSubmit(e?: React.FormEvent) {
-    e?.preventDefault();
+  function buildSearchSubmit(): JobsHeroSearchSubmit {
     const locationLabel =
       (
         mapsEnabled
@@ -181,13 +223,19 @@ export function JobsHeroSearchV5({
         : hasGeoFromUrl
           ? { lat, lng }
           : undefined;
-    runSearch({
+
+    return {
       category: selectedCategory,
-      workTypes: selectedWorkTypes,
-      contractTypes: selectedContractTypes,
+      workTypes: isNarrow ? [] : selectedWorkTypes,
+      contractTypes: isNarrow ? [] : selectedContractTypes,
       location: { label: locationLabel, ...coords },
-      radius,
-    });
+      radius: isNarrow || !showRadiusSelect ? undefined : radius,
+    };
+  }
+
+  function handleSubmit(e?: React.FormEvent) {
+    e?.preventDefault();
+    runSearch(buildSearchSubmit());
   }
 
   const locationUp = locationFocused || locationValue.trim() !== "";
@@ -199,79 +247,144 @@ export function JobsHeroSearchV5({
         : "top-1/2 -translate-y-1/2 text-[16px] font-normal text-[#86868b]"
     }`;
 
+  const categoryLabelClass = (up: boolean) => {
+    if (up) return labelClass(true);
+    return `${labelClass(false)} max-lg:text-[#1d1d1f] max-lg:font-medium`;
+  };
+
+  const refinePills = (
+    <>
+      {HERO_WORK_TYPE_OPTIONS.map((option) => {
+        const active = selectedWorkTypes.includes(option.value);
+        return (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={active}
+            onClick={() =>
+              setSelectedWorkTypes((current) =>
+                toggleValue(current, option.value),
+              )
+            }
+            className={pillClass(active)}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+      {HERO_CONTRACT_TYPE_OPTIONS.map((option) => {
+        const active = selectedContractTypes.includes(option.value);
+        return (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={active}
+            onClick={() =>
+              setSelectedContractTypes((current) =>
+                toggleValue(current, option.value),
+              )
+            }
+            className={pillClass(active)}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+      <button
+        type="button"
+        aria-pressed={centreRefinePills ? latestSelected : undefined}
+        onClick={() =>
+          centreRefinePills
+            ? setLatestSelected((current) => !current)
+            : onBrowseLatest?.()
+        }
+        className={pillClass(centreRefinePills ? latestSelected : false)}
+      >
+        Latest
+      </button>
+    </>
+  );
+
   return (
     <form onSubmit={handleSubmit} className={formClassName}>
-      <div className="w-full rounded-2xl bg-white ring-1 ring-black/[0.04]">
-        <div className="flex flex-col gap-2 p-2 sm:p-2.5 lg:flex-row lg:items-center lg:gap-3">
-          <div className="min-w-0 flex-1 basis-0">
-            <JobsCategoryCombobox
-              id="v5-hero-category"
-              categories={categories}
-              value={selectedCategory}
-              onChange={setSelectedCategory}
-              fetchWhenEmpty
-              inputClassName={`${INPUT_CLASS} pr-10`}
-              labelClassName={labelClass}
-            />
-          </div>
-
-          <div
-            className="hidden h-7 w-px shrink-0 bg-[#d2d2d7] lg:block"
-            aria-hidden="true"
-          />
-
-          <div className="flex min-w-0 flex-1 basis-0 items-center gap-2">
-            <div className="flex shrink-0 items-center gap-2 pl-1 sm:pl-0">
-              <span className="text-[13px] font-medium text-[#86868b]">
-                Within
-              </span>
-              <JobsLocationRadiusSelect
-                radius={radius}
-                onChange={(nextRadius) => onRadiusChange?.(nextRadius)}
-                inline
-                compact
-                className="min-w-[5.5rem]"
+      <div
+        className={`w-full rounded-2xl bg-white ring-1 ring-black/[0.04] ${
+          elevated
+            ? "shadow-[0_2px_8px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]"
+            : ""
+        }`}
+      >
+        {/* 1 — Category + location (desktop: one row) */}
+        <div className="p-2 sm:p-2.5">
+          <div className="min-w-0 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-center lg:gap-3">
+            <div className="min-w-0">
+              <JobsCategoryCombobox
+                id="v5-hero-category"
+                categories={categories}
+                value={selectedCategory}
+                onChange={setSelectedCategory}
+                fetchWhenEmpty
+                fieldLabel={isNarrow ? "Choose a category" : "Category"}
+                inputClassName={`${MOBILE_INPUT_CLASS} pr-11`}
+                labelClassName={categoryLabelClass}
               />
-              <span className="text-[13px] font-medium text-[#86868b]">of</span>
             </div>
 
-            <div className="relative min-w-0 flex-1">
-              <label
-                htmlFor="v5-hero-location"
-                className={labelClass(locationUp)}
-              >
-                Town or postcode
-              </label>
-              {mapsEnabled ? (
-                <LocationSearch
-                  ref={locationRef}
-                  id="v5-hero-location"
-                  initialLabel={location}
-                  onPlaceSelect={handlePlaceSelect}
-                  onFocus={() => setLocationFocused(true)}
-                  onBlur={(e: FocusEvent<HTMLInputElement>) => {
-                    setLocationFocused(false);
-                    setLocationValue(e.target.value);
-                  }}
-                  placeholder=""
-                  className={INPUT_CLASS}
-                />
-              ) : (
-                <input
-                  ref={plainLocationRef}
-                  id="v5-hero-location"
-                  type="text"
-                  defaultValue={location}
-                  onFocus={() => setLocationFocused(true)}
-                  onBlur={(e) => {
-                    setLocationFocused(false);
-                    setLocationValue(e.target.value);
-                  }}
-                  onChange={(e) => setLocationValue(e.target.value)}
-                  className={`${INPUT_CLASS} outline-none`}
-                  aria-label="Town or postcode"
-                />
-              )}
+            {/* Location — desktop: town/postcode with radius on the right; mobile: town only */}
+            <div className="min-w-0 max-lg:border-t max-lg:border-[#ececf0] max-lg:pt-2 lg:flex lg:flex-row lg:items-center lg:gap-2 lg:border-0 lg:pt-0">
+              <div className="relative flex min-w-0 flex-1 lg:items-center">
+                <div className="relative min-w-0 flex-1">
+                  <label
+                    htmlFor="v5-hero-location"
+                    className={labelClass(locationUp)}
+                  >
+                    Town or postcode
+                  </label>
+                  {mapsEnabled ? (
+                    <LocationSearch
+                      ref={locationRef}
+                      id="v5-hero-location"
+                      initialLabel={location}
+                      onPlaceSelect={handlePlaceSelect}
+                      onFocus={() => setLocationFocused(true)}
+                      onBlur={(e: FocusEvent<HTMLInputElement>) => {
+                        setLocationFocused(false);
+                        setLocationValue(e.target.value);
+                      }}
+                      placeholder=""
+                      className={MOBILE_INPUT_CLASS}
+                    />
+                  ) : (
+                    <input
+                      ref={plainLocationRef}
+                      id="v5-hero-location"
+                      type="text"
+                      defaultValue={location}
+                      onFocus={() => setLocationFocused(true)}
+                      onBlur={(e) => {
+                        setLocationFocused(false);
+                        setLocationValue(e.target.value);
+                      }}
+                      onChange={(e) => setLocationValue(e.target.value)}
+                      className={`${MOBILE_INPUT_CLASS} outline-none`}
+                      aria-label="Town or postcode"
+                    />
+                  )}
+                </div>
+
+                {showRadiusSelect ? (
+                  <div className="hidden shrink-0 items-center self-center pl-2 lg:flex">
+                    <JobsLocationRadiusSelect
+                      radius={radius}
+                      onChange={(nextRadius) => onRadiusChange?.(nextRadius)}
+                      inline
+                      compact
+                      fullLabels
+                      className="min-w-[9.5rem]"
+                    />
+                  </div>
+                ) : null}
+              </div>
             </div>
 
             <button
@@ -284,78 +397,32 @@ export function JobsHeroSearchV5({
           </div>
         </div>
 
-        <div className="mx-2.5 border-t border-[#ececf0] sm:mx-3" />
-
-        <div className="flex flex-col gap-2 p-2 sm:flex-row sm:items-center sm:justify-between sm:p-2.5">
-          <div className="flex flex-wrap items-center gap-1.5 px-1 sm:px-0">
-            <div role="group" aria-label="Work type" className="flex flex-wrap gap-1.5">
-              {HERO_WORK_TYPE_OPTIONS.map((option) => {
-                const active = selectedWorkTypes.includes(option.value);
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() =>
-                      setSelectedWorkTypes((current) =>
-                        toggleValue(current, option.value),
-                      )
-                    }
-                    className={pillClass(active)}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div
-              className="hidden h-5 w-px shrink-0 bg-[#d2d2d7] sm:block"
-              aria-hidden="true"
-            />
-
-            <div
-              role="group"
-              aria-label="Contract type and shortcuts"
-              className="flex flex-wrap gap-1.5"
-            >
-              {HERO_CONTRACT_TYPE_OPTIONS.map((option) => {
-                const active = selectedContractTypes.includes(option.value);
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() =>
-                      setSelectedContractTypes((current) =>
-                        toggleValue(current, option.value),
-                      )
-                    }
-                    className={pillClass(active)}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-              <button
-                type="button"
-                onClick={() => onBrowseLatest?.()}
-                className={pillClass(false)}
-              >
-                Latest
-              </button>
-            </div>
-          </div>
-
+        {/* Search — mobile/tablet primary CTA */}
+        <div className={`${zoneDividerClass} px-2 pb-2 pt-2 sm:px-2.5 lg:hidden`}>
           <button
             type="submit"
             aria-label="Search jobs"
-            className="flex h-10 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#235A0E] px-4 text-[15px] font-semibold text-white transition-[transform,opacity] hover:opacity-90 active:scale-95 sm:w-auto lg:hidden"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#235A0E] px-4 text-[15px] font-semibold text-white transition-[transform,opacity] hover:opacity-90 active:scale-95"
           >
             <Search className="h-[18px] w-[18px]" aria-hidden="true" />
-            Search
+            Search jobs
           </button>
         </div>
+
+        {/* Refine filters — homepage desktop only */}
+        {showRefinePills ? (
+          <div className={`${zoneDividerClass} hidden p-2 sm:p-2.5 lg:block`}>
+            <div
+              className={`flex flex-wrap items-center gap-1.5 px-1 lg:px-0 ${
+                centreRefinePills ? "justify-center" : ""
+              }`}
+              role="group"
+              aria-label="Refine search"
+            >
+              {refinePills}
+            </div>
+          </div>
+        ) : null}
       </div>
     </form>
   );

@@ -148,7 +148,7 @@ export function JobListItem({
             </span>
             {postedLabel ? (
               <span className="inline-flex rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[11px] font-medium text-[#92400E]">
-                {postedLabel.replace("Posted ", "")}
+                {postedLabel}
               </span>
             ) : null}
             {closingLabel ? (

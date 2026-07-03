@@ -2,11 +2,15 @@
 
 import { FilterOption, FilterPopover } from "@components/jobs/browser/FilterPopover";
 import type { JobFacet } from "@lib/algolia/jobs";
+import { DEFAULT_LOCATION_RADIUS_METERS } from "@lib/algolia/constants";
+import { X } from "lucide-react";
 import {
   CONTRACT_TYPE_OPTIONS,
   DATE_POSTED_OPTIONS,
   hasActiveJobSearch,
+  LOCATION_RADIUS_OPTIONS,
   ORGANISATION_TYPE_OPTIONS,
+  resolveLocationRadiusMeters,
   SALARY_OPTIONS,
   SORT_OPTIONS,
   WORK_TYPE_OPTIONS,
@@ -37,6 +41,11 @@ export function JobsFilterPills({
   compact = false,
 }: Props) {
   const hasActive = hasActiveJobSearch(state);
+  const hasGeo = state.lat !== undefined && state.lng !== undefined;
+  const activeRadiusMeters = resolveLocationRadiusMeters(state.radius);
+  const radiusLabel =
+    LOCATION_RADIUS_OPTIONS.find((option) => option.value === activeRadiusMeters)
+      ?.label ?? "Within 25 miles";
 
   const contractOptions =
     facets.contractTypes.length > 0
@@ -59,12 +68,46 @@ export function JobsFilterPills({
   return (
     <div className={compact ? undefined : "border-b border-border bg-background"}>
       <div className={compact ? "py-1" : "mx-auto max-w-[1600px] px-4 py-2 sm:px-6"}>
-        <div className="relative min-w-0">
+        <div className="relative min-w-0 w-full">
           <div
-            className={`flex items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden${
-              hasActive ? " pr-32" : ""
+            className={`flex w-full items-center gap-2 ${
+              compact
+                ? "flex-wrap"
+                : `overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden${
+                    hasActive ? " pr-32" : ""
+                  }`
             }`}
           >
+          <FilterPopover
+            label={radiusLabel}
+            active={state.radius !== undefined || hasGeo}
+          >
+            <div className="flex flex-col">
+              {LOCATION_RADIUS_OPTIONS.map((option) => (
+                <FilterOption
+                  key={option.value}
+                  type="radio"
+                  name="radius"
+                  label={option.label}
+                  checked={activeRadiusMeters === option.value}
+                  onChange={() =>
+                    onChange({
+                      radius:
+                        option.value === DEFAULT_LOCATION_RADIUS_METERS
+                          ? undefined
+                          : option.value,
+                      page: 0,
+                      sort:
+                        hasGeo && state.lat !== undefined
+                          ? "distance"
+                          : state.sort,
+                    })
+                  }
+                />
+              ))}
+            </div>
+          </FilterPopover>
+
           <FilterPopover
             label="Salary"
             active={!!state.minSalary}
@@ -249,9 +292,19 @@ export function JobsFilterPills({
               ))}
             </div>
           </FilterPopover>
+          {hasActive && compact ? (
+            <button
+              type="button"
+              onClick={onClearAll}
+              className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#2d6a4f]/35 bg-[#2d6a4f]/[0.07] px-3 py-1.5 text-sm font-medium text-[#2d6a4f] transition-colors hover:border-[#2d6a4f]/55 hover:bg-[#2d6a4f]/10"
+            >
+              <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              Clear search
+            </button>
+          ) : null}
           </div>
 
-          {hasActive ? (
+          {hasActive && !compact ? (
             <>
               <div
                 className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-32 bg-gradient-to-r from-transparent to-background"
@@ -260,8 +313,9 @@ export function JobsFilterPills({
               <button
                 type="button"
                 onClick={onClearAll}
-                className="absolute inset-y-0 right-0 z-[2] flex items-center bg-background pl-4 text-sm font-medium text-[#2d6a4f] hover:underline"
+                className="absolute inset-y-0 right-0 z-[2] flex items-center gap-1.5 bg-background pl-4 text-sm font-medium text-[#2d6a4f] hover:underline"
               >
+                <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 Clear search
               </button>
             </>

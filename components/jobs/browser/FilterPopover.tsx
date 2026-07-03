@@ -143,12 +143,12 @@ export function FilterPopover({
       >
         {label}
         {activeCount && activeCount > 0 ? (
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#2d6a4f] px-1 text-[11px] font-bold text-white">
+          <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[#2d6a4f] px-1 text-[11px] font-bold text-white">
             {activeCount}
           </span>
         ) : null}
         <ChevronDown
-          className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-3.5 w-3.5 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden="true"
         />
       </button>

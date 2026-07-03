@@ -157,18 +157,18 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
       updateUrl({
         ...latestJobsBrowseState(),
         category: values.category,
-        workTypes: values.workTypes,
-        contractTypes: values.contractTypes ?? [],
+        workTypes: urlState.workTypes,
+        contractTypes: urlState.contractTypes,
         location: values.location.label,
         place: values.location.label || undefined,
         lat: values.location.lat,
         lng: values.location.lng,
-        radius: values.radius,
+        radius: hasGeo ? urlState.radius : undefined,
         sort: hasGeo ? "distance" : "date_desc",
       });
       setMobileDetailOpen(false);
     },
-    [updateUrl],
+    [updateUrl, urlState.workTypes, urlState.contractTypes, urlState.radius],
   );
 
   const handleBrowseLatest = useCallback(() => {
@@ -177,22 +177,6 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     updateUrl(latestJobsBrowseState());
     setMobileDetailOpen(false);
   }, [updateUrl]);
-
-  const handleRadiusChange = useCallback(
-    (radius: number | undefined) => {
-      updateUrl({
-        ...urlState,
-        radius,
-        sort:
-          urlState.lat !== undefined && urlState.lng !== undefined
-            ? "distance"
-            : urlState.sort,
-        page: 0,
-        vjk: undefined,
-      });
-    },
-    [urlState, updateUrl],
-  );
 
   const handleClearFilters = useCallback(() => {
     restoreScrollRef.current = window.scrollY;
@@ -247,7 +231,8 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     categories: facets.categories,
     onSearch: handleSearch,
     onBrowseLatest: handleBrowseLatest,
-    onRadiusChange: handleRadiusChange,
+    showRadiusSelect: false,
+    elevated: true,
   };
 
   const detailPanel = (
@@ -265,18 +250,18 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     <div className="font-[family-name:var(--font-outfit)] bg-[#F9FAFB]">
       {/* Search + filters — white band with breathing room */}
       <div className="border-b border-[#E5E7EB]/80 bg-[#FFFFFF]">
-        <div className="mx-auto w-full max-w-[1100px] px-4 py-4 sm:px-6 sm:py-5">
-          <div className="mx-auto w-full max-w-4xl">
+        <div className="px-4 py-4 sm:px-6 sm:py-5">
+          <div className="mx-auto w-full max-w-[1100px]">
             <JobsHeroSearchV5 {...sharedSearchProps} />
-          </div>
-          <div className="mt-3">
-            <JobsFilterPills
-              state={urlState}
-              facets={sharedFilterFacets}
-              onChange={handleFilterChange}
-              onClearAll={handleClearFilters}
-              compact
-            />
+            <div className="mt-3">
+              <JobsFilterPills
+                state={urlState}
+                facets={sharedFilterFacets}
+                onChange={handleFilterChange}
+                onClearAll={handleClearFilters}
+                compact
+              />
+            </div>
           </div>
         </div>
       </div>

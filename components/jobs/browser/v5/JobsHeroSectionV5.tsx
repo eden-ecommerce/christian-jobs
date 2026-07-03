@@ -101,6 +101,9 @@ export function JobsHeroSectionV5({ onSearch, onBrowseLatest }: Props) {
                     onSearch={onSearch}
                     onBrowseLatest={onBrowseLatest}
                     location=""
+                    showRadiusSelect={false}
+                    showRefinePills
+                    centreRefinePills
                   />
                 </div>
 

@@ -21,6 +21,8 @@ type Props = {
   className?: string;
   inputClassName?: string;
   labelClassName?: (floating: boolean) => string;
+  /** Floating label text — defaults to "Category". */
+  fieldLabel?: string;
   placeholder?: string;
   /** When true, fetches categories from /api/jobs/filters if the list is empty. */
   fetchWhenEmpty?: boolean;
@@ -41,6 +43,7 @@ export function JobsCategoryCombobox({
   className = "",
   inputClassName = "",
   labelClassName,
+  fieldLabel = "Category",
   placeholder = "All categories",
   fetchWhenEmpty = false,
 }: Props) {
@@ -250,7 +253,7 @@ export function JobsCategoryCombobox({
     <div ref={containerRef} className={`relative min-w-0 ${className}`}>
       {labelClassName ? (
         <label htmlFor={id} className={labelClassName(labelUp)}>
-          Category
+          {fieldLabel}
         </label>
       ) : null}
 
@@ -264,7 +267,7 @@ export function JobsCategoryCombobox({
           aria-expanded={open}
           aria-controls={listboxId}
           aria-autocomplete="list"
-          aria-label="Category"
+          aria-label={fieldLabel}
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
@@ -306,7 +309,7 @@ export function JobsCategoryCombobox({
         ) : null}
 
         <ChevronDown
-          className="pointer-events-none absolute right-3 h-4 w-4 text-[#86868b]"
+          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#86868b]"
           aria-hidden="true"
         />
       </div>

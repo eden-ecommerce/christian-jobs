@@ -15,6 +15,8 @@ type Props = {
   inline?: boolean;
   /** Compact styling for the v3 hero search row. */
   compact?: boolean;
+  /** Show full option labels (e.g. "Within 25 miles") in compact mode. */
+  fullLabels?: boolean;
 };
 
 function compactRadiusLabel(miles: number): string {
@@ -28,6 +30,7 @@ export function JobsLocationRadiusSelect({
   className = "",
   inline = false,
   compact = false,
+  fullLabels = false,
 }: Props) {
   const activeRadiusMeters = resolveLocationRadiusMeters(radius);
 
@@ -51,7 +54,11 @@ export function JobsLocationRadiusSelect({
         >
           {LOCATION_RADIUS_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
-              {compactRadiusLabel(option.miles)}
+              {compact && fullLabels
+                ? option.label
+                : compact && !fullLabels
+                  ? compactRadiusLabel(option.miles)
+                  : option.label}
             </option>
           ))}
         </select>

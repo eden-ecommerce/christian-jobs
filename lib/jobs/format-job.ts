@@ -52,9 +52,9 @@ export function formatPostedLabel(
   if (!postedTimestamp) return null;
   const diffDays = Math.floor((now - postedTimestamp) / 86_400_000);
   if (diffDays >= RECENT_POSTED_WINDOW_DAYS) return null;
-  if (diffDays === 0) return "Posted today";
-  if (diffDays === 1) return "Posted yesterday";
-  if (diffDays < RECENT_POSTED_WINDOW_DAYS) return "Posted this week";
+  if (diffDays === 0) return "Added Today";
+  if (diffDays === 1) return "Added Yesterday";
+  if (diffDays < RECENT_POSTED_WINDOW_DAYS) return "Added This Week";
   return null;
 }
 
