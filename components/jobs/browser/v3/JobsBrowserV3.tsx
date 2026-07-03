@@ -212,12 +212,18 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     );
   }
 
-  // Treat the card as selected and the detail pane as loading as soon as the
-  // user clicks, before the URL round-trip resolves (pendingId covers that gap).
-  const activeId = urlState.vjk ?? pendingId ?? undefined;
+  // pendingId is set synchronously on click and cleared once the URL settles.
+  // We must prefer pendingId over urlState.vjk so the card highlights and the
+  // detail spinner fire immediately — before the router.replace round-trip
+  // resolves. Without this, urlState.vjk still holds the OLD job id and wins.
+  const activeId = pendingId ?? urlState.vjk ?? undefined;
   const detailData = detailQuery.data ?? null;
+  // Show the spinner immediately when the user clicks a different job (pendingId
+  // is set but hasn't committed to the URL yet), or when the query is in-flight.
+  const pendingDifferentJob =
+    Boolean(pendingId) && pendingId !== urlState.vjk;
   const detailLoading =
-    (detailQuery.isLoading && Boolean(urlState.vjk)) || Boolean(pendingId);
+    pendingDifferentJob || (detailQuery.isLoading && Boolean(urlState.vjk));
   const detailError = detailQuery.isError ? "Unable to load job details." : null;
 
   const sharedFilterFacets = {
