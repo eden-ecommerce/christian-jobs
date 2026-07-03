@@ -29,7 +29,6 @@ import {
   Check,
   ExternalLink,
   Globe,
-  Loader2,
   MapPin,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -126,22 +125,61 @@ export function JobDetailPanel({
     );
   }
 
-  // Show spinner when loading with no data, OR when the currently displayed job
+  // Show skeleton when loading with no data, OR when the currently displayed job
   // doesn't match the selected id (stale data from previous selection).
   const isStale = Boolean(data && selectedId && data.job.id !== selectedId);
   if (loading && (!data || isStale)) {
+    const skeletonShellClass = scrollWithPage
+      ? "flex flex-col rounded-2xl bg-white shadow-soft"
+      : "flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white shadow-soft";
+    const skeletonBodyClass = scrollWithPage
+      ? "p-6"
+      : "min-h-0 flex-1 overflow-y-auto overscroll-contain p-6";
     return (
-      <div
-        className={
-          scrollWithPage
-            ? "flex min-h-[280px] items-center justify-center rounded-2xl bg-white shadow-soft"
-            : "flex h-full items-center justify-center rounded-2xl bg-white shadow-soft"
-        }
-      >
-        <Loader2
-          className="h-8 w-8 animate-spin text-[#2d6a4f]"
-          aria-label="Loading job details"
-        />
+      <div className={skeletonShellClass} aria-busy="true" aria-label="Loading job details">
+        <div className={skeletonBodyClass}>
+          {/* Header skeleton */}
+          <div className="flex items-start gap-3">
+            <div className="h-14 w-14 shrink-0 animate-pulse rounded-[4px] bg-[#E5E7EB]" />
+            <div className="flex-1 space-y-2 pt-1">
+              <div className="h-5 w-2/3 animate-pulse rounded-md bg-[#E5E7EB]" />
+              <div className="h-4 w-1/3 animate-pulse rounded-md bg-[#E5E7EB]" />
+            </div>
+            <div className="flex shrink-0 gap-1.5 pt-1">
+              <div className="h-7 w-7 animate-pulse rounded-full bg-[#E5E7EB]" />
+              <div className="h-7 w-7 animate-pulse rounded-full bg-[#E5E7EB]" />
+            </div>
+          </div>
+
+          {/* Metadata grid skeleton */}
+          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-5 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 sm:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                <div className="mt-0.5 h-4 w-4 animate-pulse rounded bg-[#E5E7EB]" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-2.5 w-14 animate-pulse rounded bg-[#E5E7EB]" />
+                  <div className="h-3.5 w-20 animate-pulse rounded bg-[#E5E7EB]" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Apply button skeleton */}
+          <div className="mt-5 h-11 w-full animate-pulse rounded-xl bg-[#E5E7EB]" />
+
+          {/* Description skeleton */}
+          <div className="mt-8 space-y-2.5">
+            <div className="h-4 w-28 animate-pulse rounded-md bg-[#E5E7EB]" />
+            <div className="h-3 w-full animate-pulse rounded bg-[#E5E7EB]" />
+            <div className="h-3 w-full animate-pulse rounded bg-[#E5E7EB]" />
+            <div className="h-3 w-5/6 animate-pulse rounded bg-[#E5E7EB]" />
+            <div className="h-3 w-full animate-pulse rounded bg-[#E5E7EB]" />
+            <div className="h-3 w-4/6 animate-pulse rounded bg-[#E5E7EB]" />
+            <div className="mt-4 h-3 w-full animate-pulse rounded bg-[#E5E7EB]" />
+            <div className="h-3 w-full animate-pulse rounded bg-[#E5E7EB]" />
+            <div className="h-3 w-3/4 animate-pulse rounded bg-[#E5E7EB]" />
+          </div>
+        </div>
       </div>
     );
   }
