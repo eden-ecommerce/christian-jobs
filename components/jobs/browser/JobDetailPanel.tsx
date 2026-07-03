@@ -196,13 +196,8 @@ export function JobDetailPanel({
           )}
 
           <div className="min-w-0 flex-1">
-            {postedLabel ? (
-              <span className="mb-1.5 inline-flex rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[11px] font-semibold text-[#92400E]">
-                {postedLabel}
-              </span>
-            ) : null}
             {closingUrgency?.isImminent ? (
-              <span className="mb-1.5 ml-1.5 inline-flex rounded-full bg-[#FEE2E2] px-2.5 py-0.5 text-[11px] font-semibold text-[#B91C1C]">
+              <span className="mb-1.5 inline-flex rounded-full bg-[#FEE2E2] px-2.5 py-0.5 text-[11px] font-semibold text-[#B91C1C]">
                 {closingUrgency.label}
               </span>
             ) : null}

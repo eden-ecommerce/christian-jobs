@@ -147,6 +147,24 @@ function multi(value: string | string[] | undefined): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
+/** Preserve repeated query keys (e.g. multiple contractType values) for URLSearchParams. */
+export function urlSearchParamsToRecord(
+  searchParams: URLSearchParams,
+): Record<string, string | string[] | undefined> {
+  const record: Record<string, string | string[] | undefined> = {};
+
+  for (const key of new Set(searchParams.keys())) {
+    const values = searchParams.getAll(key);
+    record[key] = values.length > 1 ? values : values[0];
+  }
+
+  return record;
+}
+
+export function parseJobsUrlSearchParams(searchParams: URLSearchParams): JobsUrlState {
+  return parseJobsUrlState(urlSearchParamsToRecord(searchParams));
+}
+
 export function parseJobsUrlState(
   sp: Record<string, string | string[] | undefined>,
 ): JobsUrlState {

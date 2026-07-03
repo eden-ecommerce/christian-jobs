@@ -1,6 +1,5 @@
 "use client";
 
-import { JobsActiveFilterBadges } from "@components/jobs/browser/JobsActiveFilterBadges";
 import { JobsEmptyResultsSuggestions } from "@components/jobs/browser/JobsEmptyResultsSuggestions";
 import { JobListItem } from "@components/jobs/browser/JobListItem";
 import { NAMESPACE_PATH } from "@lib/config";
@@ -87,7 +86,6 @@ function resultsLabel(
 export function JobsListToolbar({
   total,
   filterState,
-  onClearSearch,
 }: {
   total: number;
   filterState?: JobsUrlState;
@@ -99,20 +97,9 @@ export function JobsListToolbar({
 
   return (
     <div className="flex items-center justify-between px-1 pb-2">
-      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-        <p className="text-sm text-foreground">
-          {resultsLabel(filterState, total, hasActiveFilters)}
-        </p>
-        {filterState && onClearSearch && hasActiveJobSearch(filterState) ? (
-          <button
-            type="button"
-            onClick={onClearSearch}
-            className="text-sm font-medium text-[#2d6a4f] underline-offset-2 hover:underline"
-          >
-            Clear search
-          </button>
-        ) : null}
-      </div>
+      <p className="text-sm text-foreground">
+        {resultsLabel(filterState, total, hasActiveFilters)}
+      </p>
       <div className="flex items-center gap-2">
         <Link
           href={`${NAMESPACE_PATH}/saved`}
@@ -181,24 +168,8 @@ export function JobsListPane({
   return (
     <div className={pageScroll ? "flex flex-col" : "flex h-full min-h-0 flex-col"}>
       {hideToolbar ? null : (
-        <JobsListToolbar
-          total={total}
-          filterState={filterState}
-          onClearSearch={onClearFilters}
-        />
+        <JobsListToolbar total={total} filterState={filterState} />
       )}
-
-      {filterState &&
-      filterFacets &&
-      onFilterChange &&
-      onClearFilters ? (
-        <JobsActiveFilterBadges
-          state={filterState}
-          facets={filterFacets}
-          onChange={onFilterChange}
-          onClearAll={onClearFilters}
-        />
-      ) : null}
 
       <div
         ref={listRef}

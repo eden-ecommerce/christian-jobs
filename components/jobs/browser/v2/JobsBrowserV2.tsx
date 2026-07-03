@@ -30,7 +30,7 @@ import {
   isLatestJobsBrowse,
   jobsUrlStateToSearchParams,
   latestJobsBrowseState,
-  parseJobsUrlState,
+  parseJobsUrlSearchParams,
   type JobsUrlState,
 } from "@lib/jobs/search-params";
 
@@ -51,7 +51,7 @@ export function JobsBrowserV2({ initialResult, initialFacets, blogCarousel }: Pr
   const queryClient = useQueryClient();
 
   const urlState = useMemo(
-    () => parseJobsUrlState(Object.fromEntries(searchParams.entries())),
+    () => parseJobsUrlSearchParams(searchParams),
     [searchParams],
   );
 

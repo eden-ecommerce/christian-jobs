@@ -137,13 +137,13 @@ export function FilterPopover({
         onClick={() => setOpen((o) => !o)}
         className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
           active
-            ? "border-[#2d6a4f] bg-[#2d6a4f]/10 text-[#2d6a4f]"
+            ? "border-[#2d6a4f]/25 bg-[#2d6a4f]/[0.06] text-[#3d6b52]"
             : "border-border bg-card text-foreground hover:border-[#2d6a4f]/50"
         }`}
       >
         {label}
         {activeCount && activeCount > 0 ? (
-          <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[#2d6a4f] px-1 text-[11px] font-bold text-white">
+          <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[#2d6a4f]/15 px-1 text-[11px] font-semibold text-[#3d6b52]">
             {activeCount}
           </span>
         ) : null}

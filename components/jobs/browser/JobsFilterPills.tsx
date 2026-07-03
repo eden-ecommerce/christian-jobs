@@ -65,22 +65,24 @@ export function JobsFilterPills({
       : [...values, value];
   }
 
+  const fadeGradientClass = compact
+    ? "bg-gradient-to-r from-transparent via-white/70 to-white"
+    : "bg-gradient-to-r from-transparent via-background/70 to-background";
+  const clearBackdropClass = compact ? "bg-white" : "bg-background";
+
   return (
     <div className={compact ? undefined : "border-b border-border bg-background"}>
       <div className={compact ? "py-1" : "mx-auto max-w-[1600px] px-4 py-2 sm:px-6"}>
         <div className="relative min-w-0 w-full">
           <div
-            className={`flex w-full items-center gap-2 ${
-              compact
-                ? "flex-wrap"
-                : `overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden${
-                    hasActive ? " pr-32" : ""
-                  }`
+            className={`flex w-full items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden${
+              hasActive ? " pr-44" : ""
             }`}
           >
           <FilterPopover
             label={radiusLabel}
             active={state.radius !== undefined || hasGeo}
+            activeCount={state.radius !== undefined || hasGeo ? 1 : undefined}
           >
             <div className="flex flex-col">
               {LOCATION_RADIUS_OPTIONS.map((option) => (
@@ -111,6 +113,7 @@ export function JobsFilterPills({
           <FilterPopover
             label="Salary"
             active={!!state.minSalary}
+            activeCount={state.minSalary ? 1 : undefined}
           >
             <div className="flex flex-col">
               {SALARY_OPTIONS.map((opt) => (
@@ -250,6 +253,7 @@ export function JobsFilterPills({
           <FilterPopover
             label="Date Posted"
             active={state.datePosted !== "any"}
+            activeCount={state.datePosted !== "any" ? 1 : undefined}
           >
             <div className="flex flex-col">
               {DATE_POSTED_OPTIONS.map((opt) => (
@@ -292,33 +296,31 @@ export function JobsFilterPills({
               ))}
             </div>
           </FilterPopover>
-          {hasActive && compact ? (
-            <button
-              type="button"
-              onClick={onClearAll}
-              className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#2d6a4f]/35 bg-[#2d6a4f]/[0.07] px-3 py-1.5 text-sm font-medium text-[#2d6a4f] transition-colors hover:border-[#2d6a4f]/55 hover:bg-[#2d6a4f]/10"
-            >
-              <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              Clear search
-            </button>
-          ) : null}
           </div>
 
-          {hasActive && !compact ? (
-            <>
+          {hasActive ? (
+            <div className="absolute inset-y-0 right-0 z-[2] flex items-stretch pointer-events-none">
               <div
-                className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-32 bg-gradient-to-r from-transparent to-background"
+                className={`w-16 shrink-0 ${fadeGradientClass}`}
                 aria-hidden="true"
               />
-              <button
-                type="button"
-                onClick={onClearAll}
-                className="absolute inset-y-0 right-0 z-[2] flex items-center gap-1.5 bg-background pl-4 text-sm font-medium text-[#2d6a4f] hover:underline"
+              <div
+                className={`flex items-center pl-2 pointer-events-auto ${clearBackdropClass}`}
               >
-                <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                Clear search
-              </button>
-            </>
+                <button
+                  type="button"
+                  onClick={onClearAll}
+                  className={
+                    compact
+                      ? "inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#2d6a4f]/35 bg-[#2d6a4f]/[0.07] px-3 py-1.5 text-sm font-medium text-[#2d6a4f] transition-colors hover:border-[#2d6a4f]/55 hover:bg-[#2d6a4f]/10"
+                      : "inline-flex items-center gap-1.5 text-sm font-medium text-[#2d6a4f] hover:underline"
+                  }
+                >
+                  <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  Clear search
+                </button>
+              </div>
+            </div>
           ) : null}
         </div>
       </div>

@@ -28,7 +28,7 @@ import type { JobFacets, SearchJobsResult } from "@lib/algolia/jobs";
 import {
   jobsUrlStateToSearchParams,
   latestJobsBrowseState,
-  parseJobsUrlState,
+  parseJobsUrlSearchParams,
   type JobsHeroSearchSubmit,
   type JobsUrlState,
 } from "@lib/jobs/search-params";
@@ -50,7 +50,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
   const queryClient = useQueryClient();
 
   const urlState = useMemo(
-    () => parseJobsUrlState(Object.fromEntries(searchParams.entries())),
+    () => parseJobsUrlSearchParams(searchParams),
     [searchParams],
   );
 
@@ -269,11 +269,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
       <div className="px-4 pb-4 pt-2 sm:px-6 sm:pb-5">
         <div className="mx-auto w-full max-w-[1100px]">
           <div className="hidden md:block">
-            <JobsListToolbar
-              total={total}
-              filterState={urlState}
-              onClearSearch={handleClearFilters}
-            />
+            <JobsListToolbar total={total} filterState={urlState} />
           </div>
 
           {/* Tablet + desktop: listings 2/5, sticky detail 3/5 */}
