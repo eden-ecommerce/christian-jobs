@@ -61,6 +61,8 @@ type Props = {
   formClassName?: string;
   onSearch: (values: JobsHeroSearchSubmit) => void;
   onBrowseLatest?: () => void;
+  /** When set, category picks apply immediately (e.g. results page). */
+  onCategoryChange?: (category: string | undefined) => void;
   onRadiusChange?: (radius: number | undefined) => void;
   /** Desktop radius dropdown — hidden on homepage, shown on search results. */
   showRadiusSelect?: boolean;
@@ -110,6 +112,7 @@ export function JobsHeroSearchV5({
   formClassName = "w-full",
   onSearch,
   onBrowseLatest,
+  onCategoryChange,
   onRadiusChange,
   showRadiusSelect = true,
   centreRefinePills = false,
@@ -157,6 +160,14 @@ export function JobsHeroSearchV5({
       plainLocationRef.current.value = location;
     }
   }, [location, mapsEnabled]);
+
+  const handleCategorySelect = useCallback(
+    (nextCategory: string | undefined) => {
+      setSelectedCategory(nextCategory);
+      onCategoryChange?.(nextCategory);
+    },
+    [onCategoryChange],
+  );
 
   const runSearch = useCallback(
     (values: JobsHeroSearchSubmit) => {
@@ -334,7 +345,7 @@ export function JobsHeroSearchV5({
                 id="v5-hero-category"
                 categories={categories}
                 value={selectedCategory}
-                onChange={setSelectedCategory}
+                onChange={handleCategorySelect}
                 fetchWhenEmpty
                 fieldLabel="Category"
                 inputClassName={`${MOBILE_INPUT_CLASS} pr-11`}

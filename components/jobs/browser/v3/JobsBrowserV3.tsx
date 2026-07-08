@@ -256,6 +256,13 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     resultsLoading,
   };
 
+  const handleCategoryChange = useCallback(
+    (category: string | undefined) => {
+      handleFilterChange({ category, uncategorised: undefined });
+    },
+    [handleFilterChange],
+  );
+
   const sharedSearchProps = {
     category: urlState.category,
     workTypes: urlState.workTypes,
@@ -266,6 +273,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     radius: urlState.radius,
     categories: facets.categories,
     onSearch: handleSearch,
+    onCategoryChange: handleCategoryChange,
     onBrowseLatest: handleBrowseLatest,
     showRadiusSelect: false,
     elevated: true,
@@ -276,8 +284,16 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     !loading &&
     hasActiveJobSearch(urlState);
 
+  const jobAlertSignup = showJobAlertSignup ? (
+    <JobsJobAlertSignup
+      filterState={urlState}
+      facets={sharedFilterFacets}
+      onClearFilters={handleClearFilters}
+    />
+  ) : null;
+
   const detailPanel = showJobAlertSignup ? (
-    <JobsJobAlertSignup filterState={urlState} facets={sharedFilterFacets} />
+    jobAlertSignup
   ) : (
     <JobDetailPanel
       data={detailData}
@@ -332,14 +348,21 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
           {/* Tablet + desktop: listings 2/5, sticky detail 3/5 */}
           <div className="hidden md:flex md:items-start md:gap-5">
             <div className="min-w-0 flex-[2]">
-              <JobsListPane {...listPaneProps} hideToolbar />
+              <JobsListPane
+                {...listPaneProps}
+                hideToolbar
+                emptyStateCard={showJobAlertSignup ? null : undefined}
+              />
             </div>
             <JobsDetailStickyPane>{detailPanel}</JobsDetailStickyPane>
           </div>
 
           {/* Phone: list only, detail opens as full-screen overlay */}
           <div className="md:hidden">
-            <JobsListPane {...listPaneProps} />
+            <JobsListPane
+              {...listPaneProps}
+              emptyStateCard={jobAlertSignup ?? undefined}
+            />
           </div>
         </div>
       </div>

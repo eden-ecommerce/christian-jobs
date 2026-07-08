@@ -13,7 +13,7 @@ import {
 import type { JobFacet } from "@lib/algolia/jobs";
 import type { JobsUrlState } from "@lib/jobs/search-params";
 import { submitJobAlert } from "@hooks/jobs/submit-job-alert";
-import { Bell, Check, Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 
 type Props = {
@@ -24,6 +24,7 @@ type Props = {
     organisationTypes: JobFacet[];
     denominations: JobFacet[];
   };
+  onClearFilters?: () => void;
 };
 
 const criteriaPillClassName =
@@ -36,8 +37,12 @@ const frequencyPillClass = (active: boolean) =>
       : "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#ececf0]"
   }`;
 
-/** Job alert signup shown in the detail pane when a filtered search returns no results. */
-export function JobsJobAlertSignup({ filterState, facets }: Props) {
+/** Job alert signup shown when a filtered search returns no results. */
+export function JobsJobAlertSignup({
+  filterState,
+  facets,
+  onClearFilters,
+}: Props) {
   const [email, setEmail] = useState("");
   const [frequency, setFrequency] = useState<JobAlertFrequency>("daily");
   const [submittedFrequency, setSubmittedFrequency] =
@@ -94,129 +99,133 @@ export function JobsJobAlertSignup({ filterState, facets }: Props) {
     }
   }
 
+  if (isSuccess) {
+    return (
+      <div className="rounded-2xl bg-white p-6 text-center shadow-soft sm:p-8">
+        <Check
+          className="mx-auto h-8 w-8 text-[#235A0E]"
+          aria-hidden="true"
+        />
+        <h2 className="mt-3 text-lg font-semibold text-foreground">
+          You&apos;re set
+        </h2>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          We&apos;ll email you {jobAlertFrequencyLabel(submittedFrequency)} when
+          a matching job is posted.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-[280px] flex-col justify-center rounded-2xl bg-white p-6 shadow-soft sm:p-8">
-      {isSuccess ? (
-        <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#235A0E]/10">
-            <Check className="h-6 w-6 text-[#235A0E]" aria-hidden="true" />
-          </div>
-          <h2 className="mt-4 text-lg font-semibold text-foreground">
-            You&apos;re set
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            We&apos;ll email you {jobAlertFrequencyLabel(submittedFrequency)} when
-            a matching job is posted.
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#235A0E]/10">
-              <Bell className="h-5 w-5 text-[#235A0E]" aria-hidden="true" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-foreground">
-                No jobs match right now — get notified when one does
-              </h2>
-            </div>
-          </div>
+    <div className="rounded-2xl bg-white p-5 shadow-soft sm:p-6">
+      <h2 className="text-lg font-semibold text-foreground">
+        No jobs match your search
+      </h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Get notified when a matching job is posted.
+      </p>
 
-          {criteriaPills.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {criteriaPills.map((pill) => (
-                <span key={pill.key} className={criteriaPillClassName}>
-                  {pill.prefix ? `${pill.prefix}: ${pill.label}` : pill.label}
-                </span>
-              ))}
-            </div>
-          ) : null}
-
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-              <div>
-                <label
-                  htmlFor="job-alert-email"
-                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
-                >
-                  Email
-                </label>
-                <Input
-                  id="job-alert-email"
-                  type="email"
-                  inputMode="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(event) => {
-                    setEmail(event.target.value);
-                    if (validationError) setValidationError(null);
-                    if (submitError) setSubmitError(null);
-                  }}
-                  aria-invalid={Boolean(validationError)}
-                  aria-describedby={
-                    validationError || submitError
-                      ? "job-alert-form-error"
-                      : undefined
-                  }
-                  disabled={isSubmitting}
-                  className="h-11 rounded-xl border-[#E5E7EB] bg-[#F9FAFB] px-4"
-                />
-              </div>
-
-              <fieldset>
-                <legend className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                  Frequency
-                </legend>
-                <div
-                  className="flex flex-wrap gap-1.5"
-                  role="radiogroup"
-                  aria-label="Alert frequency"
-                >
-                  {JOB_ALERT_FREQUENCY_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      role="radio"
-                      aria-checked={frequency === option.value}
-                      disabled={isSubmitting}
-                      onClick={() => setFrequency(option.value)}
-                      className={frequencyPillClass(frequency === option.value)}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-            </div>
-
-            {validationError || submitError ? (
-              <p
-                id="job-alert-form-error"
-                className="text-sm text-destructive"
-                role="alert"
-              >
-                {validationError ?? submitError}
-              </p>
-            ) : null}
-
+      {criteriaPills.length > 0 || onClearFilters ? (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {criteriaPills.map((pill) => (
+            <span key={pill.key} className={criteriaPillClassName}>
+              {pill.prefix ? `${pill.prefix}: ${pill.label}` : pill.label}
+            </span>
+          ))}
+          {onClearFilters ? (
             <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#235A0E] px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              type="button"
+              onClick={onClearFilters}
+              className="cursor-pointer text-xs font-medium text-[#2d6a4f] hover:underline"
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  Creating…
-                </>
-              ) : (
-                "Create Alert"
-              )}
+              Clear search
             </button>
-          </form>
-        </>
-      )}
+          ) : null}
+        </div>
+      ) : null}
+
+      <form onSubmit={handleSubmit} className="mt-5 space-y-3" noValidate>
+        <div>
+          <label
+            htmlFor="job-alert-email"
+            className="mb-1 block text-xs font-medium text-muted-foreground"
+          >
+            Email
+          </label>
+          <Input
+            id="job-alert-email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              if (validationError) setValidationError(null);
+              if (submitError) setSubmitError(null);
+            }}
+            aria-invalid={Boolean(validationError)}
+            aria-describedby={
+              validationError || submitError
+                ? "job-alert-form-error"
+                : undefined
+            }
+            disabled={isSubmitting}
+            className="h-10 rounded-xl border-[#E5E7EB] bg-[#F9FAFB] px-4"
+          />
+        </div>
+
+        <fieldset>
+          <legend className="mb-1 block text-xs font-medium text-muted-foreground">
+            Frequency
+          </legend>
+          <div
+            className="flex flex-wrap gap-1.5"
+            role="radiogroup"
+            aria-label="Alert frequency"
+          >
+            {JOB_ALERT_FREQUENCY_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                aria-checked={frequency === option.value}
+                disabled={isSubmitting}
+                onClick={() => setFrequency(option.value)}
+                className={frequencyPillClass(frequency === option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        {validationError || submitError ? (
+          <p
+            id="job-alert-form-error"
+            className="text-sm text-destructive"
+            role="alert"
+          >
+            {validationError ?? submitError}
+          </p>
+        ) : null}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#235A0E] px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Creating…
+            </>
+          ) : (
+            "Create Alert"
+          )}
+        </button>
+      </form>
     </div>
   );
 }

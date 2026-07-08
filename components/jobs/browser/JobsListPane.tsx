@@ -38,6 +38,8 @@ type Props = {
   /** Hide the results toolbar — use when rendering it above a split layout. */
   hideToolbar?: boolean;
   resultsLoading?: boolean;
+  /** Replace the default empty-state card; pass `null` to hide it. */
+  emptyStateCard?: React.ReactNode | null;
 };
 
 function resultsLabel(
@@ -124,6 +126,7 @@ export function JobsListPane({
   listScroll = "container",
   hideToolbar = false,
   resultsLoading = false,
+  emptyStateCard,
 }: Props) {
   const pageScroll = listScroll === "page";
 
@@ -178,24 +181,28 @@ export function JobsListPane({
           </div>
         ) : jobs.length === 0 ? (
           <div className="space-y-6">
-            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-white px-6 py-12 text-center shadow-soft">
-              <Search className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
-              <p className="text-base font-medium text-foreground">
-                No jobs match your search
-              </p>
-              <p className="max-w-sm text-sm text-muted-foreground">
-                Try widening your search area or clearing some filters.
-              </p>
-              {filterState && onClearFilters && hasActiveJobSearch(filterState) ? (
-                <button
-                  type="button"
-                  onClick={onClearFilters}
-                  className="mt-1 cursor-pointer rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#2d6a4f] shadow-soft-sm transition-colors hover:border-[#2d6a4f]/30"
-                >
-                  Clear search
-                </button>
-              ) : null}
-            </div>
+            {emptyStateCard === undefined ? (
+              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl bg-white px-6 py-12 text-center shadow-soft">
+                <Search className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
+                <p className="text-base font-medium text-foreground">
+                  No jobs match your search
+                </p>
+                <p className="max-w-sm text-sm text-muted-foreground">
+                  Try widening your search area or clearing some filters.
+                </p>
+                {filterState && onClearFilters && hasActiveJobSearch(filterState) ? (
+                  <button
+                    type="button"
+                    onClick={onClearFilters}
+                    className="mt-1 cursor-pointer rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#2d6a4f] shadow-soft-sm transition-colors hover:border-[#2d6a4f]/30"
+                  >
+                    Clear search
+                  </button>
+                ) : null}
+              </div>
+            ) : emptyStateCard ? (
+              emptyStateCard
+            ) : null}
 
             <JobsEmptyResultsSuggestions
               filterState={filterState}
