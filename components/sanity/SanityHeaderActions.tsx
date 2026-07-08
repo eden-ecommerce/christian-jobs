@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  HelpCircle,
   ShoppingBasket,
   User,
 } from "lucide-react";
@@ -11,15 +10,6 @@ import { SANITY_LINKS } from "@/data/sanity-defaults";
 export const SanityHeaderActions = () => {
   return (
     <>
-      <li>
-        <IconWithText
-          heading="Help"
-          icon={<HelpCircle className="size-5" />}
-          textLocation="bottom"
-          ariaLabel="Help"
-          link={SANITY_LINKS.headerHelp}
-        />
-      </li>
       <li>
         <IconWithText
           heading="Login"
