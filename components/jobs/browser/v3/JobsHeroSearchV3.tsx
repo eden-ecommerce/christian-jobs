@@ -234,7 +234,7 @@ export function JobsHeroSearchV3({
               type="submit"
               disabled={!canSearch}
               aria-label="Search jobs"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#235A0E] text-white transition-[transform,opacity] hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#235A0E] text-white transition-[transform,opacity] hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
             >
               <Search className="h-[18px] w-[18px]" aria-hidden="true" />
             </button>

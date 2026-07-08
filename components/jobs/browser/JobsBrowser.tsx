@@ -210,7 +210,7 @@ export function JobsBrowser({ initialResult, initialFacets, blogCarousel }: Prop
   const showLandingSearch = isLatestJobsBrowse(urlState);
 
   const page = (
-    <div className="font-[family-name:var(--font-outfit)] bg-[#F9FAFB]">
+    <div className="bg-[#F9FAFB]">
       <JobsPageHero />
 
       {/* Search — sticky so jobs stay reachable while scrolling */}

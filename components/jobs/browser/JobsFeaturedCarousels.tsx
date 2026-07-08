@@ -102,7 +102,7 @@ export function JobsFeaturedCarousels({
 
   return (
     <div
-      className={`border-t font-[family-name:var(--font-outfit)] ${
+      className={`border-t ${
         isHomepage
           ? "border-[#e8e8ed] bg-[#fbfbfd] py-4 sm:py-8"
           : "border-[#E5E7EB] bg-[#F9FAFB] px-4 py-4 sm:px-6 sm:py-6"

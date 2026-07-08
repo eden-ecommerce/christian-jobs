@@ -70,7 +70,7 @@ export function JobsHomepageV3({
   );
 
   const page = (
-    <div className="font-[family-name:var(--font-outfit)] bg-[#fbfbfd]">
+    <div className="bg-[#fbfbfd]">
       <JobsHeroSectionV3 onSearch={handleSearch} />
 
       <JobsFeaturedCarousels

@@ -104,6 +104,7 @@ export function JobsHeroSectionV5({ onSearch, onBrowseLatest }: Props) {
                     showRadiusSelect={false}
                     showRefinePills
                     centreRefinePills
+                    headingOutside
                   />
                 </div>
 

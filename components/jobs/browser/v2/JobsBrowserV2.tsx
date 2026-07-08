@@ -240,7 +240,7 @@ export function JobsBrowserV2({ initialResult, initialFacets, blogCarousel }: Pr
   };
 
   const page = (
-    <div className="font-[family-name:var(--font-outfit)] bg-[#F9FAFB]">
+    <div className="bg-[#F9FAFB]">
 
       {/* ── V2 Hero ── white, centred, Figma-matched layout ── */}
       <section className="border-b border-[#E5E7EB] bg-white">

@@ -7,17 +7,12 @@ import { isDeployEnvConfigured, isGtmEnvConfigured } from "@lib/env-configured";
 import { getTermlyResourceBlockerUrl } from "@lib/termly/constants";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Outfit } from "next/font/google";
+import { Outfit } from "next/font/google";
 import Script from "next/script";
 import { ASSET_BASE_URL, PRODUCTION_ORIGIN } from "@/constants/app";
 import iconSvg from "@public/icon.svg";
 import "@app/globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -72,7 +67,7 @@ export default function RootLayout({
     return (
       <html
         lang="en"
-        className={`light ${geistSans.variable} ${geistMono.variable} ${outfit.variable}`}
+        className={`light ${outfit.variable}`}
       >
         <body className="flex min-h-screen items-center justify-center p-6 font-sans antialiased">
           <IntegrationEnvError integration="deploy" className="max-w-lg" />
@@ -84,7 +79,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`light ${geistSans.variable} ${geistMono.variable} ${outfit.variable} bg-background`}
+      className={`light ${outfit.variable} bg-background`}
     >
       <head>
         <Script

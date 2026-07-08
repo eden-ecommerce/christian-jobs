@@ -12,6 +12,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { JobsHeroSearchV5 } from "@components/jobs/browser/v5/JobsHeroSearchV5";
+import { NsLink } from "@components/ns-link";
 import { GoogleMapsProvider } from "@components/google-maps/GoogleMapsProvider";
 import { JobsFilterPills } from "@components/jobs/browser/JobsFilterPills";
 import { JobsListPane, JobsListToolbar } from "@components/jobs/browser/JobsListPane";
@@ -19,12 +20,14 @@ import { JobDetailPanel } from "@components/jobs/browser/JobDetailPanel";
 import { JobsDetailStickyPane } from "@components/jobs/browser/v3/JobsDetailStickyPane";
 import { JobsMobileDetail } from "@components/jobs/browser/JobsMobileDetail";
 import { JobsFeaturedCarousels } from "@components/jobs/browser/JobsFeaturedCarousels";
+import { JobsJobAlertSignup } from "@components/jobs/browser/JobsJobAlertSignup";
 import { IntegrationEnvError } from "@components/common/IntegrationEnvError";
 import { isGoogleMapsEnvConfigured } from "@lib/env-configured";
 import { useJobDetail } from "@hooks/jobs/use-job-detail";
 import { useJobsInfiniteList } from "@hooks/jobs/use-jobs-infinite";
 import { getJobDetailQueryOptions } from "@hooks/jobs/get-options";
 import type { JobFacets, SearchJobsResult } from "@lib/algolia/jobs";
+import { jobsNamespacePath } from "@lib/jobs/routes";
 import {
   hasActiveJobSearch,
   isLatestJobsBrowse,
@@ -34,6 +37,7 @@ import {
   type JobsHeroSearchSubmit,
   type JobsUrlState,
 } from "@lib/jobs/search-params";
+import { ArrowLeft } from "lucide-react";
 
 type Props = {
   initialResult: SearchJobsResult;
@@ -266,7 +270,14 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     elevated: true,
   };
 
-  const detailPanel = (
+  const showJobAlertSignup =
+    jobs.length === 0 &&
+    !loading &&
+    hasActiveJobSearch(urlState);
+
+  const detailPanel = showJobAlertSignup ? (
+    <JobsJobAlertSignup filterState={urlState} facets={sharedFilterFacets} />
+  ) : (
     <JobDetailPanel
       data={detailData}
       loading={detailLoading}
@@ -278,11 +289,18 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
   );
 
   const page = (
-    <div className="font-[family-name:var(--font-outfit)] bg-[#F9FAFB]">
+    <div className="bg-[#F9FAFB]">
       {/* Search + filters — white band with breathing room */}
       <div className="border-b border-[#E5E7EB]/80 bg-[#FFFFFF]">
         <div className="px-4 py-4 sm:px-6 sm:py-5">
           <div className="mx-auto w-full max-w-[1100px]">
+            <NsLink
+              href={jobsNamespacePath()}
+              className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Back to homepage
+            </NsLink>
             <JobsHeroSearchV5 {...sharedSearchProps} />
             <div className="mt-3">
               <JobsFilterPills
