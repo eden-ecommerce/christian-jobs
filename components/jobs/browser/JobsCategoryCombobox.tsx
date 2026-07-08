@@ -2,6 +2,7 @@
 
 import type { JobFacet } from "@lib/algolia/jobs";
 import { ChevronDown, X } from "lucide-react";
+import { twMerge } from "tailwind-merge";
 import {
   useCallback,
   useEffect,
@@ -317,29 +318,35 @@ export function JobsCategoryCombobox({
           aria-haspopup="listbox"
           aria-label={selected ? `${fieldLabel}: ${selected.label}` : fieldLabel}
           onClick={toggleOpen}
-          className={`cursor-pointer text-left ${inputClassName}`}
+          className={twMerge(
+            "cursor-pointer text-left",
+            inputClassName,
+            selected ? "pr-[4.75rem]" : "pr-10",
+          )}
         >
           {selected?.label ?? (labelClassName ? "" : placeholder)}
         </button>
 
-        {selected ? (
-          <button
-            type="button"
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => selectCategory(undefined)}
-            aria-label="Clear category"
-            className="absolute right-8 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-[#86868b] hover:bg-[#f5f5f7] hover:text-[#1d1d1f]"
-          >
-            <X className="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
-        ) : null}
+        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2.5">
+          {selected ? (
+            <button
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectCategory(undefined)}
+              aria-label="Clear category"
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[#86868b] hover:bg-[#f5f5f7] hover:text-[#1d1d1f]"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          ) : null}
 
-        <ChevronDown
-          className={`pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#86868b] transition-transform ${
-            open ? "rotate-180" : ""
-          }`}
-          aria-hidden="true"
-        />
+          <ChevronDown
+            className={`pointer-events-none h-4 w-4 shrink-0 text-[#86868b] transition-transform ${
+              open ? "rotate-180" : ""
+            }`}
+            aria-hidden="true"
+          />
+        </div>
       </div>
 
       {mounted && desktopListbox ? createPortal(desktopListbox, document.body) : null}

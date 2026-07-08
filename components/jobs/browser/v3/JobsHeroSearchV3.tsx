@@ -190,7 +190,7 @@ export function JobsHeroSearchV3({
               value={selectedCategory}
               onChange={setSelectedCategory}
               fetchWhenEmpty
-              inputClassName={`${INPUT_CLASS} pr-10`}
+              inputClassName={INPUT_CLASS}
               labelClassName={labelClass}
             />
           </div>

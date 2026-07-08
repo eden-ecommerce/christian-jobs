@@ -365,7 +365,7 @@ export function JobsHeroSearchV5({
                 onChange={handleCategorySelect}
                 fetchWhenEmpty
                 fieldLabel="Category"
-                inputClassName={`${MOBILE_INPUT_CLASS} pr-11`}
+                inputClassName={MOBILE_INPUT_CLASS}
                 labelClassName={labelClass}
               />
             </div>
