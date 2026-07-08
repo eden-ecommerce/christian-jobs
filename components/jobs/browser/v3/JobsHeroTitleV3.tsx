@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { usePrefersReducedMotion } from "@hooks/jobs/use-prefers-reduced-motion";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const ROTATING_WORDS = [
   "purpose",
@@ -10,29 +11,41 @@ const ROTATING_WORDS = [
   "vision",
 ] as const;
 
-const ROTATE_MS = 2000;
-const FADE_MS = 600;
+const ROTATE_MS = 2800;
+const WORD_MS = 650;
+const WIDTH_MS = 750;
+const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-const LONGEST_ROTATING_WORD = ROTATING_WORDS.reduce((longest, word) =>
-  word.length > longest.length ? word : longest,
-);
-
-/** Hero tagline — "Work with [word]" cycles the third word with a soft fade. */
+/** Hero tagline — "Work with [word]" cycles the third word with a centred width shift. */
 export function JobsHeroTitleV3({
   variant = "default",
 }: {
   variant?: "default" | "onImage";
 } = {}) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [reduceMotion, setReduceMotion] = useState(true);
+  const [wordWidths, setWordWidths] = useState<number[]>([]);
+  const wordMeasureRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const reduceMotion = usePrefersReducedMotion();
+
+  const measureWidths = useCallback(() => {
+    const widths = ROTATING_WORDS.map(
+      (word, index) =>
+        wordMeasureRefs.current[index]?.getBoundingClientRect().width ?? 0,
+    );
+    if (widths.every((width) => width > 0)) {
+      setWordWidths(widths);
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    measureWidths();
+  }, [measureWidths]);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const syncReduceMotion = () => setReduceMotion(mediaQuery.matches);
-    syncReduceMotion();
-    mediaQuery.addEventListener("change", syncReduceMotion);
-    return () => mediaQuery.removeEventListener("change", syncReduceMotion);
-  }, []);
+    const handleResize = () => measureWidths();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [measureWidths]);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -45,39 +58,76 @@ export function JobsHeroTitleV3({
   }, [reduceMotion]);
 
   const isOnImage = variant === "onImage";
+  const activeWidth = wordWidths[activeIndex];
+  const wordColour = isOnImage ? "text-[#c8e6a0]" : "text-[#235A0E]";
 
   return (
     <h2
-      className={`mt-3 text-[2.5rem] font-semibold leading-[1.08] tracking-[-0.025em] sm:text-[3.25rem] lg:text-[3.5rem] ${
+      className={`relative mt-3 text-center text-[2.5rem] font-semibold leading-[1.08] tracking-[-0.025em] sm:text-[3.25rem] lg:text-[3.5rem] ${
         isOnImage ? "text-white" : "text-[#1d1d1f]"
       }`}
       aria-live={reduceMotion ? undefined : "polite"}
     >
-      <span className="inline-flex flex-wrap items-baseline justify-center gap-x-[0.28em]">
-        <span>Work with</span>
+      <span className="inline-flex items-baseline justify-center gap-x-[0.28em]">
+        <span className="shrink-0">Work with</span>
+
         <span
-          className={`inline-grid justify-items-start text-left ${isOnImage ? "text-[#c8e6a0]" : "text-[#235A0E]"}`}
+          className={`relative inline-block shrink-0 overflow-hidden align-baseline ${wordColour}`}
+          style={{
+            width: activeWidth ? `${activeWidth}px` : undefined,
+            transition: reduceMotion
+              ? undefined
+              : `width ${WIDTH_MS}ms ${EASE}`,
+          }}
         >
           <span
             aria-hidden
-            className="invisible col-start-1 row-start-1 select-none whitespace-nowrap"
+            className="invisible block whitespace-nowrap select-none"
           >
-            {LONGEST_ROTATING_WORD}
+            {ROTATING_WORDS[activeIndex]}
           </span>
-          {ROTATING_WORDS.map((word, index) => (
-            <span
-              key={word}
-              className="col-start-1 row-start-1 whitespace-nowrap transition-opacity ease-in-out"
-              style={{
-                opacity: index === activeIndex ? 1 : 0,
-                transitionDuration: `${FADE_MS}ms`,
-              }}
-              aria-hidden={index !== activeIndex}
-            >
-              {word}
-            </span>
-          ))}
+
+          {ROTATING_WORDS.map((word, index) => {
+            const isActive = index === activeIndex;
+            return (
+              <span
+                key={word}
+                className="absolute left-0 top-0 whitespace-nowrap will-change-[opacity,transform,filter]"
+                style={{
+                  opacity: isActive ? 1 : 0,
+                  transform: isActive
+                    ? "translateY(0) scale(1)"
+                    : "translateY(0.18em) scale(0.985)",
+                  filter: isActive ? "blur(0)" : "blur(3px)",
+                  transition: reduceMotion
+                    ? "none"
+                    : `opacity ${WORD_MS}ms ${EASE}, transform ${WORD_MS}ms ${EASE}, filter ${WORD_MS}ms ${EASE}`,
+                  pointerEvents: "none",
+                }}
+                aria-hidden={!isActive}
+              >
+                {word}
+              </span>
+            );
+          })}
         </span>
+      </span>
+
+      <span
+        aria-hidden
+        className={`pointer-events-none invisible absolute h-0 w-0 overflow-hidden whitespace-nowrap ${wordColour} text-[2.5rem] font-semibold leading-[1.08] tracking-[-0.025em] sm:text-[3.25rem] lg:text-[3.5rem]`}
+      >
+        {ROTATING_WORDS.map((word, index) => (
+          <span
+            key={word}
+            className="block"
+            ref={(element) => {
+              wordMeasureRefs.current[index] = element;
+            }}
+          >
+            {word}
+          </span>
+        ))}
       </span>
     </h2>
   );
