@@ -17,7 +17,7 @@ import {
   type JobWorkType,
   type JobsHeroSearchSubmit,
 } from "@lib/jobs/search-params";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -169,6 +169,22 @@ export function JobsHeroSearchV5({
     [onCategoryChange],
   );
 
+  const resetLocationState = useCallback(() => {
+    setLocationValue("");
+    setSelectedPlace(null);
+  }, []);
+
+  const handleClearLocation = useCallback(() => {
+    if (mapsEnabled) {
+      locationRef.current?.clear();
+      return;
+    }
+    if (plainLocationRef.current) {
+      plainLocationRef.current.value = "";
+    }
+    resetLocationState();
+  }, [mapsEnabled, resetLocationState]);
+
   const runSearch = useCallback(
     (values: JobsHeroSearchSubmit) => {
       setSelectedCategory(values.category);
@@ -253,6 +269,7 @@ export function JobsHeroSearchV5({
   }
 
   const locationUp = locationFocused || locationValue.trim() !== "";
+  const showLocationClear = locationValue.trim() !== "";
 
   const labelClass = (up: boolean) =>
     `pointer-events-none absolute left-4 select-none transition-all duration-200 ease-out ${
@@ -369,6 +386,7 @@ export function JobsHeroSearchV5({
                       id="v5-hero-location"
                       initialLabel={location}
                       onPlaceSelect={handlePlaceSelect}
+                      onClear={resetLocationState}
                       onFocus={() => setLocationFocused(true)}
                       onBlur={(e: FocusEvent<HTMLInputElement>) => {
                         setLocationFocused(false);
@@ -389,10 +407,21 @@ export function JobsHeroSearchV5({
                         setLocationValue(e.target.value);
                       }}
                       onChange={(e) => setLocationValue(e.target.value)}
-                      className={`${MOBILE_INPUT_CLASS} outline-none`}
+                      className={`${MOBILE_INPUT_CLASS}${showLocationClear ? " pr-10" : ""} outline-none`}
                       aria-label="Town or postcode"
                     />
                   )}
+                  {!mapsEnabled && showLocationClear ? (
+                    <button
+                      type="button"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={handleClearLocation}
+                      className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-[#86868b] hover:bg-[#f5f5f7] hover:text-[#1d1d1f]"
+                      aria-label="Clear location"
+                    >
+                      <X className="h-3.5 w-3.5" aria-hidden="true" />
+                    </button>
+                  ) : null}
                 </div>
 
                 {showRadiusSelect ? (

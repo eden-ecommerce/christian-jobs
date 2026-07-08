@@ -10,7 +10,7 @@ import { useRecentJobSearches } from "@hooks/jobs/use-recent-job-searches";
 import { useUserLocation } from "@hooks/google-maps/use-user-location";
 import { isGoogleMapsEnvConfigured } from "@lib/env-configured";
 import { userLocationFromPlace } from "@lib/google-maps/location-labels";
-import { MapPin, Search } from "lucide-react";
+import { MapPin, Search, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 function desktopSearchFormClass(elevated: boolean) {
@@ -117,6 +117,7 @@ export function JobsSearchBar({
   const locationSearchRef = useRef<LocationSearchHandle>(null);
   const plainLocationRef = useRef<HTMLInputElement>(null);
   const [keyword, setKeyword] = useState(query);
+  const [locationValue, setLocationValue] = useState(location);
   const [selectedPlace, setSelectedPlace] = useState<{
     label: string;
     lat: number;
@@ -127,6 +128,7 @@ export function JobsSearchBar({
 
   useEffect(() => {
     setKeyword(query);
+    setLocationValue(location);
     setSelectedPlace(null);
   }, [query, location]);
 
@@ -171,6 +173,22 @@ export function JobsSearchBar({
     [addRecent, onSearch],
   );
 
+  const resetLocationState = useCallback(() => {
+    setLocationValue("");
+    setSelectedPlace(null);
+  }, []);
+
+  const handleClearLocation = useCallback(() => {
+    if (mapsEnabled) {
+      locationSearchRef.current?.clear();
+      return;
+    }
+    if (plainLocationRef.current) {
+      plainLocationRef.current.value = "";
+    }
+    resetLocationState();
+  }, [mapsEnabled, resetLocationState]);
+
   function submitDesktop(e?: React.FormEvent) {
     e?.preventDefault();
     const locationLabel = (
@@ -208,6 +226,7 @@ export function JobsSearchBar({
 
   const keywordPlaceholder = "Job title, keywords, or company";
   const inputHeightClass = compact ? "h-10" : "h-12";
+  const showLocationClear = locationValue.trim() !== "";
   const desktopFormClass = compact
     ? "mx-auto hidden max-w-none flex-col gap-2 px-0 py-2 lg:flex-row lg:items-center lg:gap-2 lg:flex"
     : desktopSearchFormClass(showEmployerHint);
@@ -239,25 +258,43 @@ export function JobsSearchBar({
 
           <SearchField label={LOCATION_FIELD_LABEL} htmlFor={LOCATION_FIELD_ID} compact={compact}>
             <div className={locationFieldShellClass}>
-              {mapsEnabled ? (
-                <LocationSearch
-                  ref={locationSearchRef}
-                  id={LOCATION_FIELD_ID}
-                  initialLabel={location}
-                  onPlaceSelect={handlePlaceSelect}
-                  placeholder={'City, postcode or "remote"'}
-                  className={`${compact ? "h-10" : "h-12"} min-w-0 flex-1 rounded-none border-0 bg-transparent px-3 text-sm shadow-none outline-none focus-visible:border-transparent focus-visible:ring-0`}
-                />
-              ) : (
-                <input
-                  ref={plainLocationRef}
-                  id={LOCATION_FIELD_ID}
-                  type="text"
-                  defaultValue={location}
-                  placeholder={'City, postcode or "remote"'}
-                  className={`${compact ? "h-10" : "h-12"} min-w-0 flex-1 rounded-none border-0 bg-transparent px-3 text-sm shadow-none outline-none focus-visible:border-transparent focus-visible:ring-0`}
-                />
-              )}
+              <div className="relative min-w-0 flex-1">
+                {mapsEnabled ? (
+                  <LocationSearch
+                    ref={locationSearchRef}
+                    id={LOCATION_FIELD_ID}
+                    initialLabel={location}
+                    onPlaceSelect={handlePlaceSelect}
+                    onClear={resetLocationState}
+                    onBlur={(event) => setLocationValue(event.target.value)}
+                    placeholder={'City, postcode or "remote"'}
+                    className={`${inputHeightClass} min-w-0 flex-1 rounded-none border-0 bg-transparent px-3 text-sm shadow-none outline-none focus-visible:border-transparent focus-visible:ring-0`}
+                  />
+                ) : (
+                  <>
+                    <input
+                      ref={plainLocationRef}
+                      id={LOCATION_FIELD_ID}
+                      type="text"
+                      defaultValue={location}
+                      onChange={(event) => setLocationValue(event.target.value)}
+                      placeholder={'City, postcode or "remote"'}
+                      className={`${inputHeightClass} min-w-0 w-full flex-1 rounded-none border-0 bg-transparent px-3 text-sm shadow-none outline-none focus-visible:border-transparent focus-visible:ring-0${showLocationClear ? " pr-10" : ""}`}
+                    />
+                    {showLocationClear ? (
+                      <button
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={handleClearLocation}
+                        className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-[#86868b] hover:bg-[#f5f5f7] hover:text-[#1d1d1f]"
+                        aria-label="Clear location"
+                      >
+                        <X className="h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                    ) : null}
+                  </>
+                )}
+              </div>
               <div
                 className="h-5 w-px shrink-0 bg-[#E5E7EB]"
                 aria-hidden="true"

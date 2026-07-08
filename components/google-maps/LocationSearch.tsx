@@ -2,11 +2,14 @@
 
 import { Input } from "@components/ui/input";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
+import { X } from "lucide-react";
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
+  useState,
   type KeyboardEventHandler,
 } from "react";
 
@@ -17,6 +20,7 @@ const AUTOCOMPLETE_OPTIONS: google.maps.places.AutocompleteOptions = {
 
 export type LocationSearchHandle = {
   getValue: () => string;
+  clear: () => void;
 };
 
 type LocationSearchProps = {
@@ -24,6 +28,7 @@ type LocationSearchProps = {
   initialLabel?: string;
   id?: string;
   onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
+  onClear?: () => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -39,9 +44,10 @@ export const LocationSearch = forwardRef<LocationSearchHandle, LocationSearchPro
       initialLabel = "",
       id,
       onPlaceSelect,
+      onClear,
       placeholder = "Search for a location…",
       disabled = false,
-      className,
+      className = "",
       onKeyDown,
       onFocus,
       onBlur,
@@ -51,25 +57,38 @@ export const LocationSearch = forwardRef<LocationSearchHandle, LocationSearchPro
     const inputRef = useRef<HTMLInputElement>(null);
     const placesLibrary = useMapsLibrary("places");
     const onPlaceSelectRef = useRef(onPlaceSelect);
-    // Track focus so we never overwrite the DOM value while the user is typing.
+    const onClearRef = useRef(onClear);
     const isFocusedRef = useRef(false);
+    const [hasValue, setHasValue] = useState(Boolean(initialLabel));
 
     useEffect(() => {
       onPlaceSelectRef.current = onPlaceSelect;
     }, [onPlaceSelect]);
 
     useEffect(() => {
+      onClearRef.current = onClear;
+    }, [onClear]);
+
+    const clearInput = useCallback(() => {
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+      setHasValue(false);
+      onClearRef.current?.();
+    }, []);
+
+    useEffect(() => {
       const input = inputRef.current;
-      // Only sync the external label into the DOM when the input is not focused
-      // (i.e. the change came from navigation / URL, not from the user typing).
       if (!input || isFocusedRef.current || input.value === initialLabel) {
         return;
       }
       input.value = initialLabel;
+      setHasValue(Boolean(initialLabel));
     }, [initialLabel]);
 
     useImperativeHandle(ref, () => ({
       getValue: () => inputRef.current?.value ?? "",
+      clear: clearInput,
     }));
 
     useEffect(() => {
@@ -91,25 +110,45 @@ export const LocationSearch = forwardRef<LocationSearchHandle, LocationSearchPro
       };
     }, [placesLibrary]);
 
+    const showClearButton = Boolean(onClear) && hasValue && !disabled;
+
     return (
-      <Input
-        ref={inputRef}
-        id={id}
-        type="search"
-        defaultValue={initialLabel}
-        onKeyDown={onKeyDown}
-        onFocus={(e) => {
-          isFocusedRef.current = true;
-          onFocus?.(e);
-        }}
-        onBlur={(e) => {
-          isFocusedRef.current = false;
-          onBlur?.(e);
-        }}
-        placeholder={placeholder}
-        disabled={disabled}
-        className={className}
-      />
+      <div className="relative min-w-0 w-full">
+        <Input
+          ref={inputRef}
+          id={id}
+          type="search"
+          defaultValue={initialLabel}
+          onKeyDown={onKeyDown}
+          onInput={(event) => {
+            setHasValue(event.currentTarget.value.trim() !== "");
+          }}
+          onFocus={(event) => {
+            isFocusedRef.current = true;
+            onFocus?.(event);
+          }}
+          onBlur={(event) => {
+            isFocusedRef.current = false;
+            setHasValue(event.currentTarget.value.trim() !== "");
+            onBlur?.(event);
+          }}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={`${className}${showClearButton ? " pr-10" : ""}`}
+        />
+
+        {showClearButton ? (
+          <button
+            type="button"
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={clearInput}
+            className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-[#86868b] hover:bg-[#f5f5f7] hover:text-[#1d1d1f]"
+            aria-label="Clear location"
+          >
+            <X className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        ) : null}
+      </div>
     );
   },
 );
