@@ -81,7 +81,7 @@ export function JobsFilterPills({
         <div className="relative min-w-0 w-full">
           <div
             className={`flex w-full items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden${
-              hasActive ? (compact ? " pr-11 md:pr-44" : " pr-44") : ""
+              hasActive ? (compact ? " pr-24 md:pr-44" : " pr-24 md:pr-44") : ""
             }`}
           >
           {hasGeo ? (
@@ -291,11 +291,11 @@ export function JobsFilterPills({
           {hasActive ? (
             <div className="absolute inset-y-0 right-0 z-[2] flex items-stretch pointer-events-none">
               <div
-                className={`${compact ? "w-6 md:w-16" : "w-16"} shrink-0 ${fadeGradientClass}`}
+                className={`${compact ? "w-10 md:w-16" : "w-10 md:w-16"} shrink-0 ${fadeGradientClass}`}
                 aria-hidden="true"
               />
               <div
-                className={`flex items-center pl-1 md:pl-2 pointer-events-auto ${clearBackdropClass}`}
+                className={`flex items-center pl-1.5 md:pl-2 pointer-events-auto ${clearBackdropClass}`}
               >
                 <button
                   type="button"
@@ -303,11 +303,12 @@ export function JobsFilterPills({
                   aria-label="Clear search"
                   className={
                     compact
-                      ? "inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#2d6a4f]/35 bg-[#2d6a4f]/[0.07] text-[#2d6a4f] transition-colors hover:border-[#2d6a4f]/55 hover:bg-[#2d6a4f]/10 md:h-auto md:w-auto md:gap-1.5 md:px-3 md:py-1.5 md:text-sm md:font-medium"
-                      : "inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#2d6a4f] transition-colors hover:bg-[#2d6a4f]/10 md:h-auto md:w-auto md:gap-1.5 md:text-sm md:font-medium md:hover:underline md:bg-transparent"
+                      ? "inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-[#2d6a4f]/35 bg-[#2d6a4f]/[0.07] px-3 py-1.5 text-sm font-medium text-[#2d6a4f] transition-colors hover:border-[#2d6a4f]/55 hover:bg-[#2d6a4f]/10"
+                      : "inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-[#2d6a4f] transition-colors hover:bg-[#2d6a4f]/10 md:rounded-none md:bg-transparent md:px-0 md:py-0 md:hover:underline"
                   }
                 >
                   <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span className="md:hidden">Clear</span>
                   <span className="hidden md:inline">Clear search</span>
                 </button>
               </div>
