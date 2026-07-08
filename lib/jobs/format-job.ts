@@ -156,15 +156,54 @@ export function isHybridWork(
   return /\bhybrid\b/.test(text) || /\bflexible (?:working|work)\b/.test(text);
 }
 
-/** Parse a minimum annual salary from free-text salary strings. */
-export function parseSalaryMinimum(salary: string | null): number | null {
-  if (!salary) return null;
+/** Parse min and max annual salary from free-text salary strings. */
+export function parseSalaryRange(salary: string | null): {
+  min: number | null;
+  max: number | null;
+} {
+  if (!salary) return { min: null, max: null };
+
   const normalised = salary.toLowerCase();
   if (normalised.includes("competitive") || normalised.includes("negotiable")) {
-    return null;
+    return { min: null, max: null };
   }
-  const match = salary.match(/£?\s*([\d,]+(?:\.\d+)?)/);
-  if (!match?.[1]) return null;
-  const value = Number(match[1].replace(/,/g, ""));
-  return Number.isFinite(value) ? value : null;
+
+  const matches = [...salary.matchAll(/£?\s*([\d,]+(?:\.\d+)?)/g)];
+  if (matches.length === 0) return { min: null, max: null };
+
+  const amounts = matches
+    .map((match) => Number(match[1].replace(/,/g, "")))
+    .filter((value) => Number.isFinite(value));
+
+  if (amounts.length === 0) return { min: null, max: null };
+
+  const min = amounts[0];
+  const hasPlus = normalised.includes("+");
+  const max =
+    amounts.length >= 2 ? amounts[amounts.length - 1] : hasPlus ? null : min;
+
+  return { min, max };
+}
+
+/** Parse a minimum annual salary from free-text salary strings. */
+export function parseSalaryMinimum(salary: string | null): number | null {
+  return parseSalaryRange(salary).min;
+}
+
+/** Whether a job salary overlaps the requested from/to range. */
+export function salaryMatchesRange(
+  salary: string | null,
+  minSalary?: number,
+  maxSalary?: number,
+): boolean {
+  const hasMin = typeof minSalary === "number" && minSalary > 0;
+  const hasMax = typeof maxSalary === "number" && maxSalary > 0;
+  if (!hasMin && !hasMax) return true;
+
+  const { min: jobMin, max: jobMax } = parseSalaryRange(salary);
+  if (jobMin === null && jobMax === null) return true;
+
+  if (hasMin && jobMax !== null && jobMax < minSalary!) return false;
+  if (hasMax && jobMin !== null && jobMin > maxSalary!) return false;
+  return true;
 }

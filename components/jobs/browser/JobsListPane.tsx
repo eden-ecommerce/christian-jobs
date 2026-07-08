@@ -10,11 +10,9 @@ import {
   isNewestFirst,
   type JobsUrlState,
 } from "@lib/jobs/search-params";
-import { Bookmark, Loader2, Plus, Search } from "lucide-react";
+import { Bookmark, Loader2, Search } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef } from "react";
-
-const POST_JOB_HREF = "https://hub.eden.co.uk/dashboard/job-journey";
 
 type Props = {
   jobs: JobHit[];
@@ -98,20 +96,11 @@ export function JobsListToolbar({
       <div className="flex shrink-0 items-center gap-2">
         <Link
           href={`${NAMESPACE_PATH}/saved`}
-          className="inline-flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-foreground shadow-soft-sm transition-colors hover:border-[#2d6a4f]/30"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-medium text-foreground shadow-soft-sm transition-colors hover:border-[#2d6a4f]/30"
         >
           <Bookmark className="h-3.5 w-3.5" aria-hidden="true" />
           Saved
         </Link>
-        <a
-          href={POST_JOB_HREF}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-full bg-[#2d6a4f] px-3 py-1.5 text-xs font-semibold text-white shadow-soft-sm transition-opacity hover:opacity-90"
-        >
-          <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-          Post
-        </a>
       </div>
     </div>
   );
@@ -201,7 +190,7 @@ export function JobsListPane({
                 <button
                   type="button"
                   onClick={onClearFilters}
-                  className="mt-1 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#2d6a4f] shadow-soft-sm transition-colors hover:border-[#2d6a4f]/30"
+                  className="mt-1 cursor-pointer rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#2d6a4f] shadow-soft-sm transition-colors hover:border-[#2d6a4f]/30"
                 >
                   Clear search
                 </button>

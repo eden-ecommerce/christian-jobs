@@ -135,7 +135,7 @@ export function FilterPopover({
         aria-haspopup="dialog"
         aria-controls={panelId}
         onClick={() => setOpen((o) => !o)}
-        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+        className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
           active
             ? "border-[#2d6a4f]/25 bg-[#2d6a4f]/[0.06] text-[#3d6b52]"
             : "border-border bg-card text-foreground hover:border-[#2d6a4f]/50"

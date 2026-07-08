@@ -3,8 +3,9 @@ import type { JobFacet } from "@lib/algolia/jobs";
 import {
   CONTRACT_TYPE_OPTIONS,
   DATE_POSTED_OPTIONS,
+  formatSalaryRangeLabel,
+  hasActiveSalaryRange,
   ORGANISATION_TYPE_OPTIONS,
-  SALARY_OPTIONS,
   WORK_TYPE_OPTIONS,
   formatLocationRadiusLabel,
   resolveLocationRadiusMeters,
@@ -122,13 +123,10 @@ export function buildJobAlertCriteriaPills(
     });
   }
 
-  if (state.minSalary) {
-    const salaryLabel =
-      SALARY_OPTIONS.find((option) => option.value === String(state.minSalary))
-        ?.label ?? `£${state.minSalary.toLocaleString()}+`;
+  if (hasActiveSalaryRange(state)) {
     pills.push({
-      key: "minSalary",
-      label: salaryLabel,
+      key: "salary",
+      label: formatSalaryRangeLabel(state.minSalary, state.maxSalary)!,
     });
   }
 

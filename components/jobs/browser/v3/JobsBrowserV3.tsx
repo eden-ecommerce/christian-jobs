@@ -16,6 +16,7 @@ import { NsLink } from "@components/ns-link";
 import { GoogleMapsProvider } from "@components/google-maps/GoogleMapsProvider";
 import { JobsFilterPills } from "@components/jobs/browser/JobsFilterPills";
 import { JobsListPane, JobsListToolbar } from "@components/jobs/browser/JobsListPane";
+import { PostJobButton } from "@components/jobs/PostJobButton";
 import { JobDetailPanel } from "@components/jobs/browser/JobDetailPanel";
 import { JobsDetailStickyPane } from "@components/jobs/browser/v3/JobsDetailStickyPane";
 import { JobsMobileDetail } from "@components/jobs/browser/JobsMobileDetail";
@@ -294,13 +295,16 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
       <div className="border-b border-[#E5E7EB]/80 bg-[#FFFFFF]">
         <div className="px-4 py-4 sm:px-6 sm:py-5">
           <div className="mx-auto w-full max-w-[1100px]">
-            <NsLink
-              href={jobsNamespacePath()}
-              className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              Back to homepage
-            </NsLink>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <NsLink
+                href={jobsNamespacePath()}
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                Back to homepage
+              </NsLink>
+              <PostJobButton />
+            </div>
             <JobsHeroSearchV5 {...sharedSearchProps} />
             <div className="mt-3">
               <JobsFilterPills

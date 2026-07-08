@@ -1,6 +1,7 @@
 "use client";
 
 import { FilterOption, FilterPopover } from "@components/jobs/browser/FilterPopover";
+import { JobsSalaryRangeFilter } from "@components/jobs/browser/JobsSalaryRangeFilter";
 import type { JobFacet } from "@lib/algolia/jobs";
 import { DEFAULT_LOCATION_RADIUS_METERS } from "@lib/algolia/constants";
 import { X } from "lucide-react";
@@ -8,10 +9,11 @@ import {
   CONTRACT_TYPE_OPTIONS,
   DATE_POSTED_OPTIONS,
   hasActiveJobSearch,
+  formatSalaryRangeLabel,
+  hasActiveSalaryRange,
   LOCATION_RADIUS_OPTIONS,
   ORGANISATION_TYPE_OPTIONS,
   resolveLocationRadiusMeters,
-  SALARY_OPTIONS,
   SORT_OPTIONS,
   WORK_TYPE_OPTIONS,
   type DatePosted,
@@ -47,6 +49,9 @@ export function JobsFilterPills({
     LOCATION_RADIUS_OPTIONS.find((option) => option.value === activeRadiusMeters)
       ?.label ?? "Within 25 miles";
 
+  const salaryLabel = formatSalaryRangeLabel(state.minSalary, state.maxSalary) ?? "Salary";
+  const hasSalaryFilter = hasActiveSalaryRange(state);
+
   const contractOptions =
     facets.contractTypes.length > 0
       ? facets.contractTypes
@@ -79,63 +84,48 @@ export function JobsFilterPills({
               hasActive ? " pr-44" : ""
             }`}
           >
-          <FilterPopover
-            label={radiusLabel}
-            active={state.radius !== undefined || hasGeo}
-            activeCount={state.radius !== undefined || hasGeo ? 1 : undefined}
-          >
-            <div className="flex flex-col">
-              {LOCATION_RADIUS_OPTIONS.map((option) => (
-                <FilterOption
-                  key={option.value}
-                  type="radio"
-                  name="radius"
-                  label={option.label}
-                  checked={activeRadiusMeters === option.value}
-                  onChange={() =>
-                    onChange({
-                      radius:
-                        option.value === DEFAULT_LOCATION_RADIUS_METERS
-                          ? undefined
-                          : option.value,
-                      page: 0,
-                      sort:
-                        hasGeo && state.lat !== undefined
-                          ? "distance"
-                          : state.sort,
-                    })
-                  }
-                />
-              ))}
-            </div>
-          </FilterPopover>
+          {hasGeo ? (
+            <FilterPopover
+              label={radiusLabel}
+              active
+              activeCount={state.radius !== undefined ? 1 : undefined}
+            >
+              <div className="flex flex-col">
+                {LOCATION_RADIUS_OPTIONS.map((option) => (
+                  <FilterOption
+                    key={option.value}
+                    type="radio"
+                    name="radius"
+                    label={option.label}
+                    checked={activeRadiusMeters === option.value}
+                    onChange={() =>
+                      onChange({
+                        radius:
+                          option.value === DEFAULT_LOCATION_RADIUS_METERS
+                            ? undefined
+                            : option.value,
+                        page: 0,
+                        sort:
+                          state.lat !== undefined ? "distance" : state.sort,
+                      })
+                    }
+                  />
+                ))}
+              </div>
+            </FilterPopover>
+          ) : null}
 
           <FilterPopover
-            label="Salary"
-            active={!!state.minSalary}
-            activeCount={state.minSalary ? 1 : undefined}
+            label={salaryLabel}
+            active={hasSalaryFilter}
+            activeCount={hasSalaryFilter ? 1 : undefined}
           >
-            <div className="flex flex-col">
-              {SALARY_OPTIONS.map((opt) => (
-                <FilterOption
-                  key={opt.value || "any"}
-                  type="radio"
-                  name="salary"
-                  label={opt.label}
-                  checked={
-                    opt.value
-                      ? String(state.minSalary) === opt.value
-                      : !state.minSalary
-                  }
-                  onChange={() =>
-                    onChange({
-                      minSalary: opt.value ? Number(opt.value) : undefined,
-                      page: 0,
-                    })
-                  }
-                />
-              ))}
-            </div>
+            <JobsSalaryRangeFilter
+              compact
+              minSalary={state.minSalary}
+              maxSalary={state.maxSalary}
+              onChange={(changes) => onChange({ ...changes, page: 0 })}
+            />
           </FilterPopover>
 
           <FilterPopover
@@ -312,8 +302,8 @@ export function JobsFilterPills({
                   onClick={onClearAll}
                   className={
                     compact
-                      ? "inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#2d6a4f]/35 bg-[#2d6a4f]/[0.07] px-3 py-1.5 text-sm font-medium text-[#2d6a4f] transition-colors hover:border-[#2d6a4f]/55 hover:bg-[#2d6a4f]/10"
-                      : "inline-flex items-center gap-1.5 text-sm font-medium text-[#2d6a4f] hover:underline"
+                      ? "inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-[#2d6a4f]/35 bg-[#2d6a4f]/[0.07] px-3 py-1.5 text-sm font-medium text-[#2d6a4f] transition-colors hover:border-[#2d6a4f]/55 hover:bg-[#2d6a4f]/10"
+                      : "inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-[#2d6a4f] hover:underline"
                   }
                 >
                   <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />

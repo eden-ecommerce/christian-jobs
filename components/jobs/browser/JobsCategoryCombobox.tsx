@@ -208,7 +208,7 @@ export function JobsCategoryCombobox({
           role="option"
           aria-selected={!value}
           onClick={() => selectCategory(undefined)}
-          className="flex w-full items-center px-3 py-2.5 text-left text-[15px] text-[#1d1d1f] hover:bg-[#f5f5f7] active:bg-[#f5f5f7]"
+          className="flex w-full cursor-pointer items-center px-3 py-2.5 text-left text-[15px] text-[#1d1d1f] hover:bg-[#f5f5f7] active:bg-[#f5f5f7]"
         >
           All categories
         </button>
@@ -220,7 +220,7 @@ export function JobsCategoryCombobox({
             role="option"
             aria-selected={value === cat.value}
             onClick={() => selectCategory(cat.value)}
-            className={`flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-[15px] hover:bg-[#f5f5f7] active:bg-[#f5f5f7] ${
+            className={`flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-2.5 text-left text-[15px] hover:bg-[#f5f5f7] active:bg-[#f5f5f7] ${
               value === cat.value
                 ? "bg-[#235A0E]/5 font-medium text-[#235A0E]"
                 : "text-[#1d1d1f]"
@@ -328,7 +328,7 @@ export function JobsCategoryCombobox({
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => selectCategory(undefined)}
             aria-label="Clear category"
-            className="absolute right-8 flex h-6 w-6 items-center justify-center rounded-full text-[#86868b] hover:bg-[#f5f5f7] hover:text-[#1d1d1f]"
+            className="absolute right-8 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-[#86868b] hover:bg-[#f5f5f7] hover:text-[#1d1d1f]"
           >
             <X className="h-3.5 w-3.5" aria-hidden="true" />
           </button>

@@ -8,9 +8,10 @@ import {
   CONTRACT_TYPE_OPTIONS,
   DATE_POSTED_OPTIONS,
   formatLocationRadiusLabel,
+  formatSalaryRangeLabel,
   hasActiveJobSearch,
+  hasActiveSalaryRange,
   ORGANISATION_TYPE_OPTIONS,
-  SALARY_OPTIONS,
   WORK_TYPE_OPTIONS,
   type JobsUrlState,
 } from "@lib/jobs/search-params";
@@ -141,14 +142,13 @@ export function JobsActiveFilterBadges({
       });
     }
 
-    if (state.minSalary) {
-      const salaryLabel =
-        SALARY_OPTIONS.find((o) => o.value === String(state.minSalary))?.label ??
-        `£${state.minSalary.toLocaleString()}+`;
+    if (hasActiveSalaryRange(state)) {
+      const salaryLabel = formatSalaryRangeLabel(state.minSalary, state.maxSalary)!;
       items.push({
-        key: "minSalary",
+        key: "salary",
         label: salaryLabel,
-        onRemove: () => onChange({ minSalary: undefined, page: 0 }),
+        onRemove: () =>
+          onChange({ minSalary: undefined, maxSalary: undefined, page: 0 }),
       });
     }
 
@@ -181,7 +181,7 @@ export function JobsActiveFilterBadges({
         <button
           type="button"
           onClick={onClearAll}
-          className="text-xs font-medium text-[#2d6a4f] underline-offset-2 hover:underline"
+          className="cursor-pointer text-xs font-medium text-[#2d6a4f] underline-offset-2 hover:underline"
         >
           Clear search
         </button>

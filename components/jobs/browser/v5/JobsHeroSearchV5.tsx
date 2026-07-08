@@ -89,7 +89,7 @@ function toggleValue<T extends string>(current: T[], value: T): T[] {
 }
 
 const pillClass = (active: boolean) =>
-  `shrink-0 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
+  `shrink-0 cursor-pointer rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
     active
       ? "bg-[#235A0E] text-white"
       : "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#ececf0]"

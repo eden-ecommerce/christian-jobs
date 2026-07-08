@@ -31,7 +31,7 @@ export function JobsMobileSearchBar({
         <button
           type="button"
           onClick={() => onOpenSheet("what")}
-          className="flex w-full items-center gap-3 border-b border-[#E5E7EB] px-4 py-3 text-left active:bg-[#F9FAFB]"
+          className="flex w-full cursor-pointer items-center gap-3 border-b border-[#E5E7EB] px-4 py-3 text-left active:bg-[#F9FAFB]"
         >
           <Search className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
           <span className="min-w-0 flex-1">
@@ -48,7 +48,7 @@ export function JobsMobileSearchBar({
         <button
           type="button"
           onClick={() => onOpenSheet("where")}
-          className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-[#F9FAFB]"
+          className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left active:bg-[#F9FAFB]"
         >
           <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
           <span className="min-w-0 flex-1">

@@ -30,6 +30,7 @@ export type JobsUrlState = {
   workTypes: JobWorkType[];
   denominations: string[];
   minSalary?: number;
+  maxSalary?: number;
   datePosted: DatePosted;
   sort: JobSort;
   vjk?: string;
@@ -53,15 +54,49 @@ export const ORGANISATION_TYPE_OPTIONS = [
   { label: "Other", value: "other" },
 ] as const;
 
-export const SALARY_OPTIONS = [
-  { label: "Any", value: "" },
-  { label: "£15,000+", value: "15000" },
-  { label: "£20,000+", value: "20000" },
-  { label: "£25,000+", value: "25000" },
-  { label: "£30,000+", value: "30000" },
-  { label: "£35,000+", value: "35000" },
-  { label: "£40,000+", value: "40000" },
+const SALARY_AMOUNTS = [
+  15_000, 20_000, 25_000, 30_000, 35_000, 40_000, 45_000, 50_000, 60_000, 80_000,
+  100_000,
 ] as const;
+
+function formatSalaryAmount(amount: number): string {
+  return `£${amount.toLocaleString("en-GB")}`;
+}
+
+export const SALARY_AMOUNT_OPTIONS = SALARY_AMOUNTS.map((amount) => ({
+  label: formatSalaryAmount(amount),
+  value: String(amount),
+}));
+
+export const SALARY_FROM_OPTIONS = [
+  { label: "£0", value: "" },
+  ...SALARY_AMOUNT_OPTIONS,
+] as const;
+
+export const SALARY_TO_OPTIONS = [
+  { label: "Any", value: "" },
+  ...SALARY_AMOUNT_OPTIONS,
+] as const;
+
+/** @deprecated Use SALARY_FROM_OPTIONS / SALARY_TO_OPTIONS. */
+export const SALARY_OPTIONS = SALARY_FROM_OPTIONS;
+
+export function formatSalaryRangeLabel(
+  minSalary?: number,
+  maxSalary?: number,
+): string | undefined {
+  if (!minSalary && !maxSalary) return undefined;
+
+  if (minSalary && maxSalary) {
+    return `${formatSalaryAmount(minSalary)} – ${formatSalaryAmount(maxSalary)}`;
+  }
+  if (minSalary) return `From ${formatSalaryAmount(minSalary)}`;
+  return `Up to ${formatSalaryAmount(maxSalary!)}`;
+}
+
+export function hasActiveSalaryRange(state: Pick<JobsUrlState, "minSalary" | "maxSalary">): boolean {
+  return Boolean(state.minSalary || state.maxSalary);
+}
 
 export const WORK_TYPE_OPTIONS = [
   { label: "Any", value: "any" },
@@ -179,6 +214,7 @@ export function parseJobsUrlState(
     Number.isFinite(lng);
 
   const minSalaryRaw = one(sp.minSalary);
+  const maxSalaryRaw = one(sp.maxSalary);
   const pageRaw = one(sp.page);
   const sortRaw = one(sp.sort) as JobSort | undefined;
   const workTypes = parseJobWorkTypes(multi(sp.workType));
@@ -198,6 +234,7 @@ export function parseJobsUrlState(
     workTypes,
     denominations: multi(sp.denomination),
     minSalary: minSalaryRaw ? Number(minSalaryRaw) : undefined,
+    maxSalary: maxSalaryRaw ? Number(maxSalaryRaw) : undefined,
     datePosted: datePostedRaw ?? "any",
     sort: sortRaw ?? (hasGeo ? "distance" : "date_desc"),
     vjk: one(sp.vjk),
@@ -221,6 +258,7 @@ export function jobsUrlStateToSearchParams(state: JobsUrlState): URLSearchParams
   for (const workType of state.workTypes) params.append("workType", workType);
   for (const d of state.denominations) params.append("denomination", d);
   if (state.minSalary) params.set("minSalary", String(state.minSalary));
+  if (state.maxSalary) params.set("maxSalary", String(state.maxSalary));
   if (state.datePosted !== "any") params.set("datePosted", state.datePosted);
   if (state.sort !== "date_desc" && state.sort !== "relevance") {
     params.set("sort", state.sort);
@@ -246,6 +284,7 @@ export function toSearchJobsParams(state: JobsUrlState): SearchJobsParams {
       ? state.organisationTypes
       : undefined,
     minSalary: state.minSalary,
+    maxSalary: state.maxSalary,
     datePosted: state.datePosted !== "any" ? state.datePosted : undefined,
     denominations: state.denominations.length ? state.denominations : undefined,
   };
@@ -273,7 +312,7 @@ export function countActiveFilters(state: JobsUrlState): number {
   if (state.organisationTypes.length) count++;
   if (state.workTypes.length) count++;
   if (state.denominations.length) count++;
-  if (state.minSalary) count++;
+  if (state.minSalary || state.maxSalary) count++;
   if (state.datePosted !== "any") count++;
   if (state.category) count++;
   if (state.uncategorised) count++;

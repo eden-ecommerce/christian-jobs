@@ -3,11 +3,11 @@
 import type { JobFacet } from "@lib/algolia/jobs";
 import type { JobSort } from "@lib/algolia/jobs";
 import type { DatePosted, JobWorkType, JobsUrlState } from "@lib/jobs/search-params";
+import { JobsSalaryRangeFilter } from "@components/jobs/browser/JobsSalaryRangeFilter";
 import {
   CONTRACT_TYPE_OPTIONS,
   DATE_POSTED_OPTIONS,
   ORGANISATION_TYPE_OPTIONS,
-  SALARY_OPTIONS,
   SORT_OPTIONS,
   WORK_TYPE_OPTIONS,
   countActiveFilters,
@@ -71,7 +71,7 @@ function QuickPill({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+      className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
         active
           ? "bg-[#2d6a4f] text-white shadow-soft-sm"
           : "border border-[#E5E7EB] bg-white text-foreground hover:border-[#2d6a4f]/40"
@@ -117,7 +117,7 @@ function CategoryListSection({
           <button
             type="button"
             onClick={() => onChange({ category: undefined, page: 0 })}
-            className={`flex w-full items-center justify-between rounded-lg px-2 py-2 text-left text-sm transition-colors hover:bg-[#F9FAFB] ${
+            className={`flex w-full cursor-pointer items-center justify-between rounded-lg px-2 py-2 text-left text-sm transition-colors hover:bg-[#F9FAFB] ${
               !selectedCategory
                 ? "font-semibold text-[#2d6a4f]"
                 : "text-foreground"
@@ -140,7 +140,7 @@ function CategoryListSection({
                   page: 0,
                 })
               }
-              className={`flex w-full items-center justify-between rounded-lg px-2 py-2 text-left text-sm transition-colors hover:bg-[#F9FAFB] ${
+              className={`flex w-full cursor-pointer items-center justify-between rounded-lg px-2 py-2 text-left text-sm transition-colors hover:bg-[#F9FAFB] ${
                 selectedCategory === cat.value
                   ? "font-semibold text-[#2d6a4f]"
                   : "text-foreground"
@@ -165,7 +165,7 @@ function CategoryListSection({
         <button
           type="button"
           onClick={() => setShowAll((expanded) => !expanded)}
-          className="mt-1 px-2 text-xs font-medium text-[#2d6a4f] hover:underline"
+          className="mt-1 cursor-pointer px-2 text-xs font-medium text-[#2d6a4f] hover:underline"
           aria-expanded={showAll}
         >
           {showAll ? "Show less" : `Show ${hiddenCount} more`}
@@ -180,7 +180,6 @@ function SidebarAdvancedFilters({
   contractOptions,
   organisationOptions,
   denominationOptions,
-  activeMinSalary,
   activeDatePosted,
   activeSort,
   onChange,
@@ -189,7 +188,6 @@ function SidebarAdvancedFilters({
   contractOptions: ReturnType<typeof mergeFacetOptions>;
   organisationOptions: ReturnType<typeof mergeFacetOptions>;
   denominationOptions: { label: string; value: string; count: number }[];
-  activeMinSalary?: string;
   activeDatePosted?: string;
   activeSort?: JobSort;
   onChange: Props["onChange"];
@@ -243,22 +241,11 @@ function SidebarAdvancedFilters({
         />
       </SidebarFilterSection>
 
-      <SidebarFilterSection title="Min Salary">
-        <SidebarRadioGroup
-          allLabel="All"
-          value={activeMinSalary}
-          options={SALARY_OPTIONS.filter((option) => option.value).map(
-            (option) => ({
-              label: option.label,
-              value: option.value,
-            }),
-          )}
-          onChange={(value) =>
-            onChange({
-              minSalary: value ? Number(value) : undefined,
-              page: 0,
-            })
-          }
+      <SidebarFilterSection title="Salary">
+        <JobsSalaryRangeFilter
+          minSalary={state.minSalary}
+          maxSalary={state.maxSalary}
+          onChange={(changes) => onChange({ ...changes, page: 0 })}
         />
       </SidebarFilterSection>
 
@@ -355,7 +342,6 @@ export function JobsFilterSidebar({
     count: option.count,
   }));
 
-  const activeMinSalary = state.minSalary ? String(state.minSalary) : undefined;
   const activeSort = state.sort === "date_desc" ? undefined : state.sort;
   const activeDatePosted =
     state.datePosted === "any" ? undefined : state.datePosted;
@@ -441,7 +427,6 @@ export function JobsFilterSidebar({
           contractOptions={contractOptions}
           organisationOptions={organisationOptions}
           denominationOptions={denominationOptions}
-          activeMinSalary={activeMinSalary}
           activeDatePosted={activeDatePosted}
           activeSort={activeSort}
           onChange={onChange}

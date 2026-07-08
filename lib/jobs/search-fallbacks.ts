@@ -113,6 +113,7 @@ export function buildJobSearchFallbackTiers(
     category: state.category,
     uncategorised: undefined,
     minSalary: undefined,
+    maxSalary: undefined,
     radius: undefined,
     lat: undefined,
     lng: undefined,

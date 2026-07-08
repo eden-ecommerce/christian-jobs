@@ -29,6 +29,7 @@ export const jobAlertFiltersSchema = z.object({
   workTypes: z.array(jobWorkTypeSchema),
   denominations: z.array(z.string()),
   minSalary: z.number().optional(),
+  maxSalary: z.number().optional(),
   datePosted: datePostedSchema,
   sort: jobSortSchema,
 });
@@ -61,6 +62,7 @@ export function jobAlertFiltersFromUrlState(state: {
   workTypes: JobWorkType[];
   denominations: string[];
   minSalary?: number;
+  maxSalary?: number;
   datePosted: DatePosted;
   sort: JobSort;
 }): JobAlertFilters {
@@ -78,6 +80,7 @@ export function jobAlertFiltersFromUrlState(state: {
     workTypes: state.workTypes,
     denominations: state.denominations,
     minSalary: state.minSalary,
+    maxSalary: state.maxSalary,
     datePosted: state.datePosted,
     sort: state.sort,
   };

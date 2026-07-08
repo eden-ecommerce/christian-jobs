@@ -7,7 +7,7 @@ import {
   organisationHubIndex,
 } from "@lib/algolia/constants";
 import { cleanCategoryLabel } from "@lib/algolia/category-label";
-import { isHybridWork } from "@lib/jobs/format-job";
+import { isHybridWork, salaryMatchesRange } from "@lib/jobs/format-job";
 import type { JobWorkType } from "@lib/jobs/search-params";
 
 /**
@@ -187,6 +187,7 @@ export type SearchJobsParams = {
   contractTypes?: string[];
   denominations?: string[];
   minSalary?: number;
+  maxSalary?: number;
   datePosted?: DatePostedFilter;
   /** @deprecated Prefer workTypes — kept for direct API use. */
   online?: boolean;
@@ -276,18 +277,6 @@ function datePostedCutoff(datePosted: DatePostedFilter): number {
   }
 }
 
-function parseSalaryMinimum(salary: string | null): number | null {
-  if (!salary) return null;
-  const normalised = salary.toLowerCase();
-  if (normalised.includes("competitive") || normalised.includes("negotiable")) {
-    return null;
-  }
-  const match = salary.match(/£?\s*([\d,]+(?:\.\d+)?)/);
-  if (!match?.[1]) return null;
-  const value = Number(match[1].replace(/,/g, ""));
-  return Number.isFinite(value) ? value : null;
-}
-
 /**
  * Server-side job search supporting free-text, geo radius, category &
  * organisation-type facets, and sorting.
@@ -307,6 +296,7 @@ export async function searchJobs(
     contractTypes,
     denominations,
     minSalary,
+    maxSalary,
     datePosted,
     online,
     workType,
@@ -355,7 +345,9 @@ export async function searchJobs(
   const sortByDate = sort === "date_asc" || sort === "date_desc";
   const needsContractFilter = Boolean(contractTypes?.length);
   const needsWorkTypeFilter = resolvedWorkTypes.length > 0;
-  const needsSalaryFilter = typeof minSalary === "number" && minSalary > 0;
+  const needsSalaryFilter =
+    (typeof minSalary === "number" && minSalary > 0) ||
+    (typeof maxSalary === "number" && maxSalary > 0);
   const needsDatePostedFilter = Boolean(datePosted);
   const needsClientProcessing =
     sortByDate ||
@@ -425,10 +417,9 @@ export async function searchJobs(
   }
 
   if (needsSalaryFilter) {
-    hits = hits.filter((hit) => {
-      const min = parseSalaryMinimum(hit.salary);
-      return min === null || min >= minSalary!;
-    });
+    hits = hits.filter((hit) =>
+      salaryMatchesRange(hit.salary, minSalary, maxSalary),
+    );
     nbHits = hits.length;
   }
 

@@ -52,7 +52,7 @@ export function SaveJobButton({ jobId, variant = "icon", className = "" }: Props
           onClick={handleClick}
           aria-label={saved ? "Remove from saved jobs" : "Save this job"}
           aria-pressed={saved}
-          className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+          className={`inline-flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
             saved
               ? "bg-primary/10 text-primary hover:bg-primary/20"
               : "border border-border bg-card text-foreground hover:border-primary hover:text-primary"
@@ -85,7 +85,7 @@ export function SaveJobButton({ jobId, variant = "icon", className = "" }: Props
         onClick={handleClick}
         aria-label={saved ? "Remove from saved jobs" : "Save this job"}
         aria-pressed={saved}
-        className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
+        className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition-colors ${
           saved
             ? "bg-[#2d6a4f] text-white"
             : "bg-[#F3F4F6] text-muted-foreground hover:bg-[#E5E7EB] hover:text-[#2d6a4f]"

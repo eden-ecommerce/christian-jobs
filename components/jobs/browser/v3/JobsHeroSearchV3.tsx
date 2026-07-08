@@ -217,7 +217,7 @@ export function JobsHeroSearchV3({
                       toggleWorkType(current, option.value),
                     )
                   }
-                  className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                  className={`cursor-pointer rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
                     active
                       ? "bg-[#235A0E] text-white"
                       : "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#ececf0]"

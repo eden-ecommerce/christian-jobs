@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
   const sortRaw = one(sp.get("sort")) as JobSort | undefined;
   const datePostedRaw = one(sp.get("datePosted")) as DatePostedFilter | undefined;
   const minSalaryRaw = one(sp.get("minSalary"));
+  const maxSalaryRaw = one(sp.get("maxSalary"));
   const onlineRaw = one(sp.get("online"));
   const workTypes = multi(sp, "workType").filter(
     (value): value is JobWorkType =>
@@ -81,6 +82,7 @@ export async function GET(req: NextRequest) {
         ? multi(sp, "denomination")
         : undefined,
       minSalary: minSalaryRaw ? Number(minSalaryRaw) : undefined,
+      maxSalary: maxSalaryRaw ? Number(maxSalaryRaw) : undefined,
       datePosted: datePostedRaw,
       workTypes: resolvedWorkTypes.length ? resolvedWorkTypes : undefined,
       sort: sortRaw ?? (hasGeo ? "distance" : "date_desc"),

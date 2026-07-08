@@ -21,7 +21,7 @@ export function SidebarFilterSection({
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between py-0.5 text-left"
+        className="flex w-full cursor-pointer items-center justify-between py-0.5 text-left"
       >
         <span className="text-sm font-bold text-foreground">{title}</span>
         <ChevronDown
@@ -129,7 +129,7 @@ export function SidebarRadioOption({
     <button
       type="button"
       onClick={onSelect}
-      className="flex w-full items-center justify-between rounded-lg px-1 py-1.5 text-left text-sm transition-colors hover:bg-[#F9FAFB]"
+      className="flex w-full cursor-pointer items-center justify-between rounded-lg px-1 py-1.5 text-left text-sm transition-colors hover:bg-[#F9FAFB]"
     >
       <span className="flex min-w-0 items-center gap-2.5">
         <SidebarRadioIndicator checked={checked} />

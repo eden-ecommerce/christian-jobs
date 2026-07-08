@@ -132,7 +132,7 @@ export function JobsFeaturedCarousels({
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="inline-flex items-center gap-1 text-sm font-medium text-[#2d6a4f] hover:underline"
+          className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-[#2d6a4f] hover:underline"
         >
           Back to search <ArrowRight className="h-4 w-4 rotate-[-90deg]" />
         </button>

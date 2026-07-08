@@ -44,7 +44,7 @@ export function JobCard({ job }: { job: JobHit }) {
   return (
     <NsLink
       href={`${NAMESPACE_PATH}/job/${job.id}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className={`group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
     >
       <div className="flex flex-1 flex-col gap-3 p-4">
 
