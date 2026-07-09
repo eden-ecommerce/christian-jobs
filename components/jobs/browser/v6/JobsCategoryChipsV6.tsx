@@ -1,9 +1,7 @@
-import { Clock } from "lucide-react";
 import type { CategoryFacet } from "@lib/algolia/jobs";
 import {
   browseAllCategoriesHref,
   categoryResultsHref,
-  latestJobsResultsHref,
 } from "@lib/jobs/category-results-href";
 
 const TOP_CATEGORY_COUNT = 8;
@@ -27,7 +25,7 @@ type Props = {
 };
 
 /**
- * Hero CTAs — crawlable category links with live job counts, plus Latest.
+ * Hero CTAs — crawlable category links with live job counts.
  * Server-rendered so counts and hrefs ship in the initial HTML.
  */
 export function JobsCategoryChipsV6({
@@ -36,7 +34,6 @@ export function JobsCategoryChipsV6({
   showHeading = true,
 }: Props) {
   const topCategories = categories.slice(0, TOP_CATEGORY_COUNT);
-  const latestHref = latestJobsResultsHref(resultsPath);
   const browseAllHref = browseAllCategoriesHref(resultsPath);
 
   if (topCategories.length === 0) return null;
@@ -72,16 +69,6 @@ export function JobsCategoryChipsV6({
             className={`${secondaryChipClass} bg-white/15 text-white ring-1 ring-white/40 hover:bg-white/25`}
           >
             Browse all categories
-          </a>
-        </li>
-        <li>
-          <a
-            href={latestHref}
-            aria-label="Latest jobs, newest first"
-            className={`${secondaryChipClass} gap-1 bg-transparent text-white ring-1 ring-white/70 hover:bg-white/10`}
-          >
-            <Clock className="h-3 w-3 shrink-0 opacity-90" aria-hidden="true" />
-            Latest
           </a>
         </li>
       </ul>

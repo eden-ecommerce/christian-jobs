@@ -12,7 +12,7 @@ import {
 } from "@lib/jobs/job-alert.schema";
 import type { JobFacet } from "@lib/algolia/jobs";
 import type { JobsUrlState } from "@lib/jobs/search-params";
-import { submitJobAlert } from "@hooks/jobs/submit-job-alert";
+import { submitJobAlert } from "@hooks/jobs/fetch-job-alert";
 import { Check, Loader2 } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 

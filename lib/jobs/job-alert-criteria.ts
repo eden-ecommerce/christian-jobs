@@ -20,7 +20,7 @@ export type JobAlertCriteriaPill = {
 
 function labelFromFacet(facets: JobFacet[], value: string): string {
   const facetLabel = facets.find((facet) => facet.value === value)?.label;
-  return cleanCategoryLabel(facetLabel) ?? facetLabel ?? value;
+  return cleanCategoryLabel(facetLabel ?? null) ?? facetLabel ?? value;
 }
 
 function labelFromOptions(

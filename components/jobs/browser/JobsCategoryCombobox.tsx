@@ -1,5 +1,6 @@
 "use client";
 
+import { useJobFilters } from "@hooks/jobs/use-job-filters";
 import type { JobFacet } from "@lib/algolia/jobs";
 import { ChevronDown, X } from "lucide-react";
 import { twMerge } from "tailwind-merge";
@@ -77,36 +78,20 @@ export function JobsCategoryCombobox({
   const listboxRef = useRef<HTMLUListElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const [fetchedCategories, setFetchedCategories] = useState<JobFacet[]>([]);
   const [mounted, setMounted] = useState(false);
   const [panelPosition, setPanelPosition] = useState<PanelPosition | null>(
     null,
   );
   const isNarrow = useNarrowCategoryPicker();
+  const shouldFetchFilters = fetchWhenEmpty && categoriesProp.length === 0;
+  const { data: fetchedFilters } = useJobFilters(shouldFetchFilters);
+  const fetchedCategories = fetchedFilters?.categories ?? [];
 
   const categories = categoriesProp.length ? categoriesProp : fetchedCategories;
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (!fetchWhenEmpty || categoriesProp.length) return;
-    let cancelled = false;
-    void fetch("/api/jobs/filters")
-      .then((res) => res.json())
-      .then((data: { categories?: JobFacet[] }) => {
-        if (!cancelled && Array.isArray(data.categories)) {
-          setFetchedCategories(data.categories);
-        }
-      })
-      .catch(() => {
-        // Facets unavailable — leave list empty.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [categoriesProp.length, fetchWhenEmpty]);
 
   const selected = useMemo(
     () => categories.find((cat) => cat.value === value),

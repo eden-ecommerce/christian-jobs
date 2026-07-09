@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { JobsHomepageV5 } from "@components/jobs/browser/v5/JobsHomepageV5";
+import { JobsHomepageV8 } from "@components/jobs/browser/v8/JobsHomepageV8";
 import { BlogArticleCarousel } from "@components/blog/BlogArticleCarousel";
+import { getJobCategoryFacets } from "@lib/algolia/jobs";
 import {
   isLatestJobsBrowse,
   jobsUrlStateToSearchParams,
@@ -40,6 +41,8 @@ export default async function ChristianJobsPage({
     redirect(qs ? `${jobsSearchPath()}?${qs}` : jobsSearchPath());
   }
 
+  const { categories } = await getJobCategoryFacets();
+
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Eden", url: "https://www.eden.co.uk" },
     { name: "Christian Jobs", url: "https://www.eden.co.uk/christian-jobs" },
@@ -55,7 +58,10 @@ export default async function ChristianJobsPage({
           </div>
         }
       >
-        <JobsHomepageV5 blogCarousel={<BlogArticleCarousel />} />
+        <JobsHomepageV8
+          categories={categories}
+          blogCarousel={<BlogArticleCarousel />}
+        />
       </Suspense>
     </main>
   );

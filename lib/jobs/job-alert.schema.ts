@@ -82,7 +82,8 @@ export function jobAlertFiltersFromUrlState(state: {
     minSalary: state.minSalary,
     maxSalary: state.maxSalary,
     datePosted: state.datePosted,
-    sort: state.sort,
+    // Alerts don't support oldest-first — fall back to newest.
+    sort: state.sort === "date_asc" ? "date_desc" : state.sort,
   };
 }
 

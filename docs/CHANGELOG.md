@@ -8,6 +8,23 @@ Maintained by `/review` for promotions. Use [`.cursor/skills/review/templates/DE
 
 <!-- Entries appended below, newest first -->
 
+## 2026-07-09 — Promote homepage v8 to production
+
+**Scope:** `/christian-jobs` homepage → v8 tabbed hero (Category / Location) and Latest + Featured carousels.
+
+### Summary
+
+- Production homepage now uses the v8 experience: Category and Location tabs, multi-select work types under Location, Latest Jobs then Featured Christian Jobs carousels
+- Charity jobs carousel removed from the homepage
+- `/v8` kept as a sandbox review route; prior `/v5`–`/v7` routes remain for comparison
+- Results still at `/christian-jobs/search` (unchanged browser)
+
+### Deploy checklist
+
+- [ ] Confirm `/christian-jobs` shows Category / Location tabs and Latest Jobs carousel
+- [ ] Confirm category chips and location search navigate to `/christian-jobs/search`
+- [ ] `pnpm predeploy` green
+
 ## 2026-06-29 — Revert monorepo to flat single-app
 
 **Scope:** `apps/christian-jobs/` monorepo shell → flat Next app @ repo root.

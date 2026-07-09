@@ -35,7 +35,7 @@ export function JobsHeroSearchTabsV8({
       <div
         role="tablist"
         aria-label="Search by"
-        className="flex items-stretch justify-start gap-1 border-b border-white/25"
+        className="mx-auto flex w-full max-w-md items-stretch justify-center gap-1 border-b border-white/30 sm:max-w-lg"
       >
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -51,7 +51,7 @@ export function JobsHeroSearchTabsV8({
               aria-controls={panelId}
               tabIndex={isActive ? 0 : -1}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative min-h-11 cursor-pointer rounded-t-md px-3.5 text-[15px] font-semibold outline-none transition-colors focus-visible:bg-white/10 focus-visible:text-white sm:min-h-12 sm:px-5 sm:text-[16px] ${
+              className={`relative flex min-h-11 flex-1 cursor-pointer items-center justify-center px-4 text-[16px] font-semibold outline-none transition-colors focus-visible:bg-white/10 sm:min-h-12 sm:px-6 sm:text-[17px] ${
                 isActive
                   ? "text-white"
                   : "text-white/65 hover:text-white/90"
@@ -60,7 +60,7 @@ export function JobsHeroSearchTabsV8({
               {tab.label}
               {isActive ? (
                 <span
-                  className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-white sm:inset-x-3"
+                  className="absolute inset-x-5 bottom-0 h-[2px] rounded-full bg-white sm:inset-x-6"
                   aria-hidden="true"
                 />
               ) : null}

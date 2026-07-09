@@ -33,13 +33,12 @@ Vercel Root Directory = empty. Needs `GITHUB_TOKEN` with `read:packages` for `@e
 
 | Route | Feature |
 |-------|---------|
-| `/christian-jobs` | Jobs browser (split-pane, URL-driven filters, infinite scroll) |
+| `/christian-jobs` | Homepage (v8) — Category/Location hero tabs, Latest + Featured carousels |
+| `/christian-jobs/search` | Results browser (split-pane, URL-driven filters, infinite scroll) |
 | `/christian-jobs/job/[id]` | Job detail |
 | `/christian-jobs/saved` | Saved jobs (localStorage + API) |
 | `/christian-jobs/blog` | Blog index |
 | `/christian-jobs/blog/[...slug]` | Article detail |
-
-`/christian-jobs/search` redirects to `/christian-jobs` (`next.config.ts`).
 
 ## Integrations
 
@@ -67,7 +66,13 @@ Access: always on in dev; production requires `SANDBOX_ACCESS=public|eden-user`.
 
 ## Version routes
 
-Scaffold at `app/v/layout.tsx` (same gate as sandbox). No feature routes in use yet. Iterate under `app/v{n}/{feature}/` before `/review` promotion to `app/christian-jobs/{feature}/`.
+Scaffold at `app/v/layout.tsx` (same gate as sandbox). Iterate under `app/v{n}/` before `/review` promotion to `app/christian-jobs/`.
+
+| Feature | Version | Version URL | Promoted | Date |
+|---------|---------|-------------|----------|------|
+| Homepage | v8 | `/v8`, `/v8/search` | `/christian-jobs`, `/christian-jobs/search` | 2026-07-09 |
+| Homepage (prior) | v5 | `/v5`, `/v5/search` | was prod until 2026-07-09 | — |
+| Homepage experiments | v6–v7 | `/v6`, `/v7` | kept for comparison | — |
 
 ## Key conventions
 

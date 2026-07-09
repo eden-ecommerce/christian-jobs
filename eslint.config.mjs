@@ -55,6 +55,7 @@ const eslintConfig = [
       "node_modules/@eden-ecommerce/lib/src/sanity/fetch.ts",
       "app/api/**",
       "hooks/**/fetch-*.ts",
+      "lib/**/*.server.ts",
       "components/jobs/SavedJobsPageClient.tsx",
     ],
     rules: {

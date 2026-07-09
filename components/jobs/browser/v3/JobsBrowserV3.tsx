@@ -209,6 +209,13 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     setMobileDetailOpen(false);
   }, [updateUrl]);
 
+  const handleCategoryChange = useCallback(
+    (category: string | undefined) => {
+      handleFilterChange({ category, uncategorised: undefined });
+    },
+    [handleFilterChange],
+  );
+
   if (!configured) {
     return (
       <div className="mx-auto max-w-screen-xl px-4 py-8">
@@ -255,13 +262,6 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
     listScroll: "page" as const,
     resultsLoading,
   };
-
-  const handleCategoryChange = useCallback(
-    (category: string | undefined) => {
-      handleFilterChange({ category, uncategorised: undefined });
-    },
-    [handleFilterChange],
-  );
 
   const sharedSearchProps = {
     category: urlState.category,
