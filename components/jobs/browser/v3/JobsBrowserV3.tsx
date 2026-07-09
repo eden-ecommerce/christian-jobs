@@ -28,7 +28,7 @@ import { useJobDetail } from "@hooks/jobs/use-job-detail";
 import { useJobsInfiniteList } from "@hooks/jobs/use-jobs-infinite";
 import { getJobDetailQueryOptions } from "@hooks/jobs/get-options";
 import type { JobFacets, SearchJobsResult } from "@lib/algolia/jobs";
-import { jobsNamespacePath } from "@lib/jobs/routes";
+import { jobsHomepagePathFromSearchPath } from "@lib/jobs/routes";
 import {
   hasActiveJobSearch,
   isLatestJobsBrowse,
@@ -313,7 +313,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
           <div className="mx-auto w-full max-w-[1100px]">
             <div className="mb-3 flex items-center justify-between gap-3">
               <NsLink
-                href={jobsNamespacePath()}
+                href={jobsHomepagePathFromSearchPath(pathname)}
                 className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
                 <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -382,6 +382,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
         onSelectJob={selectJob}
         onPrefetch={prefetchDetail}
         blogCarousel={blogCarousel}
+        resultsPath={pathname}
       />
     </div>
   );

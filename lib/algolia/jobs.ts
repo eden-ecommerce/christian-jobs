@@ -241,9 +241,31 @@ const EMPTY_RESULT: SearchJobsResult = {
   facets: EMPTY_FACETS,
 };
 
+function distanceMetersBetween(
+  originLat: number,
+  originLng: number,
+  pointLat: number,
+  pointLng: number,
+): number {
+  const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
+  const earthRadiusMeters = 6_371_000;
+  const deltaLat = toRadians(pointLat - originLat);
+  const deltaLng = toRadians(pointLng - originLng);
+  const a =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(toRadians(originLat)) *
+      Math.cos(toRadians(pointLat)) *
+      Math.sin(deltaLng / 2) ** 2;
+  return 2 * earthRadiusMeters * Math.asin(Math.sqrt(a));
+}
+
 /** Build the shared Algolia params for a job search. */
-function buildSearchParams(params: SearchJobsParams) {
+function buildSearchParams(
+  params: SearchJobsParams,
+  options?: { applyGeo?: boolean },
+) {
   const { lat, lng, radiusMeters = DEFAULT_LOCATION_RADIUS_METERS } = params;
+  const applyGeo = options?.applyGeo !== false;
 
   const filters = [JOBS_BASE_FILTER];
 
@@ -251,9 +273,9 @@ function buildSearchParams(params: SearchJobsParams) {
 
   const base: Record<string, unknown> = {
     filters: filters.join(" AND "),
-    getRankingInfo: hasGeo,
+    getRankingInfo: hasGeo && applyGeo,
   };
-  if (hasGeo) {
+  if (hasGeo && applyGeo) {
     base.aroundLatLng = `${lat}, ${lng}`;
     base.aroundRadius = radiusMeters;
   }
@@ -289,6 +311,9 @@ export async function searchJobs(
 
   const {
     query = "",
+    lat,
+    lng,
+    radiusMeters = DEFAULT_LOCATION_RADIUS_METERS,
     category,
     uncategorised,
     organisationType,
@@ -306,7 +331,33 @@ export async function searchJobs(
     hitsPerPage = 12,
   } = params;
 
-  const { base, hasGeo } = buildSearchParams(params);
+  const resolvedWorkTypes: JobWorkType[] =
+    workTypes?.length
+      ? workTypes
+      : workType
+        ? [workType]
+        : online === true
+          ? ["remote"]
+          : online === false
+            ? ["onsite"]
+            : [];
+
+  const hasGeoCoords = typeof lat === "number" && typeof lng === "number";
+  const includesRemote = resolvedWorkTypes.includes("remote");
+  const includesLocalWorkType =
+    resolvedWorkTypes.includes("hybrid") ||
+    resolvedWorkTypes.includes("onsite");
+  /**
+   * Algolia aroundRadius would drop remote jobs (no/_far geoloc). When Remote
+   * is combined with Hybrid/Onsite + a place, skip server geo and apply radius
+   * only to non-remote hits client-side.
+   */
+  const mergeRemoteOutsideGeo =
+    hasGeoCoords && includesRemote && includesLocalWorkType;
+
+  const { base, hasGeo } = buildSearchParams(params, {
+    applyGeo: !mergeRemoteOutsideGeo,
+  });
 
   if (uncategorised) {
     const existingFilters = base.filters as string;
@@ -331,17 +382,6 @@ export async function searchJobs(
 
   const numericFilters: string[] = [];
 
-  const resolvedWorkTypes: JobWorkType[] =
-    workTypes?.length
-      ? workTypes
-      : workType
-        ? [workType]
-        : online === true
-          ? ["remote"]
-          : online === false
-            ? ["onsite"]
-            : [];
-
   const sortByDate = sort === "date_asc" || sort === "date_desc";
   const needsContractFilter = Boolean(contractTypes?.length);
   const needsWorkTypeFilter = resolvedWorkTypes.length > 0;
@@ -354,7 +394,8 @@ export async function searchJobs(
     needsSalaryFilter ||
     needsContractFilter ||
     needsWorkTypeFilter ||
-    needsDatePostedFilter;
+    needsDatePostedFilter ||
+    mergeRemoteOutsideGeo;
 
   const mainParams: Record<string, unknown> = {
     ...base,
@@ -416,6 +457,26 @@ export async function searchJobs(
     nbHits = hits.length;
   }
 
+  if (mergeRemoteOutsideGeo && lat !== undefined && lng !== undefined) {
+    hits = hits
+      .map((hit) => {
+        if (hit.online) {
+          return { ...hit, distanceMeters: null };
+        }
+        if (hit.lat === null || hit.lng === null) return null;
+        const distanceMeters = distanceMetersBetween(
+          lat,
+          lng,
+          hit.lat,
+          hit.lng,
+        );
+        if (distanceMeters > radiusMeters) return null;
+        return { ...hit, distanceMeters };
+      })
+      .filter((hit): hit is JobHit => hit !== null);
+    nbHits = hits.length;
+  }
+
   if (needsSalaryFilter) {
     hits = hits.filter((hit) =>
       salaryMatchesRange(hit.salary, minSalary, maxSalary),
@@ -441,6 +502,12 @@ export async function searchJobs(
       return at < bt ? -dir : dir;
     });
     nbHits = hits.length;
+  } else if (sort === "distance" && (hasGeo || mergeRemoteOutsideGeo)) {
+    hits.sort((a, b) => {
+      const aDistance = a.distanceMeters ?? Number.POSITIVE_INFINITY;
+      const bDistance = b.distanceMeters ?? Number.POSITIVE_INFINITY;
+      return aDistance - bDistance;
+    });
   }
 
   if (needsClientProcessing) {
@@ -664,20 +731,18 @@ export async function getJobCategoryFacets(): Promise<CategoryFacetsResult> {
   return { categories, totalCount, uncategorisedCount };
 }
 
-/** Featured jobs for carousel — most recently posted. */
-export async function getFeaturedJobs(limit = 8): Promise<JobHit[]> {
+/** Latest jobs for carousel — most recently posted. */
+export async function getLatestJobs(limit = 8): Promise<JobHit[]> {
   const result = await searchJobs({ hitsPerPage: limit, sort: "date_desc" });
   return result.hits;
 }
 
-/** Charity organisation jobs for carousel. */
-export async function getCharityJobs(limit = 8): Promise<JobHit[]> {
-  const result = await searchJobs({
-    hitsPerPage: limit,
-    sort: "date_desc",
-    organisationTypes: ["charity"],
-  });
-  return result.hits;
+/**
+ * Featured jobs for carousel.
+ * Today: same newest-first source as latest (no separate featured flag in the index).
+ */
+export async function getFeaturedJobs(limit = 8): Promise<JobHit[]> {
+  return getLatestJobs(limit);
 }
 
 /** Fetch filter facet options for the jobs browser. */

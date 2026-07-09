@@ -2,57 +2,51 @@
 
 import { useCallback, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { JobsHeroSectionV5 } from "@components/jobs/browser/v5/JobsHeroSectionV5";
+import { JobsHeroSectionV8 } from "@components/jobs/browser/v8/JobsHeroSectionV8";
+import type { JobsLocationTabSubmit } from "@components/jobs/browser/v8/JobsLocationTabV8";
 import { JobsFeaturedCarousels } from "@components/jobs/browser/JobsFeaturedCarousels";
 import { GoogleMapsProvider } from "@components/google-maps/GoogleMapsProvider";
+import type { CategoryFacet } from "@lib/algolia/jobs";
 import { isGoogleMapsEnvConfigured } from "@lib/env-configured";
+import { locationResultsHref } from "@lib/jobs/category-results-href";
 import { jobsSearchPath } from "@lib/jobs/routes";
 import {
   jobsUrlStateToSearchParams,
   latestJobsBrowseState,
-  type JobsHeroSearchSubmit,
   type JobsUrlState,
 } from "@lib/jobs/search-params";
 
 type Props = {
+  categories: CategoryFacet[];
   blogCarousel?: ReactNode;
-  /** Where hero search and featured job picks navigate — defaults to namespace search. */
+  /** Where search and featured job picks navigate — defaults to namespace search. */
   resultsPath?: string;
 };
 
 const defaultBrowseState = (): JobsUrlState => latestJobsBrowseState();
 
-/** V5 landing page — Rightmove-inspired hero card, featured jobs and blog. */
-export function JobsHomepageV5({
+/** V8 landing — Category / Location tabs; Work Type nested under Location. */
+export function JobsHomepageV8({
+  categories,
   blogCarousel,
   resultsPath = jobsSearchPath(),
 }: Props) {
   const router = useRouter();
 
-  const handleSearch = useCallback(
-    (values: JobsHeroSearchSubmit) => {
-      const hasGeo =
-        values.location.lat !== undefined && values.location.lng !== undefined;
-      const params = jobsUrlStateToSearchParams({
-        ...defaultBrowseState(),
-        category: values.category,
-        workTypes: values.workTypes,
-        contractTypes: values.contractTypes ?? [],
-        location: values.location.label,
-        place: values.location.label || undefined,
-        lat: values.location.lat,
-        lng: values.location.lng,
-        radius: values.radius,
-        sort: hasGeo ? "distance" : "date_desc",
-      });
-      router.push(`${resultsPath}?${params.toString()}`);
+  const handleLocationSearch = useCallback(
+    (values: JobsLocationTabSubmit) => {
+      router.push(
+        locationResultsHref(resultsPath, {
+          label: values.label,
+          lat: values.lat,
+          lng: values.lng,
+          radius: values.radius,
+          workTypes: values.workTypes,
+        }),
+      );
     },
     [router, resultsPath],
   );
-
-  const handleBrowseLatest = useCallback(() => {
-    router.push(resultsPath);
-  }, [router, resultsPath]);
 
   const handleSelectJob = useCallback(
     (jobId: string) => {
@@ -67,9 +61,10 @@ export function JobsHomepageV5({
 
   const page = (
     <div className="bg-[#fbfbfd]">
-      <JobsHeroSectionV5
-        onSearch={handleSearch}
-        onBrowseLatest={handleBrowseLatest}
+      <JobsHeroSectionV8
+        categories={categories}
+        resultsPath={resultsPath}
+        onLocationSearch={handleLocationSearch}
       />
 
       <JobsFeaturedCarousels

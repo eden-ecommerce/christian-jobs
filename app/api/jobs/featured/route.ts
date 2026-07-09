@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
-import { getFeaturedJobs, getCharityJobs } from "@lib/algolia/jobs";
+import { getFeaturedJobs, getLatestJobs } from "@lib/algolia/jobs";
 
 export async function GET() {
   try {
-    const [featured, charity] = await Promise.all([
+    const [latest, featured] = await Promise.all([
+      getLatestJobs(8),
       getFeaturedJobs(8),
-      getCharityJobs(8),
     ]);
-    return NextResponse.json({ featured, charity });
+    return NextResponse.json({ latest, featured });
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch featured jobs" },

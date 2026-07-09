@@ -78,6 +78,7 @@ export function JobsHomepageV3({
         blogCarousel={blogCarousel}
         showBackToSearch={false}
         variant="homepage"
+        resultsPath={resultsPath}
       />
     </div>
   );

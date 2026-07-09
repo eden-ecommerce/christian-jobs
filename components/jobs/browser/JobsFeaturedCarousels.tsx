@@ -1,11 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { JobListItem } from "@components/jobs/browser/JobListItem";
 import { JobsScrollReveal } from "@components/jobs/browser/JobsScrollReveal";
 import { jobsHomepageContainerClassName } from "@components/jobs/browser/jobs-homepage-layout";
 import type { JobHit } from "@lib/algolia/jobs";
 import { useFeaturedJobs } from "@hooks/jobs/use-featured-jobs";
+import { latestJobsResultsHref } from "@lib/jobs/category-results-href";
+import { jobsSearchPath } from "@lib/jobs/routes";
 import { ArrowRight } from "lucide-react";
 
 type Props = {
@@ -15,16 +18,20 @@ type Props = {
   showBackToSearch?: boolean;
   /** Editorial styling for the v3 homepage */
   variant?: "default" | "homepage";
+  /** Results route for section heading links — defaults to namespace search. */
+  resultsPath?: string;
 };
 
 function JobCarousel({
   title,
+  href,
   jobs,
   onSelectJob,
   onPrefetch,
   variant = "default",
 }: {
   title: string;
+  href: string;
   jobs: JobHit[];
   onSelectJob: (jobId: string) => void;
   onPrefetch?: (jobId: string) => void;
@@ -36,7 +43,9 @@ function JobCarousel({
 
   return (
     <section className={isHomepage ? "py-3 sm:py-8" : "py-4"}>
-      <div className={`${jobsHomepageContainerClassName} flex items-end justify-between gap-4`}>
+      <div
+        className={`${jobsHomepageContainerClassName} flex items-end justify-between gap-4`}
+      >
         <h2
           className={
             isHomepage
@@ -44,7 +53,16 @@ function JobCarousel({
               : "text-lg font-semibold text-foreground"
           }
         >
-          {title}
+          <Link
+            href={href}
+            className="group inline-flex items-center gap-1.5 transition-colors hover:text-[#235A0E]"
+          >
+            {title}
+            <ArrowRight
+              className="h-5 w-5 shrink-0 text-[#235A0E]/70 transition-transform group-hover:translate-x-0.5 group-hover:text-[#235A0E] sm:h-6 sm:w-6"
+              aria-hidden="true"
+            />
+          </Link>
         </h2>
       </div>
       <div className={jobsHomepageContainerClassName}>
@@ -69,31 +87,37 @@ function JobCarousel({
   );
 }
 
-/** Featured and charity job carousels below the split-pane. */
+/** Latest and featured job carousels below the hero / results split-pane. */
 export function JobsFeaturedCarousels({
   onSelectJob,
   onPrefetch,
   blogCarousel,
   showBackToSearch = true,
   variant = "default",
+  resultsPath = jobsSearchPath(),
 }: Props) {
   const { data } = useFeaturedJobs();
   const isHomepage = variant === "homepage";
+  const latestHref = latestJobsResultsHref(resultsPath);
+  /** Full featured list — same newest browse until a distinct featured filter exists. */
+  const featuredHref = latestHref;
 
-  const featuredCarousel = (
+  const latestCarousel = (
     <JobCarousel
-      title="Featured Christian Jobs"
-      jobs={data?.featured ?? []}
+      title="Latest Jobs"
+      href={latestHref}
+      jobs={data?.latest ?? []}
       onSelectJob={onSelectJob}
       onPrefetch={onPrefetch}
       variant={variant}
     />
   );
 
-  const charityCarousel = (
+  const featuredCarousel = (
     <JobCarousel
-      title="Christian Charity Jobs"
-      jobs={data?.charity ?? []}
+      title="Featured Christian Jobs"
+      href={featuredHref}
+      jobs={data?.featured ?? []}
       onSelectJob={onSelectJob}
       onPrefetch={onPrefetch}
       variant={variant}
@@ -108,15 +132,15 @@ export function JobsFeaturedCarousels({
           : "border-[#E5E7EB] bg-[#F9FAFB] px-4 py-4 sm:px-6 sm:py-6"
       }`}
     >
+      {isHomepage && (data?.latest?.length ?? 0) > 0 ? (
+        <JobsScrollReveal>{latestCarousel}</JobsScrollReveal>
+      ) : (
+        latestCarousel
+      )}
       {isHomepage && (data?.featured?.length ?? 0) > 0 ? (
-        <JobsScrollReveal>{featuredCarousel}</JobsScrollReveal>
+        <JobsScrollReveal delayMs={80}>{featuredCarousel}</JobsScrollReveal>
       ) : (
         featuredCarousel
-      )}
-      {isHomepage && (data?.charity?.length ?? 0) > 0 ? (
-        <JobsScrollReveal delayMs={80}>{charityCarousel}</JobsScrollReveal>
-      ) : (
-        charityCarousel
       )}
       {blogCarousel ? (
         isHomepage ? (
@@ -128,15 +152,15 @@ export function JobsFeaturedCarousels({
         )
       ) : null}
       {showBackToSearch ? (
-      <div className="mx-auto max-w-[1600px] px-4 pb-8 sm:px-6">
-        <button
-          type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-[#2d6a4f] hover:underline"
-        >
-          Back to search <ArrowRight className="h-4 w-4 rotate-[-90deg]" />
-        </button>
-      </div>
+        <div className="mx-auto max-w-[1600px] px-4 pb-8 sm:px-6">
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-[#2d6a4f] hover:underline"
+          >
+            Back to search <ArrowRight className="h-4 w-4 rotate-[-90deg]" />
+          </button>
+        </div>
       ) : null}
     </div>
   );

@@ -347,6 +347,7 @@ export function JobsBrowserV2({ initialResult, initialFacets, blogCarousel }: Pr
         onSelectJob={selectJob}
         onPrefetch={prefetchDetail}
         blogCarousel={blogCarousel}
+        resultsPath={pathname}
       />
     </div>
   );

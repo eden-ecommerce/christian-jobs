@@ -15,8 +15,8 @@ export function fetchJobFilters(): Promise<JobFacets> {
 }
 
 export type FeaturedJobsResponse = {
+  latest: SearchJobsResult["hits"];
   featured: SearchJobsResult["hits"];
-  charity: SearchJobsResult["hits"];
 };
 
 export function fetchFeaturedJobs(): Promise<FeaturedJobsResponse> {
