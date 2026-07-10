@@ -68,13 +68,27 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
   const listScrollRef = useRef(0);
   const autoSelectedRef = useRef(false);
   const restoreScrollRef = useRef<number | null>(null);
+  const prevVjkRef = useRef(urlState.vjk);
+  const mobileDetailPushedRef = useRef(false);
 
   useEffect(() => {
     const isPhone = window.matchMedia("(max-width: 767px)").matches;
-    if (urlState.vjk && isPhone) {
-      setMobileDetailOpen(true);
-    } else if (!isPhone) {
+    const hadVjk = Boolean(prevVjkRef.current);
+    const hasVjk = Boolean(urlState.vjk);
+    prevVjkRef.current = urlState.vjk;
+
+    if (!isPhone) {
       setMobileDetailOpen(false);
+      return;
+    }
+    if (hasVjk) {
+      setMobileDetailOpen(true);
+    } else if (hadVjk) {
+      setMobileDetailOpen(false);
+      mobileDetailPushedRef.current = false;
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: listScrollRef.current, behavior: "instant" });
+      });
     }
   }, [urlState.vjk]);
 
@@ -98,14 +112,27 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
   const loadingMore = listQuery.isFetchingNextPage;
   const hasMore = listQuery.hasNextPage ?? false;
 
-  const updateUrl = useCallback(
+  const buildHref = useCallback(
     (next: JobsUrlState) => {
       const params = jobsUrlStateToSearchParams(next);
       const qs = params.toString();
-      const href = qs ? `${pathname}?${qs}` : pathname;
-      router.replace(href, { scroll: false });
+      return qs ? `${pathname}?${qs}` : pathname;
     },
-    [pathname, router],
+    [pathname],
+  );
+
+  const updateUrl = useCallback(
+    (next: JobsUrlState) => {
+      router.replace(buildHref(next), { scroll: false });
+    },
+    [buildHref, router],
+  );
+
+  const pushUrl = useCallback(
+    (next: JobsUrlState) => {
+      router.push(buildHref(next), { scroll: false });
+    },
+    [buildHref, router],
   );
 
   useEffect(() => {
@@ -141,13 +168,18 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
       // Set pendingId synchronously so the card highlights and the detail
       // spinner appears before the URL round-trip completes (~1 second).
       setPendingId(jobId);
-      updateUrl({ ...urlState, vjk: jobId });
-      if (window.matchMedia("(max-width: 767px)").matches) {
+      const next = { ...urlState, vjk: jobId };
+      const isPhone = window.matchMedia("(max-width: 767px)").matches;
+      if (isPhone) {
         listScrollRef.current = window.scrollY;
         setMobileDetailOpen(true);
+        pushUrl(next);
+        mobileDetailPushedRef.current = true;
+      } else {
+        updateUrl(next);
       }
     },
-    [urlState, updateUrl],
+    [urlState, updateUrl, pushUrl],
   );
 
   // Clear pendingId once the URL has caught up so the real urlState.vjk takes over.
@@ -159,15 +191,21 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
 
   const closeMobileDetail = useCallback(() => {
     setMobileDetailOpen(false);
-    updateUrl({ ...urlState, vjk: undefined });
+    if (mobileDetailPushedRef.current) {
+      mobileDetailPushedRef.current = false;
+      router.back();
+    } else {
+      updateUrl({ ...urlState, vjk: undefined });
+    }
     requestAnimationFrame(() => {
       window.scrollTo({ top: listScrollRef.current, behavior: "instant" });
     });
-  }, [urlState, updateUrl]);
+  }, [router, urlState, updateUrl]);
 
   const handleFilterChange = useCallback(
     (changes: Partial<JobsUrlState>) => {
       restoreScrollRef.current = window.scrollY;
+      mobileDetailPushedRef.current = false;
       updateUrl({ ...urlState, ...changes, page: 0 });
       setMobileDetailOpen(false);
     },
@@ -177,6 +215,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
   const handleSearch = useCallback(
     (values: JobsHeroSearchSubmit) => {
       autoSelectedRef.current = false;
+      mobileDetailPushedRef.current = false;
       const hasGeo =
         values.location.lat !== undefined && values.location.lng !== undefined;
       updateUrl({
@@ -198,12 +237,14 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
 
   const handleBrowseLatest = useCallback(() => {
     autoSelectedRef.current = false;
+    mobileDetailPushedRef.current = false;
     restoreScrollRef.current = window.scrollY;
     updateUrl(latestJobsBrowseState());
     setMobileDetailOpen(false);
   }, [updateUrl]);
 
   const handleClearFilters = useCallback(() => {
+    mobileDetailPushedRef.current = false;
     restoreScrollRef.current = window.scrollY;
     updateUrl(latestJobsBrowseState());
     setMobileDetailOpen(false);
@@ -226,7 +267,7 @@ export function JobsBrowserV3({ initialResult, initialFacets, blogCarousel }: Pr
 
   // pendingId is set synchronously on click and cleared once the URL settles.
   // We must prefer pendingId over urlState.vjk so the card highlights and the
-  // detail spinner fire immediately — before the router.replace round-trip
+  // detail spinner fire immediately — before the router round-trip
   // resolves. Without this, urlState.vjk still holds the OLD job id and wins.
   const activeId = pendingId ?? urlState.vjk ?? undefined;
   const detailData = detailQuery.data ?? null;
