@@ -71,19 +71,13 @@ export function JobsFilterPills({
   }
 
   const clearSurfaceClass = compact ? "bg-white" : "bg-background";
-  const clearBackingClass = compact
-    ? clearSurfaceClass
-    : `${clearSurfaceClass} md:bg-transparent`;
-  const scrollClipClass = hasActive
-    ? "[clip-path:inset(0_2.5rem_0_0)] md:[clip-path:inset(0_4rem_0_0)]"
-    : "";
 
   return (
     <div className={compact ? undefined : "border-b border-border bg-background"}>
       <div className={compact ? "py-1" : "mx-auto max-w-[1600px] px-4 py-2 sm:px-6"}>
-        <div className="relative min-w-0 w-full overflow-hidden">
+        <div className="flex min-w-0 w-full items-center gap-2">
           <div
-            className={`flex w-full items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${scrollClipClass}`}
+            className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
           {hasGeo ? (
             <FilterPopover
@@ -290,28 +284,20 @@ export function JobsFilterPills({
           </div>
 
           {hasActive ? (
-            <div className="absolute right-0 top-0 bottom-1 z-10 flex items-center">
-              <div className={`relative flex items-center ${clearBackingClass}`}>
-                <div
-                  className={`pointer-events-none absolute top-0 bottom-0 left-1/2 right-0 ${clearBackingClass}`}
-                  aria-hidden="true"
-                />
-                <button
-                  type="button"
-                  onClick={onClearAll}
-                  aria-label="Clear search"
-                  className={
-                    compact
-                      ? `relative inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-[#2d6a4f]/35 ${clearSurfaceClass} px-3 py-1.5 text-sm font-medium text-[#2d6a4f] transition-colors hover:border-[#2d6a4f]/55 hover:bg-[#F9FAFB]`
-                      : `relative inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-[#2d6a4f] transition-colors hover:border-[#2d6a4f]/30 md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0 md:hover:underline`
-                  }
-                >
-                  <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  <span className="md:hidden">Clear</span>
-                  <span className="hidden md:inline">Clear search</span>
-                </button>
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={onClearAll}
+              aria-label="Clear search"
+              className={
+                compact
+                  ? `inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-[#2d6a4f]/35 ${clearSurfaceClass} px-3 py-1.5 text-sm font-medium text-[#2d6a4f] transition-colors hover:border-[#2d6a4f]/55 hover:bg-[#F9FAFB]`
+                  : `inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-[#2d6a4f] transition-colors hover:border-[#2d6a4f]/30 md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0 md:hover:underline`
+              }
+            >
+              <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span className="md:hidden">Clear</span>
+              <span className="hidden md:inline">Clear search</span>
+            </button>
           ) : null}
         </div>
       </div>
