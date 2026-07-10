@@ -6,16 +6,13 @@ import {
 
 const TOP_CATEGORY_COUNT = 8;
 
-/** Primary category chips — unchanged size/weight. */
+/** Primary category chips. */
 const categoryChipClass =
-  "inline-flex min-h-11 items-center rounded-full px-3.5 py-2.5 text-[14px] font-semibold transition-[transform,background-color,box-shadow,opacity] active:scale-[0.98] sm:min-h-10 sm:px-4 sm:text-[15px]";
+  "inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] font-semibold leading-snug transition-[transform,background-color,box-shadow,opacity] active:scale-[0.98] sm:px-4 sm:text-[15px]";
 
-/**
- * Secondary chips only — explicitly smaller than category chips:
- * padding py-1.5 px-3, text-[13px] font-medium, min-h-9 (36px).
- */
+/** Same size as category chips; translucent style only. */
 const secondaryChipClass =
-  "inline-flex min-h-9 items-center rounded-full px-3 py-1.5 text-[13px] font-medium transition-[transform,background-color,opacity] active:scale-[0.98]";
+  "inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] font-semibold leading-snug transition-[transform,background-color,opacity] active:scale-[0.98] sm:px-4 sm:text-[15px]";
 
 type Props = {
   categories: CategoryFacet[];

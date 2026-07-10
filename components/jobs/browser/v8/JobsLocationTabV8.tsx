@@ -12,7 +12,7 @@ import {
   HERO_WORK_TYPE_OPTIONS,
   type JobWorkType,
 } from "@lib/jobs/search-params";
-import { Search, X } from "lucide-react";
+import { Check, Search, X } from "lucide-react";
 import {
   useCallback,
   useRef,
@@ -36,12 +36,12 @@ type Props = {
 };
 
 const INPUT_CLASS =
-  "h-[52px] w-full border-0 bg-transparent px-4 text-[16px] text-[#1d1d1f] shadow-none outline-none placeholder:text-[#86868b] focus-visible:ring-0 [&::-webkit-search-cancel-button]:hidden";
+  "h-11 w-full border-0 bg-transparent px-3 text-[16px] text-[#1d1d1f] shadow-none outline-none placeholder:text-[#86868b] focus-visible:ring-0 sm:h-[52px] sm:px-4 [&::-webkit-search-cancel-button]:hidden";
 
 const workTypeChipClass = (active: boolean) =>
-  `inline-flex min-h-11 items-center rounded-full px-3.5 py-2.5 text-[14px] font-semibold transition-[transform,background-color,box-shadow,color] active:scale-[0.98] sm:min-h-10 sm:px-4 sm:text-[15px] ${
+  `inline-flex min-h-11 items-center rounded-full px-3.5 py-2.5 text-[14px] font-semibold transition-[transform,background-color,box-shadow,color] duration-200 ease-out active:scale-[0.98] sm:min-h-10 sm:px-4 sm:text-[15px] ${
     active
-      ? "bg-[#E8F0E4] text-[#235A0E] shadow-[0_2px_8px_rgba(0,0,0,0.08)] ring-1 ring-[#235A0E]/35"
+      ? "bg-[#E8F0E4] text-[#235A0E] shadow-[0_2px_8px_rgba(0,0,0,0.08)] ring-2 ring-[#235A0E]/55"
       : "bg-white text-[#1d1d1f] shadow-[0_2px_8px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.06] hover:bg-[#f5f5f7] hover:shadow-[0_4px_12px_rgba(0,0,0,0.16)]"
   }`;
 
@@ -185,6 +185,22 @@ export function JobsLocationTabV8({
               onClick={() => handleWorkTypeToggle(option.value)}
               className={workTypeChipClass(active)}
             >
+              <span
+                className={`grid transition-[grid-template-columns,margin] duration-200 ease-out ${
+                  active
+                    ? "mr-1.5 grid-cols-[1fr]"
+                    : "mr-0 grid-cols-[0fr]"
+                }`}
+                aria-hidden="true"
+              >
+                <span className="overflow-hidden">
+                  <Check
+                    className={`h-3.5 w-3.5 shrink-0 transition-opacity duration-200 ease-out ${
+                      active ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
+                </span>
+              </span>
               {option.label}
             </button>
           );
@@ -192,87 +208,80 @@ export function JobsLocationTabV8({
       </div>
 
       <form onSubmit={handleSubmit} className="mt-5 sm:mt-6">
-        {/* Collapses when Remote is the only selection */}
+        {/* Keep form height reserved when Remote-only — fade out instead of collapsing. */}
         <div
-          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+          className={`transition-opacity duration-200 ease-out ${
             needsLocationFields
-              ? "grid-rows-[1fr] opacity-100"
-              : "grid-rows-[0fr] opacity-0"
+              ? "opacity-100"
+              : "pointer-events-none opacity-0"
           }`}
+          aria-hidden={!needsLocationFields}
         >
-          <div className="min-h-0 overflow-hidden">
-            <div
-              className="rounded-2xl bg-white p-2 shadow-[0_2px_8px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.06] sm:p-2.5"
-              aria-hidden={!needsLocationFields}
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
-                <div className="relative min-w-0 flex-1">
-                  {mapsEnabled ? (
-                    <LocationSearch
-                      ref={locationRef}
-                      id="v8-hero-location"
-                      onPlaceSelect={handlePlaceSelect}
-                      onClear={resetLocationState}
-                      onBlur={(e: FocusEvent<HTMLInputElement>) => {
-                        setLocationValue(e.target.value);
-                      }}
-                      placeholder="Town or postcode"
-                      className={INPUT_CLASS}
-                      disabled={!needsLocationFields}
-                    />
-                  ) : (
-                    <input
-                      ref={plainLocationRef}
-                      id="v8-hero-location"
-                      type="text"
-                      value={locationValue}
-                      disabled={!needsLocationFields}
-                      onChange={(e) => {
-                        setLocationValue(e.target.value);
-                        setSelectedPlace(null);
-                      }}
-                      placeholder="Town or postcode"
-                      className={`${INPUT_CLASS}${showClear ? " pr-10" : ""}`}
-                      aria-label="Town or postcode"
-                    />
-                  )}
-                  {!mapsEnabled && showClear && needsLocationFields ? (
-                    <button
-                      type="button"
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={handleClearLocation}
-                      className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-[#86868b] hover:bg-[#f5f5f7] hover:text-[#1d1d1f]"
-                      aria-label="Clear location"
-                    >
-                      <X className="h-3.5 w-3.5" aria-hidden="true" />
-                    </button>
-                  ) : null}
-                </div>
-
-                <div className="flex items-center gap-3 px-0.5 sm:px-0">
-                  <JobsLocationRadiusSelect
-                    radius={radius}
-                    onChange={setRadius}
-                    inline
-                    compact
-                    fullLabels
-                    className="min-w-[10.5rem] flex-1 sm:flex-none"
+          <div className="overflow-hidden rounded-full bg-white p-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.06] sm:rounded-2xl sm:p-2.5">
+            <div className="flex items-stretch">
+              <div className="relative min-w-0 flex-1">
+                {mapsEnabled ? (
+                  <LocationSearch
+                    ref={locationRef}
+                    id="v8-hero-location"
+                    onPlaceSelect={handlePlaceSelect}
+                    onClear={resetLocationState}
+                    onBlur={(e: FocusEvent<HTMLInputElement>) => {
+                      setLocationValue(e.target.value);
+                    }}
+                    placeholder="Town or postcode"
+                    className={INPUT_CLASS}
+                    disabled={!needsLocationFields}
                   />
-                </div>
+                ) : (
+                  <input
+                    ref={plainLocationRef}
+                    id="v8-hero-location"
+                    type="text"
+                    value={locationValue}
+                    disabled={!needsLocationFields}
+                    onChange={(e) => {
+                      setLocationValue(e.target.value);
+                      setSelectedPlace(null);
+                    }}
+                    placeholder="Town or postcode"
+                    className={`${INPUT_CLASS}${showClear ? " pr-9 sm:pr-10" : ""}`}
+                    aria-label="Town or postcode"
+                  />
+                )}
+                {!mapsEnabled && showClear && needsLocationFields ? (
+                  <button
+                    type="button"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={handleClearLocation}
+                    className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-[#86868b] hover:bg-[#f5f5f7] hover:text-[#1d1d1f] sm:right-2 sm:h-8 sm:w-8"
+                    aria-label="Clear location"
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="flex shrink-0 items-center border-l border-[#ececf0] pl-1 pr-0.5 sm:pl-2 sm:pr-0">
+                <JobsLocationRadiusSelect
+                  radius={radius}
+                  onChange={setRadius}
+                  inline
+                  compact
+                  plain
+                  narrow
+                  className="w-auto sm:min-w-[10.5rem]"
+                />
               </div>
             </div>
           </div>
         </div>
 
-        <div
-          className={`flex justify-center ${
-            needsLocationFields ? "mt-3 sm:mt-4" : "mt-0"
-          }`}
-        >
+        <div className="mt-3 flex justify-center sm:mt-4">
           <button
             type="submit"
             aria-label="Search jobs"
-            className="flex h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#235A0E] px-6 text-[15px] font-semibold text-white transition-[transform,opacity] hover:opacity-90 active:scale-95 sm:h-12 sm:px-7"
+            className="flex h-11 w-full max-w-sm cursor-pointer items-center justify-center gap-2 rounded-full bg-[#235A0E] px-6 text-[15px] font-semibold text-white transition-[transform,opacity] hover:opacity-90 active:scale-95 sm:h-12 sm:w-auto sm:max-w-none sm:px-7"
           >
             <Search className="h-[18px] w-[18px]" aria-hidden="true" />
             Search
